@@ -81,14 +81,14 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
 
         // The endpoint variable must agree with the socket path in the configuration file, so the
         // builder sets it here, after the socket directory is known.
-        var builder = WithEnvironment(EndpointEnvironmentVariable, "unix:" + SocketPath(DockerResourceConfiguration));
+        var builder = WithEnvironment(EndpointEnvironmentVariable, "unix:" + ParsecSocketPath.InContainer(DockerResourceConfiguration));
 
         if (NeedsConfigFile(DockerResourceConfiguration))
         {
             var content = ParsecConfigFile.Build(
                 DockerResourceConfiguration.AuthType ?? ParsecImage.DefaultAuthType,
                 DockerResourceConfiguration.LogLevel ?? ParsecImage.DefaultLogLevel,
-                SocketDirectory(DockerResourceConfiguration));
+                ParsecSocketPath.DirectoryInContainer(DockerResourceConfiguration));
 
             // The file is root owned and world readable, because the service does not run as root.
             builder = builder.WithResourceMapping(
@@ -152,23 +152,5 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
     private static bool NeedsConfigFile(ParsecConfiguration configuration)
         => (configuration.AuthType is { } authType && authType != ParsecImage.DefaultAuthType)
             || (configuration.LogLevel is { } logLevel && logLevel != ParsecImage.DefaultLogLevel)
-            || SocketDirectory(configuration) != ParsecImage.SocketDirectory;
-
-    /// <summary>
-    /// Gets the socket directory of the configuration, without a trailing slash.
-    /// </summary>
-    /// <param name="configuration">The container configuration.</param>
-    /// <returns>The directory in the container that holds the socket.</returns>
-    private static string SocketDirectory(ParsecConfiguration configuration)
-        => configuration.SocketDirectory?.TrimEnd('/') is { Length: > 0 } directory
-            ? directory
-            : ParsecImage.SocketDirectory;
-
-    /// <summary>
-    /// Gets the path of the socket in the container.
-    /// </summary>
-    /// <param name="configuration">The container configuration.</param>
-    /// <returns>The path of the socket in the container.</returns>
-    private static string SocketPath(ParsecConfiguration configuration)
-        => SocketDirectory(configuration) + "/" + ParsecImage.SocketFileName;
+            || ParsecSocketPath.DirectoryInContainer(configuration) != ParsecImage.SocketDirectory;
 }
