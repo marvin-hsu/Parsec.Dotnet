@@ -134,3 +134,6 @@ AGENTS.md
 # DocFX generated API reference (the landing page docs/api/index.md is tracked)
 docs/api/*.yml
 docs/api/.manifest
+
+# SonarScanner working directory
+.sonarqube/

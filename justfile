@@ -84,6 +84,26 @@ image-test: image-build
 docs-serve: docs
     dotnet docfx serve artifacts/docs --port 8080 --open-browser
 
+# The SonarCloud analysers only exist while the scanner is set up, so a plain build
+# cannot see rules such as S5443. This runs begin and the build, then stops: nothing
+# is sent, because only `end` uploads. Reads SONAR_TOKEN from .env.
+# Report the SonarCloud findings without publishing an analysis.
+sonar-check:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    trap 'rm -rf .sonarqube' EXIT
+    rm -rf .sonarqube
+    dotnet dotnet-sonarscanner begin \
+        /k:"marvin-hsu_Parsec.Dotnet" \
+        /o:"marvin-hsu" \
+        /d:sonar.host.url="https://sonarcloud.io" \
+        /d:sonar.token="$SONAR_TOKEN" >/dev/null
+    output=$(dotnet build --configuration Release --nologo 2>&1)
+    status=$?
+    printf '%s\n' "$output" | grep -E "error [A-Z]+[0-9]+" | sed 's|'"$PWD"'/||' | sort -u
+    if [ $status -eq 0 ]; then echo "No SonarCloud finding."; fi
+    exit $status
+
 # Analyse with SonarCloud. Reads SONAR_TOKEN from .env.
 sonar:
     dotnet dotnet-sonarscanner begin \
