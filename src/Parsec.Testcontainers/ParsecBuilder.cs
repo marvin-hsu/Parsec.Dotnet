@@ -44,7 +44,9 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
     /// </summary>
     public ParsecBuilder()
         : this(new ParsecConfiguration())
-        => DockerResourceConfiguration = Init().DockerResourceConfiguration;
+    {
+        DockerResourceConfiguration = Init().DockerResourceConfiguration;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ParsecBuilder"/> class.
@@ -52,7 +54,9 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
     /// <param name="resourceConfiguration">The Docker resource configuration.</param>
     private ParsecBuilder(ParsecConfiguration resourceConfiguration)
         : base(resourceConfiguration)
-        => DockerResourceConfiguration = resourceConfiguration;
+    {
+        DockerResourceConfiguration = resourceConfiguration;
+    }
 
     /// <inheritdoc/>
     protected override ParsecConfiguration DockerResourceConfiguration { get; }

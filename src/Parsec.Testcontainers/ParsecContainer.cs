@@ -12,7 +12,8 @@ namespace Parsec.Testcontainers;
 /// service, and dispose the instance to stop the container. After the start, give
 /// <see cref="Endpoint"/> or <see cref="SocketPath"/> to the client under test.
 /// </remarks>
-public sealed class ParsecContainer : DockerContainer
+/// <param name="configuration">The container configuration.</param>
+public sealed class ParsecContainer(ParsecConfiguration configuration) : DockerContainer(configuration)
 {
     /// <summary>
     /// The name of the command line tool of the Parsec project. The image has the tool on the
@@ -56,17 +57,6 @@ public sealed class ParsecContainer : DockerContainer
     private ParsecSocketBridge? _bridge;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ParsecContainer"/> class.
-    /// </summary>
-    /// <param name="configuration">The container configuration.</param>
-    public ParsecContainer(ParsecConfiguration configuration)
-        : base(configuration)
-    {
-        Configuration = configuration;
-        ContainerSocketPath = ParsecSocketPath.InContainer(configuration);
-    }
-
-    /// <summary>
     /// Gets the path of the socket that a client on this machine connects to.
     /// </summary>
     /// <remarks>
@@ -93,12 +83,12 @@ public sealed class ParsecContainer : DockerContainer
     /// <summary>
     /// Gets the configuration that the builder made for this container.
     /// </summary>
-    internal ParsecConfiguration Configuration { get; }
+    internal ParsecConfiguration Configuration { get; } = configuration;
 
     /// <summary>
     /// Gets the path of the socket of the service in the container.
     /// </summary>
-    internal string ContainerSocketPath { get; }
+    internal string ContainerSocketPath { get; } = ParsecSocketPath.InContainer(configuration);
 
     /// <summary>
     /// Gets the directory on this machine that holds the socket a client connects to, or
