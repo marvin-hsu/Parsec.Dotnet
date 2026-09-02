@@ -1,6 +1,5 @@
 using System.Text;
 using Docker.DotNet.Models;
-using DotNet.Testcontainers;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 
@@ -143,24 +142,7 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
     {
         base.Validate();
 
-        var socketDirectory = DockerResourceConfiguration.SocketDirectory;
-        if (socketDirectory is null)
-        {
-            return;
-        }
-
-        _ = Guard.Argument(socketDirectory, nameof(ParsecConfiguration.SocketDirectory))
-            .NotEmpty()
-            .ThrowIf(
-                argument => !argument.Value.StartsWith('/'),
-                argument => new ArgumentException(
-                    "The socket directory must be an absolute path in the container. Give a path that starts with a slash.",
-                    argument.Name))
-            .ThrowIf(
-                argument => argument.Value.TrimEnd('/').Length == 0,
-                argument => new ArgumentException(
-                    "The socket directory must not be the root directory. Give a directory that the service user can write.",
-                    argument.Name));
+        ParsecSocketPath.ValidateDirectory(DockerResourceConfiguration.SocketDirectory);
     }
 
     /// <inheritdoc/>

@@ -1,3 +1,5 @@
+using Docker.DotNet;
+
 namespace Parsec.Testcontainers.Tests;
 
 // These tests need a reachable Docker endpoint. The definition tests only make a container object,
@@ -148,5 +150,65 @@ public sealed class ParsecContainerTests
 
         _ = await Assert.ThrowsAsync<ArgumentNullException>(
             () => container.ExecParsecToolAsync(args: (string[])null!));
+    }
+
+    [Fact]
+    public async Task Container_FromStartToDispose_ServesTheServiceAndLeavesNothing()
+    {
+        var container = DockerRequirement.CreateBuilder().Build();
+        var hostSocketDirectory = container.HostSocketDirectory;
+
+        Assert.NotNull(hostSocketDirectory);
+
+        await container.StartAsync(TestContext.Current.CancellationToken);
+
+        var id = container.Id;
+
+        await container.PingAsync(TestContext.Current.CancellationToken);
+
+        var providers = await container.ExecParsecToolAsync(["list-providers"], TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, providers.ExitCode);
+        Assert.Contains("Mbed Crypto", providers.Stdout, StringComparison.Ordinal);
+
+        await container.DisposeAsync();
+
+        // The dispose must leave neither a container in the daemon nor a directory on this
+        // machine, because a test run makes many containers.
+        using var client = DockerRequirement.CreateClient();
+
+        _ = await Assert.ThrowsAsync<DockerContainerNotFoundException>(
+            () => client.Containers.InspectContainerAsync(id, TestContext.Current.CancellationToken));
+
+        Assert.False(Directory.Exists(hostSocketDirectory.DirectoryPath));
+    }
+
+    [Fact]
+    public async Task TwoContainers_StartedAtTheSameTime_ShareNoPathAndNoPort()
+    {
+        await using var first = DockerRequirement.CreateBuilder().Build();
+        await using var second = DockerRequirement.CreateBuilder().Build();
+
+        await Task.WhenAll(
+            first.StartAsync(TestContext.Current.CancellationToken),
+            second.StartAsync(TestContext.Current.CancellationToken));
+
+        Assert.NotEqual(first.SocketPath, second.SocketPath);
+
+        if (first.NeedsSocketBridge)
+        {
+            // Each bridge takes a port of this machine that Docker gives it.
+            Assert.NotEqual(
+                first.GetMappedPublicPort(ParsecSocketBridge.PortInContainer),
+                second.GetMappedPublicPort(ParsecSocketBridge.PortInContainer));
+        }
+
+        // Both sockets must answer, which shows that the second container did not take the socket
+        // or the port of the first one.
+        var (firstStatus, _) = await RawPing.SendAsync(first.SocketPath, TestContext.Current.CancellationToken);
+        var (secondStatus, _) = await RawPing.SendAsync(second.SocketPath, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, (int)firstStatus);
+        Assert.Equal(0, (int)secondStatus);
     }
 }
