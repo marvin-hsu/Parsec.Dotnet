@@ -5,6 +5,7 @@ namespace Parsec.Testcontainers.Tests;
 // These tests need a reachable Docker endpoint. The definition tests only make a container object,
 // but the Testcontainers base types resolve the endpoint while they construct the builder and the
 // container. The tests that start a container need Docker for the real reason.
+[Collection(DockerTestGroup.Name)]
 [Trait("Category", "IntegrationTests")]
 public sealed class ParsecContainerTests
 {

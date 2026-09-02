@@ -24,7 +24,7 @@ public sealed class ParsecImageTests
         var hex = ParsecImage.Digest["sha256:".Length..];
 
         Assert.Equal(64, hex.Length);
-        Assert.All(hex, c => Assert.True(char.IsAsciiDigit(c) || (c is >= 'a' and <= 'f')));
+        Assert.All(hex, c => Assert.True(char.IsAsciiDigit(c) || c is >= 'a' and <= 'f'));
     }
 
     [Fact]

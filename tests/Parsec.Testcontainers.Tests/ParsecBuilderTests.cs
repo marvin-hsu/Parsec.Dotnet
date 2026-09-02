@@ -222,13 +222,13 @@ public sealed class ParsecBuilderTests
     /// </remarks>
     private static IEnumerable<string> WaitCommands(ParsecConfiguration configuration)
     {
-        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
         foreach (var strategy in configuration.WaitStrategies)
         {
-            var waitUntil = strategy.GetType().GetField("_waitUntil", Flags)?.GetValue(strategy);
+            var waitUntil = strategy.GetType().GetField("_waitUntil", flags)?.GetValue(strategy);
 
-            if (waitUntil?.GetType().GetField("_command", Flags)?.GetValue(waitUntil) is string[] command)
+            if (waitUntil?.GetType().GetField("_command", flags)?.GetValue(waitUntil) is string[] command)
             {
                 yield return string.Join(' ', command);
             }

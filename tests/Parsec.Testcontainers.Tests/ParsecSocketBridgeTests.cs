@@ -116,7 +116,7 @@ public sealed class ParsecSocketBridgeTests
                 TestContext.Current.CancellationToken);
 
             _ = await client.SendAsync(
-                Encoding.UTF8.GetBytes("a request"),
+                "a request"u8.ToArray(),
                 SocketFlags.None,
                 TestContext.Current.CancellationToken);
 
