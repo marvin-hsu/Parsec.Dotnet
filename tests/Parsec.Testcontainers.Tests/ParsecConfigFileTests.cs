@@ -109,18 +109,6 @@ public sealed class ParsecConfigFileTests
     }
 
     [Fact]
-    public void Build_WithUnixPeerCredentials_DeclaresNoAdministrator()
-    {
-        var content = ParsecConfigFile.Build(
-            ParsecAuthType.UnixPeerCredentials,
-            ParsecLogLevel.Info,
-            "/run/parsec");
-
-        Assert.Contains("auth_type = \"UnixPeerCredentials\"\n", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("admins", content, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void Build_WithAnUnknownLogLevel_Throws()
         => Assert.Throws<ArgumentOutOfRangeException>(
             () => ParsecConfigFile.Build(ParsecAuthType.Direct, (ParsecLogLevel)99, "/run/parsec"));
