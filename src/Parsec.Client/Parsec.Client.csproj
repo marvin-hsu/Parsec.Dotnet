@@ -16,6 +16,16 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Every public member must be listed in PublicAPI.Unshipped.txt, and moves to
+       PublicAPI.Shipped.txt when a version ships. RS0016 then fails the build on a public
+       member that nobody declared, and RS0017 fails it on one that was removed. Warnings are
+       errors here, so a change to the package surface cannot reach a release unnoticed. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
   <!-- MinVer reads the version from the nearest git tag. Each packable project has its own
        tag prefix, so the two packages release on separate cadences: a client-v* tag moves
        this version only, and Parsec.Testcontainers keeps the version it has. With no matching

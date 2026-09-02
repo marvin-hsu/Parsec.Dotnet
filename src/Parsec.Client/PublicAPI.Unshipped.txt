@@ -1,0 +1,3 @@
+#nullable enable
+Parsec.Client.IParsecClient
+Parsec.Client.IParsecClient.ProviderName.get -> string!

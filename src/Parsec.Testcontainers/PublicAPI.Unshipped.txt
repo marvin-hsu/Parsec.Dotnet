@@ -1,0 +1,46 @@
+#nullable enable
+Parsec.Testcontainers.ParsecAuthType
+Parsec.Testcontainers.ParsecAuthType.Direct = 0 -> Parsec.Testcontainers.ParsecAuthType
+Parsec.Testcontainers.ParsecAuthType.UnixPeerCredentials = 1 -> Parsec.Testcontainers.ParsecAuthType
+Parsec.Testcontainers.ParsecBuilder
+Parsec.Testcontainers.ParsecBuilder.ParsecBuilder() -> void
+Parsec.Testcontainers.ParsecBuilder.WithAuthType(Parsec.Testcontainers.ParsecAuthType authType) -> Parsec.Testcontainers.ParsecBuilder!
+Parsec.Testcontainers.ParsecBuilder.WithLogLevel(Parsec.Testcontainers.ParsecLogLevel logLevel) -> Parsec.Testcontainers.ParsecBuilder!
+Parsec.Testcontainers.ParsecBuilder.WithSocketDirectory(string! socketDirectory) -> Parsec.Testcontainers.ParsecBuilder!
+Parsec.Testcontainers.ParsecConfiguration
+Parsec.Testcontainers.ParsecConfiguration.AuthType.get -> Parsec.Testcontainers.ParsecAuthType?
+Parsec.Testcontainers.ParsecConfiguration.LogLevel.get -> Parsec.Testcontainers.ParsecLogLevel?
+Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(DotNet.Testcontainers.Configurations.IContainerConfiguration! resourceConfiguration) -> void
+Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(DotNet.Testcontainers.Configurations.IResourceConfiguration<Docker.DotNet.Models.CreateContainerParameters!>! resourceConfiguration) -> void
+Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecAuthType? authType = null, Parsec.Testcontainers.ParsecLogLevel? logLevel = null, string? socketDirectory = null) -> void
+Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecConfiguration! oldValue, Parsec.Testcontainers.ParsecConfiguration! newValue) -> void
+Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecConfiguration! resourceConfiguration) -> void
+Parsec.Testcontainers.ParsecConfiguration.SocketDirectory.get -> string?
+Parsec.Testcontainers.ParsecContainer
+Parsec.Testcontainers.ParsecContainer.Endpoint.get -> System.Uri!
+Parsec.Testcontainers.ParsecContainer.ExecParsecToolAsync(System.Collections.Generic.IEnumerable<string!>! args, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<DotNet.Testcontainers.Containers.ExecResult>!
+Parsec.Testcontainers.ParsecContainer.ExecParsecToolAsync(params string![]! args) -> System.Threading.Tasks.Task<DotNet.Testcontainers.Containers.ExecResult>!
+Parsec.Testcontainers.ParsecContainer.ParsecContainer(Parsec.Testcontainers.ParsecConfiguration! configuration) -> void
+Parsec.Testcontainers.ParsecContainer.PingAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Parsec.Testcontainers.ParsecContainer.SocketPath.get -> string!
+Parsec.Testcontainers.ParsecImage
+Parsec.Testcontainers.ParsecLogLevel
+Parsec.Testcontainers.ParsecLogLevel.Debug = 3 -> Parsec.Testcontainers.ParsecLogLevel
+Parsec.Testcontainers.ParsecLogLevel.Error = 0 -> Parsec.Testcontainers.ParsecLogLevel
+Parsec.Testcontainers.ParsecLogLevel.Info = 2 -> Parsec.Testcontainers.ParsecLogLevel
+Parsec.Testcontainers.ParsecLogLevel.Trace = 4 -> Parsec.Testcontainers.ParsecLogLevel
+Parsec.Testcontainers.ParsecLogLevel.Warn = 1 -> Parsec.Testcontainers.ParsecLogLevel
+const Parsec.Testcontainers.ParsecBuilder.EndpointEnvironmentVariable = "PARSEC_SERVICE_ENDPOINT" -> string!
+const Parsec.Testcontainers.ParsecContainer.ToolName = "parsec-tool" -> string!
+const Parsec.Testcontainers.ParsecImage.ConfigFilePath = "/etc/parsec/config.toml" -> string!
+const Parsec.Testcontainers.ParsecImage.DefaultAuthType = Parsec.Testcontainers.ParsecAuthType.Direct -> Parsec.Testcontainers.ParsecAuthType
+const Parsec.Testcontainers.ParsecImage.DefaultLogLevel = Parsec.Testcontainers.ParsecLogLevel.Info -> Parsec.Testcontainers.ParsecLogLevel
+const Parsec.Testcontainers.ParsecImage.DefaultUser = "parsec" -> string!
+const Parsec.Testcontainers.ParsecImage.Digest = "sha256:daf499328f06d2f2389d49fe692b7b9e48acabd178cc7a4d2e442c9bef4a63d3" -> string!
+const Parsec.Testcontainers.ParsecImage.ParsecVersion = "1.5.0" -> string!
+const Parsec.Testcontainers.ParsecImage.Reference = "ghcr.io/marvin-hsu/parsec-testcontainers@sha256:daf499328f06d2f2389d49fe692b7b9e48acabd178cc7a4d2e442c9bef4a63d3" -> string!
+const Parsec.Testcontainers.ParsecImage.Repository = "ghcr.io/marvin-hsu/parsec-testcontainers" -> string!
+const Parsec.Testcontainers.ParsecImage.SocketDirectory = "/run/parsec" -> string!
+const Parsec.Testcontainers.ParsecImage.SocketFileName = "parsec.sock" -> string!
+const Parsec.Testcontainers.ParsecImage.Tag = "1.5.0" -> string!
+override Parsec.Testcontainers.ParsecBuilder.Build() -> Parsec.Testcontainers.ParsecContainer!
