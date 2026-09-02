@@ -46,6 +46,30 @@ await using var parsec = new ParsecBuilder()
 The module writes a new service configuration only when one of these settings differs
 from what the image already selects.
 
+### A configuration of your own
+
+`WithConfigFile` hands the service a file you wrote, in place of the one in the image.
+Reach for it when you need a setting the `With` methods do not offer, such as an
+administrator list, another key info manager, or another provider.
+
+```csharp
+await using var parsec = new ParsecBuilder()
+    .WithConfigFile("test-parsec-config.toml")
+    .Build();
+```
+
+The file replaces the whole configuration, so it has to be complete, and its schema
+follows the Parsec release in the image. A provider only works when the service in the
+image was built with it, so a file that names another provider usually needs another
+image as well.
+
+Your file decides where the socket goes. When that is not the directory of the image,
+tell the module the same directory with `WithSocketDirectory`: the module cannot read
+your file to find out.
+
+`WithAuthType` and `WithLogLevel` write into a file this build no longer produces, so
+combining them with `WithConfigFile` throws rather than dropping the setting quietly.
+
 ### Running parsec-tool
 
 ```csharp

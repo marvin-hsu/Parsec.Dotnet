@@ -174,17 +174,101 @@ public sealed class ParsecBuilderTests
             await ReadConfigFileAsync(configuration));
     }
 
-    /// <summary>
-    /// Gets the command of each wait strategy that runs a command in the container.
-    /// </summary>
-    /// <param name="configuration">The container configuration.</param>
-    /// <returns>Each command, with a space between the parts.</returns>
-    /// <remarks>
-    /// Testcontainers keeps the command in a private field, and gives no public way to read it
-    /// back. The test reads the field, because a test that only counts the strategies cannot
-    /// tell a missing command strategy from the strategy that the base builder adds. The test
-    /// fails when a new version of the library changes the fields.
-    /// </remarks>
+    [Fact]
+    public void WithConfigFile_WithAnEmptyPath_Throws()
+    {
+        var builder = DockerRequirement.CreateBuilder().WithConfigFile(string.Empty);
+
+        _ = Assert.Throws<InvalidOperationException>(builder.Build);
+    }
+
+    [Fact]
+    public void WithConfigFile_WithNoFileThere_Throws()
+    {
+        var missing = Path.Combine(Path.GetTempPath(), "parsec-not-there.toml");
+
+        var builder = DockerRequirement.CreateBuilder().WithConfigFile(missing);
+
+        var exception = Assert.Throws<FileNotFoundException>(builder.Build);
+        Assert.Equal(missing, exception.FileName);
+    }
+
+    [Fact]
+    public void WithConfigFile_AndWithAuthType_Throws()
+    {
+        var file = WriteConfigFile();
+
+        try
+        {
+            // The settings write into a file that the build no longer produces, so taking both
+            // would drop one of them without a word.
+            var builder = DockerRequirement.CreateBuilder()
+                .WithConfigFile(file)
+                .WithAuthType(ParsecAuthType.UnixPeerCredentials);
+
+            _ = Assert.Throws<InvalidOperationException>(builder.Build);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public void WithConfigFile_AndWithLogLevel_Throws()
+    {
+        var file = WriteConfigFile();
+
+        try
+        {
+            var builder = DockerRequirement.CreateBuilder()
+                .WithConfigFile(file)
+                .WithLogLevel(ParsecLogLevel.Debug);
+
+            _ = Assert.Throws<InvalidOperationException>(builder.Build);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public async Task WithConfigFile_PutsTheFileOfTheCallerInTheContainer()
+    {
+        // A marker that no other configuration carries, so the assertion cannot pass on the
+        // file that the image already has or on one that this module writes.
+        var file = WriteConfigFile("debug", admin: "a-test-admin");
+
+        try
+        {
+            var builder = DockerRequirement.CreateBuilder().WithConfigFile(file);
+            var mapped = await ReadConfigFileAsync(builder.Build().Configuration);
+
+            Assert.Equal(await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken), mapped);
+            Assert.Contains("a-test-admin", mapped, StringComparison.Ordinal);
+
+            await using var container = DockerRequirement.CreateBuilder().WithConfigFile(file).Build();
+
+            await container.StartAsync(TestContext.Current.CancellationToken);
+
+            // The service started on the file, so the file is valid and reached the container.
+            await container.PingAsync(TestContext.Current.CancellationToken);
+
+            // The administrator only exists in the file of this test, so an administrator
+            // operation proves which configuration the service read.
+            var admin = await container.ExecParsecToolAsync(
+                ["list-clients"],
+                TestContext.Current.CancellationToken);
+
+            Assert.Equal(0, admin.ExitCode);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
     private static IEnumerable<string> WaitCommands(ParsecConfiguration configuration)
     {
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -215,5 +299,47 @@ public sealed class ParsecBuilderTests
         Assert.Equal(Unix.FileMode644, mapping.FileMode);
 
         return Encoding.UTF8.GetString(await mapping.GetAllBytesAsync(TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
+    /// Writes a complete service configuration that the image can run, with an administrator
+    /// list, which no With method reaches.
+    /// </summary>
+    /// <param name="logLevel">The value for log_level, as the file spells it.</param>
+    /// <param name="admin">A second administrator, so a test can tell this file apart from another.</param>
+    /// <returns>The path of the file.</returns>
+    private static string WriteConfigFile(string logLevel = "info", string admin = "parsec-tool")
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"parsec-{Guid.NewGuid():N}.toml");
+
+        var content = $$"""
+            [core_settings]
+            log_level = "{{logLevel}}"
+            allow_root = true
+
+            [listener]
+            listener_type = "DomainSocket"
+            timeout = 200
+            socket_path = "{{ParsecImage.SocketDirectory}}/{{ParsecImage.SocketFileName}}"
+
+            [authenticator]
+            auth_type = "Direct"
+            admins = [{ name = "parsec-tool" }, { name = "{{admin}}" }]
+
+            [[key_manager]]
+            name = "sqlite-manager"
+            manager_type = "SQLite"
+            sqlite_db_path = "/var/lib/parsec/kim.sqlite3"
+
+            [[provider]]
+            name = "mbed-crypto-provider"
+            provider_type = "MbedCrypto"
+            key_info_manager = "sqlite-manager"
+
+            """;
+
+        File.WriteAllText(path, content);
+
+        return path;
     }
 }

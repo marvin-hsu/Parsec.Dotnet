@@ -21,15 +21,18 @@ public sealed class ParsecConfiguration : ContainerConfiguration
     /// </summary>
     /// <param name="authType">The authenticator of the service.</param>
     /// <param name="logLevel">The log level of the service.</param>
+    /// <param name="configFilePath">The service configuration file on this machine, or <c>null</c> to let the module write one.</param>
     /// <param name="socketDirectory">The directory in the container that holds the socket.</param>
     public ParsecConfiguration(
         ParsecAuthType? authType = null,
         ParsecLogLevel? logLevel = null,
-        string? socketDirectory = null)
+        string? socketDirectory = null,
+        string? configFilePath = null)
     {
         AuthType = authType;
         LogLevel = logLevel;
         SocketDirectory = socketDirectory;
+        ConfigFilePath = configFilePath;
     }
 
     /// <summary>
@@ -72,6 +75,7 @@ public sealed class ParsecConfiguration : ContainerConfiguration
         AuthType = BuildConfiguration.Combine(oldValue?.AuthType, newValue?.AuthType);
         LogLevel = BuildConfiguration.Combine(oldValue?.LogLevel, newValue?.LogLevel);
         SocketDirectory = BuildConfiguration.Combine(oldValue?.SocketDirectory, newValue?.SocketDirectory);
+        ConfigFilePath = BuildConfiguration.Combine(oldValue?.ConfigFilePath, newValue?.ConfigFilePath);
     }
 
     /// <summary>
@@ -91,4 +95,10 @@ public sealed class ParsecConfiguration : ContainerConfiguration
     /// directory of the image. The image uses <see cref="ParsecImage.SocketDirectory"/>.
     /// </summary>
     public string? SocketDirectory { get; }
+
+    /// <summary>
+    /// Gets the service configuration file on this machine that the container reads, or
+    /// <c>null</c> when the module writes the file.
+    /// </summary>
+    public string? ConfigFilePath { get; }
 }

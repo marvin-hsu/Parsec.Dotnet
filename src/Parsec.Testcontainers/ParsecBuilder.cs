@@ -89,6 +89,32 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
     public ParsecBuilder WithSocketDirectory(string socketDirectory)
         => Merge(DockerResourceConfiguration, new ParsecConfiguration(socketDirectory: socketDirectory));
 
+    /// <summary>
+    /// Gives the service a configuration file of your own.
+    /// </summary>
+    /// <param name="configFilePath">A path on this machine to a Parsec configuration file.</param>
+    /// <returns>A configured instance of <see cref="ParsecBuilder"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// The module writes a configuration file from the settings you give it, and that file
+    /// covers the authenticator, the log level and the socket directory. Reach for this method
+    /// when you need a setting the module does not offer, such as an administrator list, another
+    /// key info manager, or another provider.
+    /// </para>
+    /// <para>
+    /// The file replaces the one in the image, so it has to be complete. The schema follows the
+    /// Parsec release in the image. A provider only works when the service in the image was
+    /// built with it.
+    /// </para>
+    /// <para>
+    /// Your file decides where the socket goes. Tell the module the same directory with
+    /// <see cref="WithSocketDirectory"/> whenever it is not the directory of the image, because
+    /// the module cannot read your file to find out.
+    /// </para>
+    /// </remarks>
+    public ParsecBuilder WithConfigFile(string configFilePath)
+        => Merge(DockerResourceConfiguration, new ParsecConfiguration(configFilePath: configFilePath));
+
     /// <inheritdoc/>
     public override ParsecContainer Build()
     {
@@ -98,14 +124,21 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
         // builder sets it here, after the socket directory is known.
         var builder = WithEnvironment(EndpointEnvironmentVariable, "unix:" + ParsecSocketPath.InContainer(DockerResourceConfiguration));
 
-        if (NeedsConfigFile(DockerResourceConfiguration))
+        // The file is root owned and world readable, because the service does not run as root.
+        if (DockerResourceConfiguration.ConfigFilePath is { } callerFile)
+        {
+            builder = builder.WithResourceMapping(
+                File.ReadAllBytes(callerFile),
+                ParsecImage.ConfigFilePath,
+                fileMode: Unix.FileMode644);
+        }
+        else if (NeedsConfigFile(DockerResourceConfiguration))
         {
             var content = ParsecConfigFile.Build(
                 DockerResourceConfiguration.AuthType ?? ParsecImage.DefaultAuthType,
                 DockerResourceConfiguration.LogLevel ?? ParsecImage.DefaultLogLevel,
                 ParsecSocketPath.DirectoryInContainer(DockerResourceConfiguration));
 
-            // The file is root owned and world readable, because the service does not run as root.
             builder = builder.WithResourceMapping(
                 Encoding.UTF8.GetBytes(content),
                 ParsecImage.ConfigFilePath,
@@ -147,6 +180,33 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
         base.Validate();
 
         ParsecSocketPath.ValidateDirectory(DockerResourceConfiguration.SocketDirectory);
+
+        if (DockerResourceConfiguration.ConfigFilePath is not { } configFilePath)
+        {
+            return;
+        }
+
+        // Validate runs on the configuration, not on a call, so there is no argument to name.
+        if (configFilePath.Length == 0)
+        {
+            throw new InvalidOperationException(
+                "WithConfigFile needs a path to a Parsec configuration file.");
+        }
+
+        if (!File.Exists(configFilePath))
+        {
+            throw new FileNotFoundException(
+                "The Parsec configuration file of this build is not there.",
+                configFilePath);
+        }
+
+        // The settings below write into a file that this build no longer produces, so keeping
+        // them would drop them without a word.
+        if (DockerResourceConfiguration.AuthType is not null || DockerResourceConfiguration.LogLevel is not null)
+        {
+            throw new InvalidOperationException(
+                "WithConfigFile replaces the configuration file, so WithAuthType and WithLogLevel have nothing to write to. Put the authenticator and the log level in your file.");
+        }
     }
 
     /// <inheritdoc/>

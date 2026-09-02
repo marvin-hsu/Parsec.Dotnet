@@ -5,14 +5,16 @@ Parsec.Testcontainers.ParsecAuthType.UnixPeerCredentials = 1 -> Parsec.Testconta
 Parsec.Testcontainers.ParsecBuilder
 Parsec.Testcontainers.ParsecBuilder.ParsecBuilder() -> void
 Parsec.Testcontainers.ParsecBuilder.WithAuthType(Parsec.Testcontainers.ParsecAuthType authType) -> Parsec.Testcontainers.ParsecBuilder!
+Parsec.Testcontainers.ParsecBuilder.WithConfigFile(string! configFilePath) -> Parsec.Testcontainers.ParsecBuilder!
 Parsec.Testcontainers.ParsecBuilder.WithLogLevel(Parsec.Testcontainers.ParsecLogLevel logLevel) -> Parsec.Testcontainers.ParsecBuilder!
 Parsec.Testcontainers.ParsecBuilder.WithSocketDirectory(string! socketDirectory) -> Parsec.Testcontainers.ParsecBuilder!
 Parsec.Testcontainers.ParsecConfiguration
 Parsec.Testcontainers.ParsecConfiguration.AuthType.get -> Parsec.Testcontainers.ParsecAuthType?
+Parsec.Testcontainers.ParsecConfiguration.ConfigFilePath.get -> string?
 Parsec.Testcontainers.ParsecConfiguration.LogLevel.get -> Parsec.Testcontainers.ParsecLogLevel?
 Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(DotNet.Testcontainers.Configurations.IContainerConfiguration! resourceConfiguration) -> void
 Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(DotNet.Testcontainers.Configurations.IResourceConfiguration<Docker.DotNet.Models.CreateContainerParameters!>! resourceConfiguration) -> void
-Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecAuthType? authType = null, Parsec.Testcontainers.ParsecLogLevel? logLevel = null, string? socketDirectory = null) -> void
+Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecAuthType? authType = null, Parsec.Testcontainers.ParsecLogLevel? logLevel = null, string? socketDirectory = null, string? configFilePath = null) -> void
 Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecConfiguration! oldValue, Parsec.Testcontainers.ParsecConfiguration! newValue) -> void
 Parsec.Testcontainers.ParsecConfiguration.ParsecConfiguration(Parsec.Testcontainers.ParsecConfiguration! resourceConfiguration) -> void
 Parsec.Testcontainers.ParsecConfiguration.SocketDirectory.get -> string?
