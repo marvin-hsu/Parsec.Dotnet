@@ -89,7 +89,7 @@ jobs:
             /o:"marvin-hsu" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.token="$SONAR_TOKEN" \
-            /d:sonar.cs.vscoveragexml.reportsPaths="artifacts/**/TestResults/**/*.xml" \
+            /d:sonar.cs.vscoveragexml.reportsPaths="TestResults/**/*.xml" \
             /d:sonar.coverage.exclusions="tests/**" \
             /d:sonar.exclusions="artifacts/**,**/StrykerOutput/**,scripts/**,.husky/**" \
             /d:sonar.qualitygate.wait=true
@@ -98,7 +98,7 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test with coverage
-        run: dotnet test --no-build --configuration Release --coverage --coverage-output-format xml
+        run: dotnet test --no-build --configuration Release --results-directory TestResults --coverage --coverage-output-format xml
 
       - name: Sonar end
         env:
