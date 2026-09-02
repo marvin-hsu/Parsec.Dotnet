@@ -27,6 +27,18 @@ All commits must be signed off (`git commit -s`), certifying the [Developer Cert
 
 5. Open a PR using the template. Keep PRs focused and small.
 
+## Tests and Docker
+
+The suite has two lanes. Integration tests carry `[Trait("Category", "IntegrationTests")]`; every other test is a unit test.
+
+- `just test-unit` runs the unit lane. It needs no Docker.
+- `just test-integration` runs the Docker lane.
+- `just verify` covers build, the test suite and formatting. Run it before you open a PR. Without a Docker daemon it covers the unit lane only.
+
+The Docker lane needs a reachable Docker daemon. Each of these tests skips itself when Docker does not answer, so a missing daemon never makes them fail. The lane starts `ghcr.io/marvin-hsu/parsec-testcontainers`. The image is pulled anonymously and pinned by digest, so no registry login is necessary.
+
+On a host that is not Linux, the package bridges the Parsec service socket over TCP. You do not have to install an extra tool.
+
 ## Commit messages
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
