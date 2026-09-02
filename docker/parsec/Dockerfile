@@ -37,12 +37,12 @@ FROM rust:${RUST_VERSION}-bookworm AS chef
 ARG CARGO_CHEF_VERSION
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
+      ca-certificates \
       clang \
-      libclang-dev \
-      llvm-dev \
       cmake \
       git \
-      ca-certificates \
+      libclang-dev \
+      llvm-dev \
  && rm -rf /var/lib/apt/lists/*
 RUN cargo install cargo-chef --locked --version "${CARGO_CHEF_VERSION}"
 WORKDIR /src
@@ -83,12 +83,12 @@ FROM chef AS build-service
 ARG PARSEC_FEATURES=mbed-crypto-provider,direct-authenticator,unix-peer-credentials-authenticator
 WORKDIR /src/parsec
 COPY --from=plan-service /recipe.json recipe.json
-RUN cargo chef cook --release \
+RUN cargo chef cook --release --locked \
       --no-default-features \
       --features "${PARSEC_FEATURES}" \
       --recipe-path recipe.json
 COPY --from=source /src/parsec .
-RUN cargo build --release \
+RUN cargo build --release --locked \
       --no-default-features \
       --features "${PARSEC_FEATURES}" \
  && strip target/release/parsec
@@ -96,9 +96,9 @@ RUN cargo build --release \
 FROM chef AS build-tool
 WORKDIR /src/parsec-tool
 COPY --from=plan-tool /recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --release --locked --recipe-path recipe.json
 COPY --from=source /src/parsec-tool .
-RUN cargo build --release \
+RUN cargo build --release --locked \
  && strip target/release/parsec-tool
 
 # ---------------------------------------------------------------------------
@@ -118,23 +118,23 @@ LABEL org.opencontainers.image.title="Parsec service for Parsec.Testcontainers" 
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      socat \
-      openssl \
       ca-certificates \
+      socat \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-service /src/parsec/target/release/parsec /usr/local/bin/parsec
 COPY --from=build-tool /src/parsec-tool/target/release/parsec-tool /usr/local/bin/parsec-tool
 COPY config.toml /etc/parsec/config.toml
 
-# The socket directory is world-writable so the service can create its socket
-# whether it runs as this user or as root. A bind mount from the host replaces
-# these permissions with the host directory's, which is why the package creates
-# its temporary directory with the same mode.
+# The socket directory belongs to the service user, which is the user the
+# container runs as. It is deliberately not world-writable: any process in the
+# container could otherwise plant a socket there. When a bind mount supplies
+# this directory, the host directory's ownership applies instead, and
+# Parsec.Testcontainers is what reconciles the user id difference.
 RUN useradd --create-home --shell /bin/bash parsec \
  && mkdir -p /run/parsec /var/lib/parsec \
- && chown -R parsec:parsec /var/lib/parsec /etc/parsec \
- && chmod 1777 /run/parsec
+ && chown -R parsec:parsec /run/parsec /var/lib/parsec /etc/parsec \
+ && chmod 755 /run/parsec
 
 ENV PARSEC_SERVICE_ENDPOINT=unix:/run/parsec/parsec.sock
 
