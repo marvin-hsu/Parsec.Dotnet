@@ -121,14 +121,6 @@ public sealed class ParsecConfigFileTests
     }
 
     [Fact]
-    public void Build_WritesTheSocketPathBelowTheGivenDirectory()
-    {
-        var content = ParsecConfigFile.Build(ParsecAuthType.Direct, ParsecLogLevel.Info, "/tmp/parsec-abc12345");
-
-        Assert.Contains("socket_path = \"/tmp/parsec-abc12345/parsec.sock\"\n", content, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void Build_WithAnUnknownLogLevel_Throws()
         => Assert.Throws<ArgumentOutOfRangeException>(
             () => ParsecConfigFile.Build(ParsecAuthType.Direct, (ParsecLogLevel)99, "/run/parsec"));

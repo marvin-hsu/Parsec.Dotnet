@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Parsec.Testcontainers.Tests;
@@ -52,6 +53,69 @@ public sealed class ParsecSocketBridgeTests
 
             Assert.Equal("first", first);
             Assert.Equal("second", second);
+        }
+        finally
+        {
+            directory.Remove();
+        }
+    }
+
+    [Fact]
+    public async Task Start_WithMoreBytesThanOneBuffer_CarriesEveryByte()
+    {
+        using var server = EchoServer.Start();
+        var directory = ParsecHostSocketDirectory.Create();
+        directory.MakeDirectory();
+        using var wait = ShortWait();
+
+        try
+        {
+            await using var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
+
+            // An answer of the service, such as the public key of a key or the list of the keys,
+            // is longer than one buffer of the copy loop. The read loop then runs more than one
+            // time, and one send can move fewer bytes than the read gave. A request of nine
+            // bytes never reaches either loop.
+            var request = RandomNumberGenerator.GetBytes(200 * 1024);
+
+            var answer = await SendAndReceiveAllAsync(bridge.SocketPath, request, wait.Token);
+
+            Assert.Equal(request, answer);
+        }
+        finally
+        {
+            directory.Remove();
+        }
+    }
+
+    [Fact]
+    public async Task Start_WithAClientThatSendsNothing_EndsTheConnectionToThePort()
+    {
+        using var server = EchoServer.Start();
+        var directory = ParsecHostSocketDirectory.Create();
+        directory.MakeDirectory();
+        using var wait = ShortWait();
+
+        try
+        {
+            await using var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
+            using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+
+            await client.ConnectAsync(new UnixDomainSocketEndPoint(bridge.SocketPath), wait.Token);
+
+            // A client that connects and closes its half of the connection with no byte must
+            // give the end of that half to the port. A copy loop that looks at the number of
+            // bytes only after the send holds the connection to the port open instead.
+            client.Shutdown(SocketShutdown.Send);
+
+            var ended = server.ConnectionEnded;
+            var first = await Task.WhenAny(ended, Task.Delay(_shortWait, wait.Token));
+
+            Assert.Same(ended, first);
+
+            var buffer = new byte[64];
+
+            Assert.Equal(0, await client.ReceiveAsync(buffer, SocketFlags.None, wait.Token));
         }
         finally
         {
@@ -271,6 +335,75 @@ public sealed class ParsecSocketBridgeTests
         var read = await client.ReceiveAsync(buffer, SocketFlags.None, cancellationToken);
 
         return Encoding.UTF8.GetString(buffer, 0, read);
+    }
+
+    /// <summary>
+    /// Sends bytes over a Unix socket and reads the answer until the other side closes.
+    /// </summary>
+    /// <param name="socketPath">The path of the socket.</param>
+    /// <param name="request">The bytes to send.</param>
+    /// <param name="cancellationToken">A token to cancel the wait for the answer.</param>
+    /// <returns>The bytes that came back.</returns>
+    /// <remarks>
+    /// The read runs while the send runs. A request that is longer than the buffer of a socket
+    /// gets an answer before the send is done, and a client that only sends would hold both
+    /// sides.
+    /// </remarks>
+    private static async Task<byte[]> SendAndReceiveAllAsync(
+        string socketPath,
+        byte[] request,
+        CancellationToken cancellationToken)
+    {
+        var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+
+        try
+        {
+            await client.ConnectAsync(new UnixDomainSocketEndPoint(socketPath), cancellationToken);
+
+            var answer = ReceiveAllAsync(client, cancellationToken);
+            var sent = 0;
+
+            while (sent < request.Length)
+            {
+                sent += await client.SendAsync(
+                    request.AsMemory(sent),
+                    SocketFlags.None,
+                    cancellationToken);
+            }
+
+            client.Shutdown(SocketShutdown.Send);
+
+            // The read of the answer is done here, so nothing holds the socket after the method.
+            return await answer;
+        }
+        finally
+        {
+            client.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Reads a socket until the other side closes its half of the connection.
+    /// </summary>
+    /// <param name="client">The socket to read.</param>
+    /// <param name="cancellationToken">A token to cancel the wait for bytes.</param>
+    /// <returns>Every byte that came back.</returns>
+    private static async Task<byte[]> ReceiveAllAsync(Socket client, CancellationToken cancellationToken)
+    {
+        var answer = new List<byte>();
+        var buffer = new byte[4096];
+
+        while (true)
+        {
+            var read = await client.ReceiveAsync(buffer, SocketFlags.None, cancellationToken);
+
+            if (read == 0)
+            {
+                return [.. answer];
+            }
+
+            answer.AddRange(buffer.AsSpan(0, read));
+        }
     }
 
     /// <summary>

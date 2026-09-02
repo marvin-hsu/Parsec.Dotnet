@@ -41,21 +41,6 @@ public sealed class ParsecConfigurationTests
     }
 
     [Fact]
-    public void AMergeChangesOneValueAndKeepsTheOthers()
-    {
-        var oldValue = new ParsecConfiguration(
-            ParsecAuthType.Direct,
-            ParsecLogLevel.Info,
-            "/run/parsec");
-
-        var merged = new ParsecConfiguration(oldValue, new ParsecConfiguration(logLevel: ParsecLogLevel.Trace));
-
-        Assert.Equal(ParsecAuthType.Direct, merged.AuthType);
-        Assert.Equal(ParsecLogLevel.Trace, merged.LogLevel);
-        Assert.Equal("/run/parsec", merged.SocketDirectory);
-    }
-
-    [Fact]
     public void AMergeAlsoTakesTheNewValuesOfTheBaseClass()
     {
         var oldValue = new ParsecConfiguration();

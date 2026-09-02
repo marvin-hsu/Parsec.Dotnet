@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using Docker.DotNet;
 
 namespace Parsec.Testcontainers.Tests;
@@ -91,15 +92,41 @@ public sealed class ParsecContainerTests
     }
 
     [Fact]
-    public async Task DisposeAsync_WithNoStart_LeavesNothingAndTakesASecondCall()
+    public async Task StopAsync_WithNoDispose_ClosesTheSocketOnThisMachine()
+    {
+        await using var container = DockerRequirement.CreateBuilder().Build();
+
+        await container.StartAsync(TestContext.Current.CancellationToken);
+
+        var (status, _) = await RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, (int)status);
+
+        // A user can stop a container in the teardown of a fixture and start it again. The stop
+        // closes the bridge of this machine before it stops the container, so no listener holds
+        // the socket file, and nothing on this machine answers on the path any more.
+        await container.StopAsync(TestContext.Current.CancellationToken);
+
+        _ = await Assert.ThrowsAnyAsync<SocketException>(
+            () => RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task DisposeAsync_AfterAFailedCreate_RemovesTheDirectoryAndTakesASecondCall()
     {
         var container = DockerRequirement.CreateBuilder().Build();
         var hostSocketDirectory = container.HostSocketDirectory;
 
         Assert.NotNull(hostSocketDirectory);
 
-        // A test that builds a container and never starts it must leave no directory behind, and
-        // a second dispose must not throw. Both happen in a test that fails before the start.
+        // The container makes the directory in UnsafeCreateAsync, before Docker makes the
+        // container. A pull that fails, or a test that fails before the start, leaves this
+        // state: the directory is on the disk and no container ever ran. The dispose must remove
+        // the directory, and a second dispose must not throw.
+        hostSocketDirectory.MakeDirectory();
+
+        Assert.True(Directory.Exists(hostSocketDirectory.DirectoryPath));
+
         await container.DisposeAsync();
         await container.DisposeAsync();
 

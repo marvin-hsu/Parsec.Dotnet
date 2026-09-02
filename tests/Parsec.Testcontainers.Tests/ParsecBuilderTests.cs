@@ -74,18 +74,6 @@ public sealed class ParsecBuilderTests
     }
 
     [Fact]
-    public async Task Build_WithAnotherAuthType_WritesANewConfigurationFile()
-    {
-        var configuration = DockerRequirement.CreateBuilder().WithAuthType(ParsecAuthType.UnixPeerCredentials).Build().Configuration;
-
-        var content = await ReadConfigFileAsync(configuration);
-
-        Assert.Equal(
-            ParsecConfigFile.Build(ParsecAuthType.UnixPeerCredentials, ParsecLogLevel.Info, ParsecImage.SocketDirectory),
-            content);
-    }
-
-    [Fact]
     public async Task Build_WithAnotherSocketDirectory_WritesANewConfigurationFileAndMovesTheEndpoint()
     {
         var configuration = DockerRequirement.CreateBuilder().WithSocketDirectory("/tmp/parsec-abc12345/").Build().Configuration;
@@ -167,17 +155,6 @@ public sealed class ParsecBuilderTests
     }
 
     [Fact]
-    public void WithImage_ReplacesThePinnedImage()
-    {
-        var configuration = DockerRequirement.CreateBuilder()
-            .WithImage("ghcr.io/parallaxsecond/parsec-quickstart:latest")
-            .Build()
-            .Configuration;
-
-        Assert.Equal("ghcr.io/parallaxsecond/parsec-quickstart:latest", configuration.Image.FullName);
-    }
-
-    [Fact]
     public async Task WithImage_KeepsTheSettingsOfThisModule()
     {
         var configuration = DockerRequirement.CreateBuilder()
@@ -186,9 +163,12 @@ public sealed class ParsecBuilderTests
             .Build()
             .Configuration;
 
-        // A With* call of the base class goes through Clone. A Clone that makes a new
-        // ParsecConfiguration instead of a merge drops the authenticator, and the container then
-        // runs with the file of the image while the test author believes otherwise.
+        // A With* call of the base class goes through Clone. Both sides of that merge have an
+        // assertion here. The base value must win, so the image is the one of the call. A Clone
+        // that makes a new ParsecConfiguration instead of a merge drops the authenticator, and
+        // the container then runs with the file of the image while the test author believes
+        // otherwise.
+        Assert.Equal("ghcr.io/parallaxsecond/parsec-quickstart:latest", configuration.Image.FullName);
         Assert.Equal(
             ParsecConfigFile.Build(ParsecAuthType.UnixPeerCredentials, ParsecLogLevel.Info, ParsecImage.SocketDirectory),
             await ReadConfigFileAsync(configuration));

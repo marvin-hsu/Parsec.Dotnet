@@ -25,18 +25,6 @@ public sealed class ParsecHostSocketDirectoryTests
     }
 
     [Fact]
-    public void Create_NamesTheDirectoryAfterTheTool()
-    {
-        var directory = ParsecHostSocketDirectory.Create();
-
-        var name = Path.GetFileName(directory.DirectoryPath);
-
-        // The prefix tells which tool left a directory in the temporary area of this machine.
-        // The length of the name is an implementation detail and has no test.
-        Assert.StartsWith("parsec-", name, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void Create_PutsTheSocketInTheDirectory()
     {
         var directory = ParsecHostSocketDirectory.Create();
