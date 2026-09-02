@@ -27,9 +27,11 @@ test:
 test-unit:
     dotnet test --configuration Release --filter-not-trait "Category=IntegrationTests"
 
-# Run only the tests that start containers. Needs a reachable Docker endpoint.
+# Run only the tests that need a Docker endpoint. Exit code 8 means a test project
+# has no test in this category, which is not a failure.
 test-integration:
-    dotnet test --configuration Release --filter-trait "Category=IntegrationTests"
+    dotnet test --configuration Release --filter-trait "Category=IntegrationTests" \
+        --ignore-exit-code 8
 
 # Run the tests and write VS coverage XML that SonarCloud can import.
 coverage:

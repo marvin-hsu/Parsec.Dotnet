@@ -49,6 +49,12 @@ public static class ParsecImage
     public const string SocketDirectory = "/run/parsec";
 
     /// <summary>
+    /// The path of the service configuration file in the container. The entry point of the image
+    /// reads this file.
+    /// </summary>
+    public const string ConfigFilePath = "/etc/parsec/config.toml";
+
+    /// <summary>
     /// The name of the socket file in <see cref="SocketDirectory"/>.
     /// </summary>
     public const string SocketFileName = "parsec.sock";
