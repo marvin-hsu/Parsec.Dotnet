@@ -40,6 +40,10 @@ public sealed class ParsecContainer : DockerContainer
     /// The file in the container that holds the output of socat. The shell gives the file with
     /// the error when socat does not listen.
     /// </summary>
+    [SuppressMessage(
+        "Minor Code Smell",
+        "S5443:Use a directory that is not publicly writable",
+        Justification = "The path is inside the container, not on this machine. The container holds one service, it is thrown away after the test, and nothing else writes to its file system.")]
     private const string SocatLogPath = "/tmp/parsec-socat.log";
 
     /// <summary>

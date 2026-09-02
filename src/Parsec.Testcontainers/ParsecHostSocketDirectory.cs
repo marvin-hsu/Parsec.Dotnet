@@ -157,9 +157,16 @@ internal sealed class ParsecHostSocketDirectory
     /// </summary>
     /// <returns>The path of the temporary area of this machine.</returns>
     /// <remarks>
-    /// Unix systems use <c>/tmp</c> directly. On macOS the temporary area of the process is a
-    /// path under <c>/var/folders</c> that is long enough to break the socket path limit.
+    /// <para>
+    /// The temporary area of the user, not a shared one. On macOS it is a directory under
+    /// <c>/var/folders</c> that only the user can read, and the socket path it produces stays
+    /// well inside <see cref="MaxSocketPathLength"/>. On Linux it follows the TMPDIR variable
+    /// and falls back to <c>/tmp</c>.
+    /// </para>
+    /// <para>
+    /// A deep TMPDIR can still push the socket path over the limit, which is what
+    /// <see cref="Create"/> checks.
+    /// </para>
     /// </remarks>
-    private static string RootDirectory()
-        => OperatingSystem.IsWindows() ? Path.GetTempPath() : "/tmp";
+    private static string RootDirectory() => Path.GetTempPath();
 }
