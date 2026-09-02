@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -168,5 +169,9 @@ internal sealed class ParsecHostSocketDirectory
     /// <see cref="Create"/> checks.
     /// </para>
     /// </remarks>
+    [SuppressMessage(
+        "Minor Code Smell",
+        "S5443:Use a directory that is not publicly writable",
+        Justification = "A Unix socket needs a path on disk, and the temporary area is the only place a test fixture can put one. Three things keep the use safe. The directory name carries eight characters from RandomNumberGenerator, so nobody can predict it and place a symlink first. Create makes the directory itself and fails when it already exists. The mode is deliberate: the service in the container runs as another user and has to write its socket inside, which is what the bind mount needs. The directory holds one socket, for the length of one test.")]
     private static string RootDirectory() => Path.GetTempPath();
 }
