@@ -11,8 +11,11 @@ not link against a hardware driver.
 
 ## Status
 
-The public API is under development. The only published type is
-<xref:Parsec.Client.IParsecClient>.
+The public API is under development. The repository publishes two packages.
+`Parsec.Client` holds the client API. Its published type is
+<xref:Parsec.Client.IParsecClient>. `Parsec.Testcontainers` holds a
+Testcontainers module that starts a Parsec service for tests. Its published
+type is <xref:Parsec.Testcontainers.ParsecImage>.
 
 The wire-protocol messages come from the upstream
 [parsec-operations](https://github.com/parallaxsecond/parsec-operations) repository. A build
@@ -23,8 +26,12 @@ is hand-written.
 
 | Target | Notes |
 |---|---|
-| `net8.0` | LTS, AOT-compatible |
-| `net10.0` | LTS, AOT-compatible |
+| `net8.0` | LTS |
+| `net10.0` | LTS |
+
+Both packages target both frameworks. `Parsec.Client` is AOT-compatible.
+`Parsec.Testcontainers` is not AOT-compatible. Its Docker client serialises
+with reflection.
 
 ## Documentation layout
 

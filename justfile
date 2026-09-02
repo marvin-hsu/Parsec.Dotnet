@@ -23,6 +23,14 @@ build:
 test:
     dotnet test --configuration Release
 
+# Run every test that does not need Docker.
+test-unit:
+    dotnet test --configuration Release --filter-not-trait "Category=IntegrationTests"
+
+# Run only the tests that start containers. Needs a reachable Docker endpoint.
+test-integration:
+    dotnet test --configuration Release --filter-trait "Category=IntegrationTests"
+
 # Run the tests and write VS coverage XML that SonarCloud can import.
 coverage:
     dotnet test --configuration Release --results-directory TestResults \

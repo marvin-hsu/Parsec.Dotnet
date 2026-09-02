@@ -39,8 +39,12 @@ how it is built.
 
 | Target | Notes |
 |---|---|
-| `net8.0` | LTS, AOT-compatible |
-| `net10.0` | LTS, AOT-compatible |
+| `net8.0` | LTS |
+| `net10.0` | LTS |
+
+Both packages target both frameworks. `Parsec.Client` is AOT-compatible.
+`Parsec.Testcontainers` is not AOT-compatible. Its Docker client serialises
+with reflection.
 
 ## Building from source
 

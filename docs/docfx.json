@@ -4,7 +4,10 @@
     {
       "src": [
         {
-          "files": ["Parsec.Client/Parsec.Client.csproj"],
+          "files": [
+            "Parsec.Client/Parsec.Client.csproj",
+            "Parsec.Testcontainers/Parsec.Testcontainers.csproj"
+          ],
           "src": "../src"
         }
       ],

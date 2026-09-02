@@ -11,7 +11,9 @@ Computing Foundation, CNCF）的專案。Parsec 讓應用程式用單一 API 取
 
 ## 現況
 
-公開 API 仍在開發中。目前只發佈 `Parsec.Client.IParsecClient` 一個型別。
+公開 API 仍在開發中。本儲存庫發佈兩個套件。`Parsec.Client` 提供用戶端 API，目前發佈
+`Parsec.Client.IParsecClient` 型別。`Parsec.Testcontainers` 提供 Testcontainers 模組，
+在測試中啟動 Parsec 服務，目前發佈 `Parsec.Testcontainers.ParsecImage` 型別。
 
 wire protocol 的訊息定義來自上游的 parsec-operations 儲存庫。建置時會從那些 `.proto`
 檔案產生 C# 程式碼。產生的型別為 internal，公開 API 全部手寫。
@@ -20,8 +22,11 @@ wire protocol 的訊息定義來自上游的 parsec-operations 儲存庫。建�
 
 | 目標框架 | 說明 |
 |---|---|
-| `net8.0` | LTS，相容 AOT |
-| `net10.0` | LTS，相容 AOT |
+| `net8.0` | LTS |
+| `net10.0` | LTS |
+
+兩個套件都支援上述框架。`Parsec.Client` 相容 AOT；`Parsec.Testcontainers` 不相容 AOT，
+因為它的 Docker 用戶端以反射進行序列化。
 
 ## 文件架構
 

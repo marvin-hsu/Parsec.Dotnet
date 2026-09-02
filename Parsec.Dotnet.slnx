@@ -1,9 +1,11 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Parsec.Client/Parsec.Client.csproj" />
+    <Project Path="src/Parsec.Testcontainers/Parsec.Testcontainers.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Parsec.Client.Tests/Parsec.Client.Tests.csproj" />
+    <Project Path="tests/Parsec.Testcontainers.Tests/Parsec.Testcontainers.Tests.csproj" />
   </Folder>
   <Folder Name="/solution-items/">
     <File Path=".editorconfig" />
