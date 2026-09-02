@@ -42,11 +42,38 @@ jobs:
       - name: Build (warnings are errors)
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test
-        run: dotnet test --no-build --configuration Release
+      - name: Test (no Docker)
+        run: >-
+          dotnet test --no-build --configuration Release
+          --filter-not-trait "Category=IntegrationTests"
+
+      # Only the Linux runner has a Docker daemon. The tests pull the Parsec image
+      # from ghcr.io, which is public, so no login is necessary. Exit code 8 means a
+      # test project has no test in this category, which is not a failure. Detailed
+      # output puts the parsec-tool output of the tests in the log.
+      - name: Test (Docker)
+        if: matrix.os == 'ubuntu-latest'
+        run: >-
+          dotnet test --no-build --configuration Release
+          --filter-trait "Category=IntegrationTests"
+          --ignore-exit-code 8 --output Detailed
 
       - name: Verify formatting
         run: dotnet format --verify-no-changes --no-restore
+
+      - name: Pack
+        if: matrix.os == 'ubuntu-latest'
+        run: dotnet pack --no-build --configuration Release
+
+      - name: Upload the packages
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nupkg
+          path: |
+            artifacts/package/release/*.nupkg
+            artifacts/package/release/*.snupkg
+          if-no-files-found: error
 
   sonar:
     name: SonarCloud analysis
@@ -100,8 +127,13 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
+      # Coverage measures the unit tests only. The integration tests need Docker and
+      # their coverage would change with the daemon, which makes the number unstable.
       - name: Test with coverage
-        run: dotnet test --no-build --configuration Release --results-directory TestResults --coverage --coverage-output-format xml
+        run: >-
+          dotnet test --no-build --configuration Release --results-directory TestResults
+          --coverage --coverage-output-format xml
+          --filter-not-trait "Category=IntegrationTests"
 
       - name: Sonar end
         env:

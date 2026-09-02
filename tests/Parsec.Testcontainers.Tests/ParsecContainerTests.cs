@@ -127,6 +127,10 @@ public sealed class ParsecContainerTests
 
         var result = await container.ExecParsecToolAsync(["ping"], TestContext.Current.CancellationToken);
 
+        // The test log keeps the answer of the tool. A run with detailed output shows it, which
+        // makes the wire path visible in a continuous integration log.
+        TestContext.Current.TestOutputHelper?.WriteLine("parsec-tool ping: " + result.Stdout.Trim());
+
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("1.0", result.Stdout, StringComparison.Ordinal);
     }
