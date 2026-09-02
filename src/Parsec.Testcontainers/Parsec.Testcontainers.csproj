@@ -7,7 +7,11 @@
     <IsPackable>true</IsPackable>
     <PackageId>Parsec.Testcontainers</PackageId>
     <Description>Testcontainers module that starts a Parsec service in a container for integration tests.</Description>
-    <PackageTags>parsec;testcontainers;docker;integration-testing;security;hsm;tpm;cncf</PackageTags>
+    <PackageTags>testcontainers;parsec;docker;integration-testing</PackageTags>
+    <!-- Symbols travel in a .snupkg, so a debugger can step into this code with the
+         SourceLink map that the pdb carries. -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- No IsAotCompatible here. Testcontainers uses Docker.DotNet, which serialises with
          reflection, so the trim and AOT analysers cannot prove this assembly safe. -->
   </PropertyGroup>
@@ -17,8 +21,16 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- This package has its own README. The repository README describes both packages.
+       The file is excluded from the default None glob and included with a full path,
+       because pack collects the package files in the outer build, where the default
+       globs are not populated. -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);README.md</DefaultItemExcludes>
+  </PropertyGroup>
+
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
     <None Include="$(MSBuildThisFileDirectory)../../THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="/" />
     <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="/" />
   </ItemGroup>

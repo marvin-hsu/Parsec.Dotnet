@@ -38,6 +38,10 @@ coverage:
     dotnet test --configuration Release --results-directory TestResults \
         --coverage --coverage-output-format xml
 
+# Build the NuGet packages into artifacts/package/release.
+pack:
+    dotnet pack --configuration Release
+
 # Report formatting violations without changing files.
 format-check:
     dotnet format --verify-no-changes

@@ -12,6 +12,7 @@ A .NET client library for [Parsec](https://parsec.community/) — the **P**latfo
 
 ```bash
 dotnet add package Parsec.Client
+dotnet add package Parsec.Testcontainers   # for integration tests
 ```
 
 ## Quick start
