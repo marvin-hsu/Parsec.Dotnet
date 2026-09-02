@@ -98,11 +98,11 @@ sonar:
         --coverage --coverage-output-format xml
     dotnet dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
-# BROKEN: Stryker needs VSTest but this repo runs Microsoft.Testing.Platform.
-# Upstream issue: https://github.com/stryker-mutator/stryker-net/issues/3094
-# Mutation testing. Does not work yet, see the note above.
+# Settings live in stryker-config.json. The Microsoft.Testing.Platform runner is
+# still in preview upstream, so read a surviving mutant before you act on it.
+# Mutation testing over the types whose behaviour this package decides.
 mutate:
-    cd tests/Parsec.Client.Tests && dotnet dotnet-stryker
+    cd tests/Parsec.Testcontainers.Tests && dotnet dotnet-stryker --config-file ../../stryker-config.json
 
 # Delete build output, test results and the generated API reference.
 clean:

@@ -13,6 +13,17 @@ public sealed class ParsecHostSocketDirectoryTests
     }
 
     [Fact]
+    public void Create_GivesAnAbsolutePath()
+    {
+        var directory = ParsecHostSocketDirectory.Create();
+
+        // A relative path would make the bind mount of the container follow the working
+        // directory of whatever process runs the test, and the service would then write its
+        // socket where nobody looks for it.
+        Assert.True(Path.IsPathRooted(directory.SocketPath), directory.SocketPath);
+    }
+
+    [Fact]
     public void Create_GivesAShortSocketPath()
     {
         var directory = ParsecHostSocketDirectory.Create();
