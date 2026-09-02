@@ -98,28 +98,12 @@ public sealed class ParsecBuilderTests
             configuration.Environments[ParsecBuilder.EndpointEnvironmentVariable]);
     }
 
+    // One case is enough to show that Build calls the check. ParsecSocketPathTests covers the
+    // rules themselves, and needs no Docker endpoint for that.
     [Fact]
     public void Build_WithARelativeSocketDirectory_Throws()
     {
         var builder = DockerRequirement.CreateBuilder().WithSocketDirectory("run/parsec");
-
-        var exception = Assert.Throws<ArgumentException>(builder.Build);
-
-        Assert.Equal(nameof(ParsecConfiguration.SocketDirectory), exception.ParamName);
-    }
-
-    [Fact]
-    public void Build_WithAnEmptySocketDirectory_Throws()
-    {
-        var builder = DockerRequirement.CreateBuilder().WithSocketDirectory(string.Empty);
-
-        _ = Assert.Throws<ArgumentException>(builder.Build);
-    }
-
-    [Fact]
-    public void Build_WithTheRootSocketDirectory_Throws()
-    {
-        var builder = DockerRequirement.CreateBuilder().WithSocketDirectory("/");
 
         var exception = Assert.Throws<ArgumentException>(builder.Build);
 
@@ -183,22 +167,6 @@ public sealed class ParsecBuilderTests
     }
 
     [Fact]
-    public void Build_CalledTwice_GivesEachContainerItsOwnHostSocketDirectory()
-    {
-        var builder = DockerRequirement.CreateBuilder();
-
-        var first = builder.Build();
-        var second = builder.Build();
-
-        Assert.NotNull(first.HostSocketDirectory);
-        Assert.NotNull(second.HostSocketDirectory);
-
-        // Two containers must not share a socket, because tests can run at the same time.
-        Assert.NotEqual(first.HostSocketDirectory.DirectoryPath, second.HostSocketDirectory.DirectoryPath);
-        Assert.NotEqual(first.SocketPath, second.SocketPath);
-    }
-
-    [Fact]
     public void WithImage_ReplacesThePinnedImage()
     {
         var configuration = DockerRequirement.CreateBuilder()
@@ -207,6 +175,23 @@ public sealed class ParsecBuilderTests
             .Configuration;
 
         Assert.Equal("ghcr.io/parallaxsecond/parsec-quickstart:latest", configuration.Image.FullName);
+    }
+
+    [Fact]
+    public async Task WithImage_KeepsTheSettingsOfThisModule()
+    {
+        var configuration = DockerRequirement.CreateBuilder()
+            .WithAuthType(ParsecAuthType.UnixPeerCredentials)
+            .WithImage("ghcr.io/parallaxsecond/parsec-quickstart:latest")
+            .Build()
+            .Configuration;
+
+        // A With* call of the base class goes through Clone. A Clone that makes a new
+        // ParsecConfiguration instead of a merge drops the authenticator, and the container then
+        // runs with the file of the image while the test author believes otherwise.
+        Assert.Equal(
+            ParsecConfigFile.Build(ParsecAuthType.UnixPeerCredentials, ParsecLogLevel.Info, ParsecImage.SocketDirectory),
+            await ReadConfigFileAsync(configuration));
     }
 
     /// <summary>

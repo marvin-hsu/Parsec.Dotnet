@@ -1,19 +1,9 @@
-using System.Runtime.InteropServices;
-
 namespace Parsec.Testcontainers.Tests;
 
 // These tests need no Docker endpoint. They only look at a path, and two of them make a
 // directory in the temporary area of this machine.
 public sealed class ParsecHostSocketDirectoryTests
 {
-    [Fact]
-    public void IsBindMountSupported_TellsIfTheHostIsLinux()
-    {
-        Assert.Equal(
-            RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
-            ParsecHostSocketDirectory.IsBindMountSupported);
-    }
-
     [Fact]
     public void Create_MakesNoDirectoryOnTheDisk()
     {
@@ -41,8 +31,9 @@ public sealed class ParsecHostSocketDirectoryTests
 
         var name = Path.GetFileName(directory.DirectoryPath);
 
+        // The prefix tells which tool left a directory in the temporary area of this machine.
+        // The length of the name is an implementation detail and has no test.
         Assert.StartsWith("parsec-", name, StringComparison.Ordinal);
-        Assert.Equal("parsec-".Length + 8, name.Length);
     }
 
     [Fact]

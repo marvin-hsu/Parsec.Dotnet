@@ -1,30 +1,10 @@
 namespace Parsec.Testcontainers.Tests;
 
+// Only the merge of two configurations has a test. The merge semantics of Testcontainers are easy
+// to get wrong, and every With* call of the builder goes through them. A test of a constructor
+// that stores its arguments catches no defect of this package.
 public sealed class ParsecConfigurationTests
 {
-    [Fact]
-    public void ANewConfigurationKeepsEveryValueOfTheImage()
-    {
-        var configuration = new ParsecConfiguration();
-
-        Assert.Null(configuration.AuthType);
-        Assert.Null(configuration.LogLevel);
-        Assert.Null(configuration.SocketDirectory);
-    }
-
-    [Fact]
-    public void TheConstructorKeepsTheValuesThatYouGive()
-    {
-        var configuration = new ParsecConfiguration(
-            ParsecAuthType.UnixPeerCredentials,
-            ParsecLogLevel.Trace,
-            "/tmp/parsec");
-
-        Assert.Equal(ParsecAuthType.UnixPeerCredentials, configuration.AuthType);
-        Assert.Equal(ParsecLogLevel.Trace, configuration.LogLevel);
-        Assert.Equal("/tmp/parsec", configuration.SocketDirectory);
-    }
-
     [Fact]
     public void AMergeTakesTheNewValues()
     {
@@ -73,21 +53,6 @@ public sealed class ParsecConfigurationTests
         Assert.Equal(ParsecAuthType.Direct, merged.AuthType);
         Assert.Equal(ParsecLogLevel.Trace, merged.LogLevel);
         Assert.Equal("/run/parsec", merged.SocketDirectory);
-    }
-
-    [Fact]
-    public void TheCopyConstructorKeepsEveryValue()
-    {
-        var source = new ParsecConfiguration(
-            ParsecAuthType.UnixPeerCredentials,
-            ParsecLogLevel.Error,
-            "/run/parsec");
-
-        var copy = new ParsecConfiguration(source);
-
-        Assert.Equal(source.AuthType, copy.AuthType);
-        Assert.Equal(source.LogLevel, copy.LogLevel);
-        Assert.Equal(source.SocketDirectory, copy.SocketDirectory);
     }
 
     [Fact]

@@ -1,21 +1,10 @@
 namespace Parsec.Testcontainers.Tests;
 
+// The constants of the image are literals. A test that repeats such a literal can never fail for
+// a real reason, so only the two decisions of this type have a test: the shape of the digest, and
+// the reference that pins the digest.
 public sealed class ParsecImageTests
 {
-    [Fact]
-    public void ImageRepositoryIsTheGhcrPackage() =>
-        Assert.Equal("ghcr.io/marvin-hsu/parsec-testcontainers", ParsecImage.Repository);
-
-    [Fact]
-    public void ImageTagIsThePinnedParsecVersion() =>
-        Assert.Equal("1.5.0", ParsecImage.Tag);
-
-    [Fact]
-    public void ImageDigestIsThePinnedDigest() =>
-        Assert.Equal(
-            "sha256:daf499328f06d2f2389d49fe692b7b9e48acabd178cc7a4d2e442c9bef4a63d3",
-            ParsecImage.Digest);
-
     [Fact]
     public void ImageDigestHasTheSha256Shape()
     {
@@ -28,38 +17,9 @@ public sealed class ParsecImageTests
     }
 
     [Fact]
-    public void ParsecVersionIsTheTag() =>
-        Assert.Equal(ParsecImage.Tag, ParsecImage.ParsecVersion);
-
-    [Fact]
     public void ReferencePinsTheDigestAndNotTheTag()
     {
         Assert.Equal($"{ParsecImage.Repository}@{ParsecImage.Digest}", ParsecImage.Reference);
         Assert.DoesNotContain($":{ParsecImage.Tag}", ParsecImage.Reference, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void SocketDirectoryIsAnAbsolutePath()
-    {
-        Assert.Equal("/run/parsec", ParsecImage.SocketDirectory);
-        Assert.StartsWith("/", ParsecImage.SocketDirectory, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void SocketFileNameIsTheParsecSocket() =>
-        Assert.Equal("parsec.sock", ParsecImage.SocketFileName);
-
-    [Fact]
-    public void DefaultUserIsNotRoot()
-    {
-        Assert.Equal("parsec", ParsecImage.DefaultUser);
-        Assert.NotEqual("root", ParsecImage.DefaultUser);
-    }
-
-    [Fact]
-    public void DefaultsMatchTheConfigurationInTheImage()
-    {
-        Assert.Equal(ParsecAuthType.Direct, ParsecImage.DefaultAuthType);
-        Assert.Equal(ParsecLogLevel.Info, ParsecImage.DefaultLogLevel);
     }
 }

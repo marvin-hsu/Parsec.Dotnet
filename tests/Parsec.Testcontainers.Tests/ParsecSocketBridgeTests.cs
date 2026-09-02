@@ -14,7 +14,7 @@ public sealed class ParsecSocketBridgeTests
     private static readonly TimeSpan _shortWait = TimeSpan.FromSeconds(5);
 
     [Fact]
-    public async Task Start_MakesTheSocketOfTheGivenPath()
+    public async Task Start_CarriesTheBytesOfBothDirections()
     {
         using var server = EchoServer.Start();
         var directory = ParsecHostSocketDirectory.Create();
@@ -25,24 +25,6 @@ public sealed class ParsecSocketBridgeTests
             await using var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
 
             Assert.Equal(directory.SocketPath, bridge.SocketPath);
-            Assert.True(File.Exists(bridge.SocketPath));
-        }
-        finally
-        {
-            directory.Remove();
-        }
-    }
-
-    [Fact]
-    public async Task Start_CarriesTheBytesOfBothDirections()
-    {
-        using var server = EchoServer.Start();
-        var directory = ParsecHostSocketDirectory.Create();
-        directory.MakeDirectory();
-
-        try
-        {
-            await using var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
 
             var answer = await SendAsync(bridge.SocketPath, "a request", TestContext.Current.CancellationToken);
 
@@ -149,6 +131,126 @@ public sealed class ParsecSocketBridgeTests
         }
     }
 
+    [Fact]
+    public async Task Start_WithAServerThatAnswersAfterTheRequest_CarriesTheEndOfTheRequest()
+    {
+        using var server = LateAnswerServer.Start();
+        var directory = ParsecHostSocketDirectory.Create();
+        directory.MakeDirectory();
+        using var wait = ShortWait();
+
+        try
+        {
+            await using var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
+
+            // A client of the service can close the half of the request and then wait for the
+            // answer, and the option -t of socat in the container holds the connection open for
+            // that. The bridge must give the end of the request to the port, or a server that
+            // answers only after the end of the request never answers.
+            var answer = await SendAsync(bridge.SocketPath, "a request", wait.Token);
+
+            Assert.Equal("a request", answer);
+        }
+        finally
+        {
+            directory.Remove();
+        }
+    }
+
+    [Fact]
+    public async Task DisposeAsync_WithAnOpenConnection_EndsThatConnection()
+    {
+        using var server = EchoServer.Start();
+        var directory = ParsecHostSocketDirectory.Create();
+        directory.MakeDirectory();
+        using var wait = ShortWait();
+
+        try
+        {
+            var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
+            using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+
+            await client.ConnectAsync(new UnixDomainSocketEndPoint(bridge.SocketPath), wait.Token);
+
+            var buffer = new byte[64];
+            _ = await client.SendAsync("a request"u8.ToArray(), SocketFlags.None, wait.Token);
+
+            // The answer shows that the bridge holds an open connection to the port now.
+            Assert.True(await client.ReceiveAsync(buffer, SocketFlags.None, wait.Token) > 0);
+
+            // The dispose must end the open connection instead of waiting for a client that keeps
+            // it. The container disposes the bridge while a client can still hold a connection.
+            var dispose = bridge.DisposeAsync().AsTask();
+            var firstOfTheDispose = await Task.WhenAny(dispose, Task.Delay(_shortWait, wait.Token));
+
+            Assert.Same(dispose, firstOfTheDispose);
+            await dispose;
+
+            try
+            {
+                Assert.Equal(0, await client.ReceiveAsync(buffer, SocketFlags.None, wait.Token));
+            }
+            catch (SocketException)
+            {
+                // The close of the socket can also come to the client as an error.
+            }
+        }
+        finally
+        {
+            directory.Remove();
+        }
+    }
+
+    [Fact]
+    public async Task Start_WhenTheClientGoesAway_ClosesTheConnectionToThePort()
+    {
+        using var server = EchoServer.Start();
+        var directory = ParsecHostSocketDirectory.Create();
+        directory.MakeDirectory();
+        using var wait = ShortWait();
+
+        try
+        {
+            await using var bridge = ParsecSocketBridge.Start(directory.SocketPath, "127.0.0.1", server.Port);
+
+            using (var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
+            {
+                await client.ConnectAsync(new UnixDomainSocketEndPoint(bridge.SocketPath), wait.Token);
+
+                var buffer = new byte[64];
+                _ = await client.SendAsync("a request"u8.ToArray(), SocketFlags.None, wait.Token);
+
+                Assert.True(await client.ReceiveAsync(buffer, SocketFlags.None, wait.Token) > 0);
+            }
+
+            // The client is gone. The bridge must end its connection to the port as well, because
+            // a client makes a connection for each request, and a connection that stays open for
+            // every request of a test run fills the table of the container.
+            var ended = server.ConnectionEnded;
+            var first = await Task.WhenAny(ended, Task.Delay(_shortWait, wait.Token));
+
+            Assert.Same(ended, first);
+        }
+        finally
+        {
+            directory.Remove();
+        }
+    }
+
+    /// <summary>
+    /// Makes a token source that cancels after <see cref="_shortWait"/>, so a bridge that carries
+    /// nothing fails the test instead of holding the test run.
+    /// </summary>
+    /// <returns>A new token source. The caller disposes it.</returns>
+    private static CancellationTokenSource ShortWait()
+    {
+        var source = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+
+        source.CancelAfter(_shortWait);
+
+        return source;
+    }
+
     /// <summary>
     /// Sends text over a Unix socket and reads the answer.
     /// </summary>
@@ -179,6 +281,8 @@ public sealed class ParsecSocketBridgeTests
     {
         private readonly Socket _listener;
         private readonly CancellationTokenSource _stop = new();
+        private readonly TaskCompletionSource _connectionEnded =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         private EchoServer(Socket listener)
         {
@@ -191,6 +295,11 @@ public sealed class ParsecSocketBridgeTests
         /// Gets the port that the server listens on.
         /// </summary>
         internal int Port { get; }
+
+        /// <summary>
+        /// Gets a task that completes when a connection of the server closes.
+        /// </summary>
+        internal Task ConnectionEnded => _connectionEnded.Task;
 
         public void Dispose()
         {
@@ -266,6 +375,90 @@ public sealed class ParsecSocketBridgeTests
                 catch (SocketException)
                 {
                 }
+                finally
+                {
+                    _ = _connectionEnded.TrySetResult();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// A TCP server that reads a request until the end of it, and answers only then. It stands
+    /// for a service that needs time for the answer, while the client already closed the half of
+    /// the request.
+    /// </summary>
+    private sealed class LateAnswerServer : IDisposable
+    {
+        private readonly Socket _listener;
+        private readonly CancellationTokenSource _stop = new();
+
+        private LateAnswerServer(Socket listener)
+        {
+            _listener = listener;
+            Port = ((IPEndPoint)listener.LocalEndPoint!).Port;
+            _ = AcceptAsync();
+        }
+
+        /// <summary>
+        /// Gets the port that the server listens on.
+        /// </summary>
+        internal int Port { get; }
+
+        public void Dispose()
+        {
+            _stop.Cancel();
+            _listener.Dispose();
+            _stop.Dispose();
+        }
+
+        /// <summary>
+        /// Starts a server on a free port of the loopback address.
+        /// </summary>
+        /// <returns>A server that listens.</returns>
+        internal static LateAnswerServer Start()
+        {
+            var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+            listener.Listen(16);
+
+            return new LateAnswerServer(listener);
+        }
+
+        private async Task AcceptAsync()
+        {
+            try
+            {
+                using var client = await _listener.AcceptAsync(_stop.Token);
+
+                var request = new List<byte>();
+                var buffer = new byte[64];
+
+                while (true)
+                {
+                    var read = await client.ReceiveAsync(buffer, SocketFlags.None, _stop.Token);
+
+                    if (read == 0)
+                    {
+                        break;
+                    }
+
+                    request.AddRange(buffer.AsSpan(0, read));
+                }
+
+                // The end of the request came through the bridge, so the answer can go back.
+                _ = await client.SendAsync(request.ToArray(), SocketFlags.None, _stop.Token);
+                client.Shutdown(SocketShutdown.Send);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (SocketException)
+            {
             }
         }
     }

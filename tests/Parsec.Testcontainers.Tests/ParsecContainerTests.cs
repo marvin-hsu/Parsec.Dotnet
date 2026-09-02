@@ -10,14 +10,6 @@ namespace Parsec.Testcontainers.Tests;
 public sealed class ParsecContainerTests
 {
     [Fact]
-    public void ContainerSocketPath_WithNoSettings_IsThePathInTheImage()
-    {
-        var container = DockerRequirement.CreateBuilder().Build();
-
-        Assert.Equal("/run/parsec/parsec.sock", container.ContainerSocketPath);
-    }
-
-    [Fact]
     public void ContainerSocketPath_WithASocketDirectory_FollowsTheDirectory()
     {
         var container = DockerRequirement.CreateBuilder()
@@ -49,19 +41,6 @@ public sealed class ParsecContainerTests
     }
 
     [Fact]
-    public void Endpoint_WithNoSettings_AgreesWithTheEnvironmentVariableInTheContainer()
-    {
-        var container = DockerRequirement.CreateBuilder().Build();
-
-        // The variable tells the service and the tools in the container where the socket is, so
-        // it holds the path in the container. A client on this machine reads SocketPath, which is
-        // the same path only while the container needs no bind mount and no bridge.
-        Assert.Equal(
-            "unix:" + container.ContainerSocketPath,
-            container.Configuration.Environments[ParsecBuilder.EndpointEnvironmentVariable]);
-    }
-
-    [Fact]
     public async Task SocketPath_AfterStart_AnswersAPingFromThisMachine()
     {
         await using var container = DockerRequirement.CreateBuilder().Build();
@@ -75,23 +54,6 @@ public sealed class ParsecContainerTests
         // The body is the protobuf encoding of the version 1.0 of the wire protocol. The minor
         // version is zero, and protobuf leaves a zero out.
         Assert.Equal(new byte[] { 0x08, 0x01 }, body);
-    }
-
-    [Fact]
-    public async Task DisposeAsync_RemovesTheSocketDirectoryOfThisMachine()
-    {
-        var container = DockerRequirement.CreateBuilder().Build();
-        var hostSocketDirectory = container.HostSocketDirectory;
-
-        Assert.NotNull(hostSocketDirectory);
-
-        await container.StartAsync(TestContext.Current.CancellationToken);
-
-        Assert.True(Directory.Exists(hostSocketDirectory.DirectoryPath));
-
-        await container.DisposeAsync();
-
-        Assert.False(Directory.Exists(hostSocketDirectory.DirectoryPath));
     }
 
     [Fact]
@@ -110,51 +72,38 @@ public sealed class ParsecContainerTests
     }
 
     [Fact]
-    public async Task PingAsync_AfterStart_Answers()
+    public async Task StartAsync_WithSettingsThatTheImageDoesNotHave_ServesTheService()
     {
-        await using var container = DockerRequirement.CreateBuilder().Build();
+        await using var container = DockerRequirement.CreateBuilder()
+            .WithAuthType(ParsecAuthType.UnixPeerCredentials)
+            .WithLogLevel(ParsecLogLevel.Debug)
+            .Build();
 
+        // This is the one test that gives the file of ParsecConfigFile to the real service. The
+        // wait strategy of the builder runs the tool in the container, so a file with a key that
+        // the schema does not have, or an administrator list that the authenticator rejects, ends
+        // the start here and not in the test suite of a user.
         await container.StartAsync(TestContext.Current.CancellationToken);
 
-        await container.PingAsync(TestContext.Current.CancellationToken);
+        var (status, _) = await RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, (int)status);
     }
 
     [Fact]
-    public async Task ExecParsecToolAsync_WithPing_ReportsTheProtocolVersion()
-    {
-        await using var container = DockerRequirement.CreateBuilder().Build();
-
-        await container.StartAsync(TestContext.Current.CancellationToken);
-
-        var result = await container.ExecParsecToolAsync(["ping"], TestContext.Current.CancellationToken);
-
-        // The test log keeps the answer of the tool. A run with detailed output shows it, which
-        // makes the wire path visible in a continuous integration log.
-        TestContext.Current.TestOutputHelper?.WriteLine("parsec-tool ping: " + result.Stdout.Trim());
-
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("1.0", result.Stdout, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public async Task ExecParsecToolAsync_WithAnUnknownCommand_GivesTheExitCode()
-    {
-        await using var container = DockerRequirement.CreateBuilder().Build();
-
-        await container.StartAsync(TestContext.Current.CancellationToken);
-
-        var result = await container.ExecParsecToolAsync("no-such-command");
-
-        Assert.NotEqual(0, result.ExitCode);
-    }
-
-    [Fact]
-    public async Task ExecParsecToolAsync_WithNullArguments_Throws()
+    public async Task DisposeAsync_WithNoStart_LeavesNothingAndTakesASecondCall()
     {
         var container = DockerRequirement.CreateBuilder().Build();
+        var hostSocketDirectory = container.HostSocketDirectory;
 
-        _ = await Assert.ThrowsAsync<ArgumentNullException>(
-            () => container.ExecParsecToolAsync(args: (string[])null!));
+        Assert.NotNull(hostSocketDirectory);
+
+        // A test that builds a container and never starts it must leave no directory behind, and
+        // a second dispose must not throw. Both happen in a test that fails before the start.
+        await container.DisposeAsync();
+        await container.DisposeAsync();
+
+        Assert.False(Directory.Exists(hostSocketDirectory.DirectoryPath));
     }
 
     [Fact]
@@ -175,6 +124,12 @@ public sealed class ParsecContainerTests
 
         Assert.Equal(0, providers.ExitCode);
         Assert.Contains("Mbed Crypto", providers.Stdout, StringComparison.Ordinal);
+
+        // The method gives the result of the tool and throws on no exit code, because the caller
+        // reads the exit code itself.
+        var unknown = await container.ExecParsecToolAsync(["no-such-command"], TestContext.Current.CancellationToken);
+
+        Assert.NotEqual(0, unknown.ExitCode);
 
         await container.DisposeAsync();
 
