@@ -9,6 +9,11 @@
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
   </ItemGroup>
 
+  <ItemGroup Label="Protobuf">
+    <PackageVersion Include="Google.Protobuf" Version="3.36.1" />
+    <PackageVersion Include="Grpc.Tools" Version="2.83.0" />
+  </ItemGroup>
+
   <ItemGroup Label="Build">
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>

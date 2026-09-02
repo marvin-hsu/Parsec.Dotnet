@@ -20,6 +20,23 @@
     <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <!-- Wire-protocol messages come from the upstream parsec-operations submodule and are compiled
+       by protoc at build time. They stay internal: the public API of this library is hand-written. -->
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+    <Protobuf Include="$(MSBuildThisFileDirectory)../../external/parsec-operations/protobuf/*.proto"
+              ProtoRoot="$(MSBuildThisFileDirectory)../../external/parsec-operations/protobuf"
+              GrpcServices="None"
+              Access="Internal" />
+  </ItemGroup>
+
+  <!-- Fail fast with a readable message when the submodule has not been checked out -->
+  <Target Name="EnsureParsecOperationsSubmodule" BeforeTargets="Protobuf_BeforeCompile;CoreCompile">
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)../../external/parsec-operations/protobuf/ping.proto')"
+           Text="The parsec-operations submodule is missing. Run: git submodule update --init" />
+  </Target>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Parsec.Client.Tests" />
   </ItemGroup>

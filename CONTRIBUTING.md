@@ -15,7 +15,7 @@ All commits must be signed off (`git commit -s`), certifying the [Developer Cert
 ## Development workflow
 
 1. Fork and create a topic branch from `main`.
-2. Install the .NET SDK version pinned in `global.json`.
+2. Install the .NET SDK version pinned in `global.json` and run `git submodule update --init` (the `.proto` files live in the `external/parsec-operations` submodule).
 3. Make your change, including tests. Coverage must not decrease.
 4. Verify locally (the `pre-push` hook runs build + test):
 

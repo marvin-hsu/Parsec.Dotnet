@@ -29,10 +29,16 @@ dotnet add package Parsec.Client
 
 ## Building from source
 
-Requires the .NET SDK pinned in [`global.json`](global.json).
+Requires the .NET SDK pinned in [`global.json`](global.json). The wire-protocol `.proto` files come from the upstream [parsec-operations](https://github.com/parallaxsecond/parsec-operations) repository as a git submodule, so clone with submodules:
 
 ```bash
-dotnet build          # warnings are errors; all analyzers on
+git clone --recurse-submodules https://github.com/marvin-hsu/Parsec.Dotnet.git
+# or, in an existing clone:
+git submodule update --init
+```
+
+```bash
+dotnet build          # warnings are errors; all analyzers on; protoc runs here (Grpc.Tools)
 dotnet test           # xunit v3 on net8.0 + net10.0
 dotnet format --verify-no-changes
 ```

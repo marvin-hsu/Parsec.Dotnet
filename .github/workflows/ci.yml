@@ -28,6 +28,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v7
+        with:
+          submodules: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
@@ -54,6 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          submodules: true
           # SonarCloud needs full history for blame / new-code detection
           fetch-depth: 0
 
@@ -91,7 +94,7 @@ jobs:
             /d:sonar.token="$SONAR_TOKEN" \
             /d:sonar.cs.vscoveragexml.reportsPaths="TestResults/**/*.xml" \
             /d:sonar.coverage.exclusions="tests/**" \
-            /d:sonar.exclusions="artifacts/**,**/StrykerOutput/**,scripts/**,.husky/**" \
+            /d:sonar.exclusions="artifacts/**,external/**,**/StrykerOutput/**,scripts/**,.husky/**" \
             /d:sonar.qualitygate.wait=true
 
       - name: Build
