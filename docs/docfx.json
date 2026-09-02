@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": ["Parsec.Client/Parsec.Client.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net10.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["**/*.{md,yml}"],
+        "exclude": ["zh-tw/**", "template/**"]
+      }
+    ],
+    "output": "../artifacts/docs",
+    "template": ["default", "modern"],
+    "postProcessors": ["ExtractSearchIndex"],
+    "globalMetadata": {
+      "_appName": "Parsec.Dotnet",
+      "_appTitle": "Parsec.Dotnet",
+      "_appFooter": "Copyright (c) Parsec.Dotnet contributors. Licensed under Apache-2.0.",
+      "_enableSearch": true,
+      "_enableNewTab": true,
+      "_gitContribute": {
+        "repo": "https://github.com/marvin-hsu/Parsec.Dotnet",
+        "branch": "main"
+      }
+    }
+  }
+}

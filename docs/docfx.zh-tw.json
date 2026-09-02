@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "build": {
+    "content": [
+      {
+        "files": ["**/*.{md,yml}"],
+        "src": "zh-tw"
+      }
+    ],
+    "output": "../artifacts/docs/zh-tw",
+    "template": ["default", "modern", "template/zh-tw"],
+    "postProcessors": ["ExtractSearchIndex"],
+    "globalMetadata": {
+      "_appName": "Parsec.Dotnet",
+      "_appTitle": "Parsec.Dotnet",
+      "_appFooter": "Copyright (c) Parsec.Dotnet contributors. 依 Apache-2.0 授權。",
+      "_enableSearch": true,
+      "_enableNewTab": true,
+      "_gitContribute": {
+        "repo": "https://github.com/marvin-hsu/Parsec.Dotnet",
+        "branch": "main"
+      }
+    }
+  }
+}
