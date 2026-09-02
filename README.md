@@ -54,3 +54,5 @@ Please report vulnerabilities privately — see [SECURITY.md](SECURITY.md). **Do
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE), consistent with the upstream Parsec project.
+
+The wire-protocol definitions come from [parsec-operations](https://github.com/parallaxsecond/parsec-operations) and parts of the documentation are adapted from the [Parsec book](https://github.com/parallaxsecond/parsec-book), both Apache-2.0. Attribution and the licenses of all third-party material are listed in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), which also ships inside the NuGet package.
