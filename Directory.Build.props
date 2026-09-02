@@ -43,6 +43,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoPackageAnalysis>false</NoPackageAnalysis>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <!-- Symbols travel in a .snupkg, so a debugger can step into the code with the
+         SourceLink map that the pdb carries. Every packable project does this. -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup>

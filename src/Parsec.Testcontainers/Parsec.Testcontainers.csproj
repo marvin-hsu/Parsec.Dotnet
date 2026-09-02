@@ -8,10 +8,6 @@
     <PackageId>Parsec.Testcontainers</PackageId>
     <Description>Testcontainers module that starts a Parsec service in a container for integration tests.</Description>
     <PackageTags>testcontainers;parsec;docker;integration-testing</PackageTags>
-    <!-- Symbols travel in a .snupkg, so a debugger can step into this code with the
-         SourceLink map that the pdb carries. -->
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- No IsAotCompatible here. Testcontainers uses Docker.DotNet, which serialises with
          reflection, so the trim and AOT analysers cannot prove this assembly safe. -->
   </PropertyGroup>
@@ -19,6 +15,18 @@
   <!-- SourceLink needs a git remote; enable it only in CI so fresh local clones still build -->
   <ItemGroup Condition="'$(CI)' == 'true'">
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- MinVer reads the version from the nearest git tag. Each packable project has its own
+       tag prefix, so the two packages release on separate cadences: a testcontainers-v* tag
+       moves this version only, and Parsec.Client keeps the version it has. With no matching
+       tag MinVer falls back to 0.0.0-alpha.0 plus the commit height. -->
+  <PropertyGroup>
+    <MinVerTagPrefix>testcontainers-v</MinVerTagPrefix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- This package has its own README. The repository README describes both packages.

@@ -16,6 +16,18 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- MinVer reads the version from the nearest git tag. Each packable project has its own
+       tag prefix, so the two packages release on separate cadences: a client-v* tag moves
+       this version only, and Parsec.Testcontainers keeps the version it has. With no matching
+       tag MinVer falls back to 0.0.0-alpha.0 plus the commit height. -->
+  <PropertyGroup>
+    <MinVerTagPrefix>client-v</MinVerTagPrefix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" />
     <None Include="$(MSBuildThisFileDirectory)../../THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="/" />
