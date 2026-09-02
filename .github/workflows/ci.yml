@@ -25,7 +25,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          # Both Linux runners have a Docker daemon, so the integration lane runs on
+          # each architecture. The image is a multi-architecture index, and the direct
+          # bind mount of the socket only works on Linux, so amd64 alone would leave
+          # the arm64 path of that mount untested.
+          - os: ubuntu-latest
+            docker: true
+          - os: ubuntu-24.04-arm
+            docker: true
+          - os: windows-latest
+            docker: false
+          - os: macos-latest
+            docker: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,12 +63,12 @@ jobs:
           dotnet test --no-build --configuration Release
           --filter-not-trait "Category=IntegrationTests"
 
-      # Only the Linux runner has a Docker daemon. The tests pull the Parsec image
-      # from ghcr.io, which is public, so no login is necessary. Exit code 8 means a
-      # test project has no test in this category, which is not a failure. Detailed
-      # output puts the parsec-tool output of the tests in the log.
+      # The tests pull the Parsec image from ghcr.io, which is public, so no login is
+      # necessary. Exit code 8 means a test project has no test in this category, which
+      # is not a failure. Detailed output puts the parsec-tool output of the tests in
+      # the log.
       - name: Test (Docker)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.docker
         run: >-
           dotnet test --no-build --configuration Release
           --filter-trait "Category=IntegrationTests"
