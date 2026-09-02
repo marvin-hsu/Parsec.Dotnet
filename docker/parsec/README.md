@@ -73,10 +73,39 @@ docker rm -f parsec
 runners are used on purpose: cross-compiling Rust under QEMU emulation is far
 too slow.
 
-Two things need doing by hand, once:
+Every build publishes two tags:
+
+| Tag | Meaning |
+|---|---|
+| `sha-<short sha>` | Immutable, points at one commit |
+| `0.1.0-alpha.<run number>` | Numbered preview |
+
+### Promoting a build
+
+The workflow does not publish `latest` or a release version on its own. An
+image that nobody has pulled and started is not known to work, and a release
+tag on such an image misleads everyone who reads it.
+
+Promote a build only after it passes this check on a machine that has never
+built the image:
+
+```bash
+docker pull ghcr.io/marvin-hsu/parsec-testcontainers:0.1.0-alpha.<n>
+docker run --rm -d --name parsec-verify \
+  ghcr.io/marvin-hsu/parsec-testcontainers:0.1.0-alpha.<n>
+docker exec parsec-verify parsec-tool ping
+docker rm -f parsec-verify
+```
+
+Then run the workflow again from the Actions tab with the `promote` input
+checked. That run adds the release version and `latest` to the same digests.
+
+### One-time setup
 
 1. Set the `parsec-testcontainers` package visibility to public. GitHub
    packages default to private, and that setting is separate from the
-   repository's.
+   repository's. Until this is done, anonymous pulls fail and the package is
+   as unusable as the Java client's unpublished image.
 2. Copy the published manifest digest into `ParsecImage.Digest` in the
-   `Parsec.Testcontainers` source, then release a package version.
+   `Parsec.Testcontainers` source, then release a package version. The
+   workflow prints the digest in its run summary.

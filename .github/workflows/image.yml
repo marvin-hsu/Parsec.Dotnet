@@ -1,0 +1,228 @@
+name: Image
+
+# Builds the Parsec service image that Parsec.Testcontainers starts.
+#
+# Each architecture builds on a native runner. Cross-building Rust under QEMU
+# emulation takes hours, because psa-crypto-sys compiles Mbed TLS from source.
+# Each job pushes an untagged manifest by digest, and a final job joins those
+# digests into one multi-architecture manifest.
+#
+# Tagging is deliberately conservative. Until a published image has been pulled
+# anonymously from a clean machine and verified, this workflow publishes only
+# preview tags. It never publishes `latest` or a release version. Promoting an
+# image is a separate, explicit act: see "Promoting a build" in
+# docker/parsec/README.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docker/parsec/**
+      - .github/workflows/image.yml
+  pull_request:
+    paths:
+      - docker/parsec/**
+      - .github/workflows/image.yml
+  workflow_dispatch:
+    inputs:
+      promote:
+        description: "Also publish the release version and latest tags. Only use this once a preview build has been verified."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/parsec-testcontainers
+  # Keep in step with the ARG defaults in docker/parsec/Dockerfile.
+  PARSEC_VERSION: 1.5.0
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    outputs:
+      # Both jobs write the same key, which is fine: the merge job reads the
+      # digests from artifacts, not from these outputs.
+      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Derive a filesystem-safe platform name
+        id: platform
+        run: echo "pair=${PLATFORM//\//-}" >> "$GITHUB_OUTPUT"
+        env:
+          PLATFORM: ${{ matrix.platform }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to the container registry
+        # A pull request from a fork cannot read the token, and does not need
+        # to: the build still runs, it just does not publish.
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: docker/parsec
+          platforms: ${{ matrix.platform }}
+          provenance: true
+          sbom: true
+          build-args: |
+            PARSEC_VERSION=${{ env.PARSEC_VERSION }}
+          cache-from: type=gha,scope=${{ steps.platform.outputs.pair }}
+          cache-to: type=gha,mode=max,scope=${{ steps.platform.outputs.pair }}
+          outputs: >-
+            type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=${{ github.event_name != 'pull_request' }}
+
+      - name: Smoke test the built image
+        # Load the same build for the local architecture and check the service
+        # actually answers. A pushed image that cannot start is worse than a
+        # failed build, because the digest looks legitimate.
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --load \
+            --build-arg "PARSEC_VERSION=${PARSEC_VERSION}" \
+            --cache-from "type=gha,scope=${{ steps.platform.outputs.pair }}" \
+            -t parsec-smoke:local \
+            docker/parsec
+          docker run --rm -d --name parsec-smoke parsec-smoke:local
+          trap 'docker rm -f parsec-smoke >/dev/null 2>&1 || true' EXIT
+          for _ in $(seq 1 60); do
+            if docker exec parsec-smoke parsec-tool ping >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec parsec-smoke parsec-tool ping
+          docker exec parsec-smoke parsec-tool list-providers
+          docker exec parsec-smoke sh -c 'command -v socat'
+
+      - name: Record the digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+
+      - name: Upload the digest
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: digest-${{ steps.platform.outputs.pair }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Publish manifest
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download the digests
+        uses: actions/download-artifact@v8
+        with:
+          path: /tmp/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Decide which tags to publish
+        id: tags
+        run: |
+          set -euo pipefail
+          image="${REGISTRY}/${IMAGE_NAME}"
+          # Always published: an immutable commit tag and a numbered preview.
+          tags="--tag ${image}:sha-${GITHUB_SHA::7}"
+          tags="${tags} --tag ${image}:0.1.0-alpha.${GITHUB_RUN_NUMBER}"
+          if [ "${PROMOTE}" = "true" ]; then
+            tags="${tags} --tag ${image}:${PARSEC_VERSION}"
+            tags="${tags} --tag ${image}:latest"
+            echo "Promoting: publishing ${PARSEC_VERSION} and latest."
+          else
+            echo "Preview only: not publishing ${PARSEC_VERSION} or latest."
+          fi
+          echo "args=${tags}" >> "$GITHUB_OUTPUT"
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          PARSEC_VERSION: ${{ env.PARSEC_VERSION }}
+          PROMOTE: ${{ inputs.promote }}
+
+      - name: Create and push the manifest
+        working-directory: /tmp/digests
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2046
+          docker buildx imagetools create ${{ steps.tags.outputs.args }} \
+            $(printf "${REGISTRY}/${IMAGE_NAME}@sha256:%s " *)
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+
+      - name: Report the published manifest
+        run: |
+          set -euo pipefail
+          image="${REGISTRY}/${IMAGE_NAME}:0.1.0-alpha.${GITHUB_RUN_NUMBER}"
+          docker buildx imagetools inspect "${image}"
+          {
+            echo "### Published image"
+            echo
+            echo '```'
+            echo "${image}"
+            echo '```'
+            echo
+            echo "Platforms:"
+            echo
+            docker buildx imagetools inspect --raw "${image}" \
+              | jq -r '.manifests[] | select(.platform.os != "unknown") | "- \(.platform.os)/\(.platform.architecture)"'
+            echo
+            echo "Copy the manifest digest below into \`ParsecImage.Digest\` once this build is verified."
+            echo
+            echo '```'
+            docker buildx imagetools inspect "${image}" --format '{{ .Manifest.Digest }}'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
