@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Parsec.Client</RootNamespace>
+    <AssemblyName>Parsec.Client</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <PackageId>Parsec.Client</PackageId>
+    <Description>.NET client for Parsec (Platform AbstRaction for SECurity) — a platform-agnostic interface to hardware-backed security services.</Description>
+    <PackageTags>parsec;security;hsm;tpm;pkcs11;crypto;cncf</PackageTags>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <!-- SourceLink needs a git remote; enable it only in CI so fresh local clones still build -->
+  <ItemGroup Condition="'$(CI)' == 'true'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Parsec.Client.Tests" />
+  </ItemGroup>
+
+</Project>

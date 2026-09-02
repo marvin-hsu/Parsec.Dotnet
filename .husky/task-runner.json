@@ -1,0 +1,24 @@
+{
+  "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+  "tasks": [
+    {
+      "name": "commit-msg",
+      "group": "commit-msg",
+      "command": "dotnet",
+      "args": ["husky", "exec", "scripts/commit-msg.csx", "--args", "${args}"]
+    },
+    {
+      "name": "format-staged",
+      "group": "pre-commit",
+      "command": "dotnet",
+      "args": ["husky", "exec", "scripts/format-staged.csx", "--args", "${staged}"],
+      "include": ["**/*.cs"]
+    },
+    {
+      "name": "build-and-test",
+      "group": "pre-push",
+      "command": "dotnet",
+      "args": ["husky", "exec", "scripts/pre-push.csx"]
+    }
+  ]
+}
