@@ -1,0 +1,45 @@
+# Parsec service configuration for the Parsec.Testcontainers image.
+#
+# THIS FILE IS FOR INTEGRATION TESTING ONLY.
+#
+# It selects the Direct authenticator, which trusts whatever application
+# identity the client puts in the request. That is convenient for tests and
+# unsafe anywhere else. It also declares an admin, so tests can exercise the
+# ListClients and DeleteClient operations. Read the deployment guidance before
+# copying any of this into a real system:
+# https://parallaxsecond.github.io/parsec-book/parsec_security/secure_deployment.html
+#
+# Schema follows parsec 1.5.0 (see config.toml in the upstream repository).
+
+[core_settings]
+log_level = "info"
+# Allow the service to run as root. Container runtimes often start the process
+# as root, and refusing to start is unhelpful for a test fixture.
+allow_root = true
+
+[listener]
+listener_type = "DomainSocket"
+timeout = 200 # milliseconds
+socket_path = "/run/parsec/parsec.sock"
+
+[authenticator]
+auth_type = "Direct"
+# With Direct authentication an admin is identified by its application name.
+#
+# "parsec-tool" is here because parsec-tool hardcodes its application name to
+# its own crate name. Version 0.7.0 offers no flag and reads no environment
+# variable for it, so this is the only value that lets the bundled tool run
+# admin operations such as list-clients.
+#
+# "admin" is here for test code, which can send any name it likes.
+admins = [{ name = "parsec-tool" }, { name = "admin" }]
+
+[[key_manager]]
+name = "sqlite-manager"
+manager_type = "SQLite"
+sqlite_db_path = "/var/lib/parsec/kim.sqlite3"
+
+[[provider]]
+name = "mbed-crypto-provider"
+provider_type = "MbedCrypto"
+key_info_manager = "sqlite-manager"

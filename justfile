@@ -44,6 +44,26 @@ docs:
     dotnet docfx docs/docfx.json --warningsAsErrors
     dotnet docfx docs/docfx.zh-tw.json --warningsAsErrors
 
+# Build the Parsec service image for the native architecture.
+image-build:
+    docker buildx build -t parsec-testcontainers:dev docker/parsec
+
+# Start the locally built image and check the service answers.
+image-test: image-build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    docker rm -f parsec-selftest >/dev/null 2>&1 || true
+    docker run --rm -d --name parsec-selftest parsec-testcontainers:dev >/dev/null
+    trap 'docker rm -f parsec-selftest >/dev/null 2>&1 || true' EXIT
+    for i in $(seq 1 30); do
+        if docker exec parsec-selftest parsec-tool ping >/dev/null 2>&1; then break; fi
+        sleep 1
+    done
+    echo "--- ping";           docker exec parsec-selftest parsec-tool ping
+    echo "--- list-providers"; docker exec parsec-selftest parsec-tool list-providers
+    echo "--- list-opcodes";   docker exec parsec-selftest parsec-tool list-opcodes -p 1
+    echo "--- socat present";  docker exec parsec-selftest sh -c 'command -v socat'
+
 # Serving the combined output folder is what makes the language switcher
 # and the /api/ links resolve, because both are root-relative.
 # Build both locales and serve them on http://localhost:8080.
