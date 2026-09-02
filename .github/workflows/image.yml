@@ -75,6 +75,18 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
+      - name: Compute labels and annotations
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # The Dockerfile carries the descriptive labels, because a local build
+          # should produce them too. These two can only come from the build
+          # environment, so they are added here.
+          labels: |
+            org.opencontainers.image.version=${{ env.PARSEC_VERSION }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
       - name: Log in to the container registry
         # A pull request from a fork cannot read the token, and does not need
         # to: the build still runs, it just does not publish.
@@ -95,6 +107,8 @@ jobs:
           sbom: true
           build-args: |
             PARSEC_VERSION=${{ env.PARSEC_VERSION }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: type=gha,scope=${{ steps.platform.outputs.pair }}
           cache-to: type=gha,mode=max,scope=${{ steps.platform.outputs.pair }}
           outputs: >-
@@ -160,6 +174,15 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
+      - name: Compute annotations for the index
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          labels: |
+            org.opencontainers.image.version=${{ env.PARSEC_VERSION }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
       - name: Log in to the container registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -195,10 +218,12 @@ jobs:
           set -euo pipefail
           # shellcheck disable=SC2046
           docker buildx imagetools create ${{ steps.tags.outputs.args }} \
+            $(jq -cr '.[] | "--annotation index:" + .' <<<"${ANNOTATIONS}") \
             $(printf "${REGISTRY}/${IMAGE_NAME}@sha256:%s " *)
         env:
           REGISTRY: ${{ env.REGISTRY }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          ANNOTATIONS: ${{ steps.meta.outputs.json && toJSON(fromJSON(steps.meta.outputs.json).annotations) }}
 
       - name: Report the published manifest
         run: |

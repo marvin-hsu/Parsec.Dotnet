@@ -108,10 +108,14 @@ FROM ubuntu:${UBUNTU_VERSION} AS runtime
 ARG PARSEC_VERSION
 ARG PARSEC_TOOL_VERSION
 
+# org.opencontainers.image.version must be set here. Without it the label is
+# inherited from the base image, which reports the Ubuntu release rather than
+# the Parsec version. The workflow adds created and revision on top.
 LABEL org.opencontainers.image.title="Parsec service for Parsec.Testcontainers" \
-      org.opencontainers.image.description="Parsec service and parsec-tool, configured for integration testing. Not for production use." \
+      org.opencontainers.image.description="Parsec service ${PARSEC_VERSION} and parsec-tool ${PARSEC_TOOL_VERSION}, configured for integration testing with the Parsec.Testcontainers package. Software Mbed Crypto provider, Direct authentication, socat included. Not for production use." \
+      org.opencontainers.image.version="${PARSEC_VERSION}" \
       org.opencontainers.image.source="https://github.com/marvin-hsu/Parsec.Dotnet" \
-      org.opencontainers.image.url="https://github.com/marvin-hsu/Parsec.Dotnet" \
+      org.opencontainers.image.url="https://github.com/marvin-hsu/Parsec.Dotnet/pkgs/container/parsec-testcontainers" \
       org.opencontainers.image.documentation="https://github.com/marvin-hsu/Parsec.Dotnet/blob/main/docker/parsec/README.md" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.vendor="Parsec.Dotnet contributors"

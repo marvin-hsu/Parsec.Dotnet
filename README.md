@@ -20,6 +20,21 @@ dotnet add package Parsec.Client
 // API under design — see docs/ for the roadmap.
 ```
 
+## Testing against a real service
+
+`Parsec.Testcontainers` starts a Parsec service in a container for integration
+tests. The image it uses is published from this repository:
+
+```bash
+docker pull ghcr.io/marvin-hsu/parsec-testcontainers
+```
+
+That image bundles the Parsec service and `parsec-tool`, configured with the
+software Mbed Crypto provider and Direct authentication. It exists for tests
+and is not fit for production. See
+[docker/parsec/README.md](docker/parsec/README.md) for what is inside it and
+how it is built.
+
 ## Supported frameworks
 
 | Target | Notes |
