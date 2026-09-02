@@ -25,19 +25,12 @@ public sealed class ParsecContainerTests
     }
 
     [Fact]
-    public void SocketPath_OnALinuxHost_IsThePathOfTheBindMount()
+    public void SocketPath_WithNoSettings_IsAShortPathOnThisMachine()
     {
         var container = DockerRequirement.CreateBuilder().Build();
 
-        if (!ParsecHostSocketDirectory.IsBindMountSupported)
-        {
-            // Another host system runs the container in a virtual machine. There the socket of
-            // the container needs a bridge, and the path of the bridge is the path to use.
-            Assert.Equal(container.ContainerSocketPath, container.SocketPath);
-
-            return;
-        }
-
+        // A Linux host gets the socket of the container through a bind mount, and another host
+        // system gets the socket of the bridge. Both are in the same directory of this machine.
         Assert.Equal(container.HostSocketDirectory?.SocketPath, container.SocketPath);
         Assert.NotEqual(container.ContainerSocketPath, container.SocketPath);
         Assert.True(container.SocketPath.Length <= ParsecHostSocketDirectory.MaxSocketPathLength);
@@ -70,13 +63,6 @@ public sealed class ParsecContainerTests
     {
         await using var container = DockerRequirement.CreateBuilder().Build();
 
-        if (container.HostSocketDirectory is null)
-        {
-            Assert.Skip("This host has no socket on this machine yet. It needs the bridge.");
-
-            return;
-        }
-
         await container.StartAsync(TestContext.Current.CancellationToken);
 
         var (status, body) = await RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken);
@@ -94,12 +80,7 @@ public sealed class ParsecContainerTests
         var container = DockerRequirement.CreateBuilder().Build();
         var hostSocketDirectory = container.HostSocketDirectory;
 
-        if (hostSocketDirectory is null)
-        {
-            Assert.Skip("This host makes no socket directory yet. It needs the bridge.");
-
-            return;
-        }
+        Assert.NotNull(hostSocketDirectory);
 
         await container.StartAsync(TestContext.Current.CancellationToken);
 
@@ -108,6 +89,21 @@ public sealed class ParsecContainerTests
         await container.DisposeAsync();
 
         Assert.False(Directory.Exists(hostSocketDirectory.DirectoryPath));
+    }
+
+    [Fact]
+    public async Task SocketPath_AfterStart_TakesMoreThanOneConnection()
+    {
+        await using var container = DockerRequirement.CreateBuilder().Build();
+
+        await container.StartAsync(TestContext.Current.CancellationToken);
+
+        // A client opens a connection for each request, so the path must stay usable.
+        var (firstStatus, _) = await RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken);
+        var (secondStatus, _) = await RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, (int)firstStatus);
+        Assert.Equal(0, (int)secondStatus);
     }
 
     [Fact]

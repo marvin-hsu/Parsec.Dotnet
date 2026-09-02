@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using DotNet.Testcontainers.Containers;
 
@@ -18,6 +19,37 @@ public sealed class ParsecContainer : DockerContainer
     /// path.
     /// </summary>
     public const string ToolName = "parsec-tool";
+
+    /// <summary>
+    /// The value of the option <c>-t</c> of socat, in seconds. It is the time that socat holds a
+    /// connection open after one side closes its half of the connection.
+    /// </summary>
+    private const string SocatHalfCloseSeconds = "60";
+
+    /// <summary>
+    /// The number of times that the shell looks for the port of socat in the container.
+    /// </summary>
+    private const string SocatTries = "100";
+
+    /// <summary>
+    /// The time between two looks of the shell for the port of socat, in seconds.
+    /// </summary>
+    private const string SocatPollSeconds = "0.1";
+
+    /// <summary>
+    /// The file in the container that holds the output of socat. The shell gives the file with
+    /// the error when socat does not listen.
+    /// </summary>
+    private const string SocatLogPath = "/tmp/parsec-socat.log";
+
+    /// <summary>
+    /// The bridge on this machine, or <c>null</c> while no bridge runs.
+    /// </summary>
+    [SuppressMessage(
+        "Usage",
+        "CA2213:Disposable fields should be disposed",
+        Justification = "The stop of the container and DisposeAsyncCore both close the bridge. The base class gives no DisposeAsync method to override, so the rule cannot see the call.")]
+    private ParsecSocketBridge? _bridge;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ParsecContainer"/> class.
@@ -41,8 +73,8 @@ public sealed class ParsecContainer : DockerContainer
     /// <para>
     /// On a Linux host the container mounts a directory of this machine over the socket directory,
     /// so the path is a path on this machine, under the temporary area. On another host system the
-    /// socket needs a bridge, and the path is the path of the bridge. Without a bridge the value
-    /// falls back to the path in the container.
+    /// container starts a bridge, and the path is the path of the socket of the bridge, in the
+    /// same temporary area. Both paths only carry a connection after <c>StartAsync</c>.
     /// </para>
     /// </remarks>
     public string SocketPath => HostSocketDirectory?.SocketPath ?? ContainerSocketPath;
@@ -69,6 +101,17 @@ public sealed class ParsecContainer : DockerContainer
     /// <c>null</c> when only the socket in the container exists.
     /// </summary>
     internal ParsecHostSocketDirectory? HostSocketDirectory { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether the container must bridge the socket of the service to a
+    /// socket of this machine.
+    /// </summary>
+    /// <remarks>
+    /// The builder sets the value. It is <c>true</c> when the host system gives no usable socket
+    /// through a bind mount, and the configuration of the container then maps a port for the
+    /// bridge.
+    /// </remarks>
+    internal bool NeedsSocketBridge { get; init; }
 
     /// <summary>
     /// Runs the command line tool of the Parsec project in the container.
@@ -129,11 +172,50 @@ public sealed class ParsecContainer : DockerContainer
     }
 
     /// <inheritdoc/>
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        // The bridge must close even when a caller disposes the container without a stop.
+        await StopBridgeAsync().ConfigureAwait(false);
+
+        await base.DisposeAsyncCore().ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    protected override async Task UnsafeStartAsync(CancellationToken ct = default)
+    {
+        await base.UnsafeStartAsync(ct).ConfigureAwait(false);
+
+        if (!NeedsSocketBridge || HostSocketDirectory is null || _bridge is not null)
+        {
+            return;
+        }
+
+        // The service answers a ping now, because the wait strategy of the builder asked it. The
+        // bridge can start.
+        await StartSocatAsync(ct).ConfigureAwait(false);
+
+        _bridge = ParsecSocketBridge.Start(
+            HostSocketDirectory.SocketPath,
+            Hostname,
+            GetMappedPublicPort(ParsecSocketBridge.PortInContainer));
+    }
+
+    /// <inheritdoc/>
+    protected override async Task UnsafeStopAsync(CancellationToken ct = default)
+    {
+        // The bridge holds connections to the container, so it closes first.
+        await StopBridgeAsync().ConfigureAwait(false);
+
+        await base.UnsafeStopAsync(ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     protected override async Task UnsafeCreateAsync(CancellationToken ct = default)
     {
         // The directory must exist, and it must have full permissions, before Docker makes the
         // container. Docker makes a missing bind mount source as root, and the service in the
-        // container is not root.
+        // container is not root. A host with a bridge keeps the socket of the bridge in the same
+        // directory.
         HostSocketDirectory?.MakeDirectory();
 
         await base.UnsafeCreateAsync(ct).ConfigureAwait(false);
@@ -142,6 +224,9 @@ public sealed class ParsecContainer : DockerContainer
     /// <inheritdoc/>
     protected override async Task UnsafeDeleteAsync(CancellationToken ct = default)
     {
+        // A delete without a stop also has to close the bridge. The method runs one time only.
+        await StopBridgeAsync().ConfigureAwait(false);
+
         try
         {
             await base.UnsafeDeleteAsync(ct).ConfigureAwait(false);
@@ -150,6 +235,74 @@ public sealed class ParsecContainer : DockerContainer
         {
             // The container holds the socket, so the directory goes away after the container.
             HostSocketDirectory?.Remove();
+        }
+    }
+
+    /// <summary>
+    /// Starts the part of the bridge that runs in the container.
+    /// </summary>
+    /// <param name="ct">A token to cancel the wait for the start.</param>
+    /// <returns>A task that completes when socat listens on the port.</returns>
+    /// <exception cref="InvalidOperationException">socat did not listen on the port.</exception>
+    /// <remarks>
+    /// <para>
+    /// socat listens for the life of the container, so the shell puts it in the background. The
+    /// shell then waits for the entry of the port in <c>/proc/net/tcp</c>, because only the
+    /// network namespace of the container shows whether socat listens. A connection from this
+    /// machine shows nothing: the port forward of Docker accepts the connection of a client even
+    /// when no process in the container listens. The exit code of the shell is therefore the one
+    /// signal that socat is ready, and a failure of socat gives an error with the output of the
+    /// process.
+    /// </para>
+    /// <para>
+    /// The option <c>-t</c> holds the connection open after one side closes its half. The default
+    /// of socat is half a second, which is less than the time that the service needs for the
+    /// answer of an operation such as the make of a key. A client that closes the half of the
+    /// request would lose that answer.
+    /// </para>
+    /// <para>
+    /// The image has socat, so the container needs no other container and no volume.
+    /// </para>
+    /// </remarks>
+    private async Task StartSocatAsync(CancellationToken ct)
+    {
+        var port = ParsecSocketBridge.PortInContainer.ToString(CultureInfo.InvariantCulture);
+        var portInHex = ParsecSocketBridge.PortInContainer.ToString("X4", CultureInfo.InvariantCulture);
+
+        // The state 0A of an entry of /proc/net/tcp means that a process listens on the port.
+        var command =
+            $"socat -t {SocatHalfCloseSeconds} TCP-LISTEN:{port},fork,reuseaddr UNIX-CONNECT:{ContainerSocketPath} >{SocatLogPath} 2>&1 &"
+            + $" for _ in $(seq 1 {SocatTries}); do"
+            + $" if grep -qE '^ *[0-9]+: [0-9A-F]+:{portInHex} [0-9A-F]+:0000 0A' /proc/net/tcp; then exit 0; fi;"
+            + $" sleep {SocatPollSeconds}; done;"
+            + $" cat {SocatLogPath} >&2; exit 1";
+
+        var result = await ExecAsync(["sh", "-c", command], ct).ConfigureAwait(false);
+
+        if (result.ExitCode != 0)
+        {
+            var message = string.Format(
+                CultureInfo.InvariantCulture,
+                "The container did not start the bridge. The shell gave exit code {0}. {1}{2}",
+                result.ExitCode,
+                result.Stdout,
+                result.Stderr);
+
+            throw new InvalidOperationException(message);
+        }
+    }
+
+    /// <summary>
+    /// Closes the bridge on this machine, if one runs.
+    /// </summary>
+    /// <returns>A task that completes when the socket of the bridge is closed.</returns>
+    private async Task StopBridgeAsync()
+    {
+        if (_bridge is { } bridge)
+        {
+            _bridge = null;
+
+            await bridge.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

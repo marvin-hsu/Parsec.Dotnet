@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
@@ -147,13 +148,18 @@ public sealed class ParsecBuilderTests
         if (!ParsecHostSocketDirectory.IsBindMountSupported)
         {
             // Another host system runs the container in a virtual machine, where a bind mount
-            // shows the socket file but carries no connection. Such a host gets a bridge.
+            // shows the socket file but carries no connection. Such a host gets a bridge, so the
+            // container maps the port of the bridge instead of the directory.
             Assert.Null(mount);
-            Assert.Null(container.HostSocketDirectory);
+            Assert.True(container.NeedsSocketBridge);
+            Assert.Contains(
+                ParsecSocketBridge.PortInContainer.ToString(CultureInfo.InvariantCulture),
+                container.Configuration.PortBindings!.Keys);
 
             return;
         }
 
+        Assert.False(container.NeedsSocketBridge);
         Assert.NotNull(mount);
         Assert.NotNull(container.HostSocketDirectory);
         Assert.Equal(MountType.Bind, mount.Type);
@@ -184,15 +190,11 @@ public sealed class ParsecBuilderTests
         var first = builder.Build();
         var second = builder.Build();
 
-        if (first.HostSocketDirectory is null)
-        {
-            Assert.Skip("This host makes no socket directory yet. It needs the bridge.");
-
-            return;
-        }
+        Assert.NotNull(first.HostSocketDirectory);
+        Assert.NotNull(second.HostSocketDirectory);
 
         // Two containers must not share a socket, because tests can run at the same time.
-        Assert.NotEqual(first.HostSocketDirectory.DirectoryPath, second.HostSocketDirectory?.DirectoryPath);
+        Assert.NotEqual(first.HostSocketDirectory.DirectoryPath, second.HostSocketDirectory.DirectoryPath);
         Assert.NotEqual(first.SocketPath, second.SocketPath);
     }
 

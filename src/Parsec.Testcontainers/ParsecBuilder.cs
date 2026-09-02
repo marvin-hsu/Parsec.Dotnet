@@ -25,6 +25,12 @@ namespace Parsec.Testcontainers;
 /// <see cref="ParsecContainer.SocketPath"/> with no bridge. The container makes the directory
 /// before the start and removes it after the stop.
 /// </para>
+/// <para>
+/// On another host system the builder maps a port of the container instead, and the container
+/// puts a bridge between that port and a socket of this machine.
+/// <see cref="ParsecContainer.SocketPath"/> then gives the socket of the bridge. The client under
+/// test speaks only to a Unix socket in both cases.
+/// </para>
 /// </remarks>
 public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContainer, ParsecConfiguration>
 {
@@ -103,24 +109,25 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
                 fileMode: Unix.FileMode644);
         }
 
-        // On a Linux host the socket in the bind mount is the same listening socket, so a client
-        // on this machine connects to it. On another host system the container runs in a virtual
-        // machine, and only the socket file crosses the file system. Such a host needs a bridge.
-        var hostSocketDirectory = ParsecHostSocketDirectory.IsBindMountSupported
-            ? ParsecHostSocketDirectory.Create()
-            : null;
+        // The directory holds the socket that a client on this machine connects to. On a Linux
+        // host the container writes its own socket there through a bind mount. On another host
+        // system the container runs in a virtual machine, where only the socket file crosses the
+        // file system and carries no connection. There the bridge makes the socket instead, and
+        // the container maps the port that socat listens on.
+        var hostSocketDirectory = ParsecHostSocketDirectory.Create();
+        var needsBridge = !ParsecHostSocketDirectory.IsBindMountSupported;
 
-        if (hostSocketDirectory is not null)
-        {
-            builder = builder.WithBindMount(
+        builder = needsBridge
+            ? builder.WithPortBinding(ParsecSocketBridge.PortInContainer, assignRandomHostPort: true)
+            : builder.WithBindMount(
                 hostSocketDirectory.DirectoryPath,
                 ParsecSocketPath.DirectoryInContainer(DockerResourceConfiguration),
                 AccessMode.ReadWrite);
-        }
 
         return new ParsecContainer(builder.DockerResourceConfiguration)
         {
             HostSocketDirectory = hostSocketDirectory,
+            NeedsSocketBridge = needsBridge,
         };
     }
 
