@@ -19,6 +19,12 @@ namespace Parsec.Testcontainers;
 /// log level, or the socket directory. This keeps the container start as near to the image as
 /// possible.
 /// </para>
+/// <para>
+/// On a Linux host the builder mounts a new directory of this machine over the socket directory of
+/// the container. A client on this machine then connects to
+/// <see cref="ParsecContainer.SocketPath"/> with no bridge. The container makes the directory
+/// before the start and removes it after the stop.
+/// </para>
 /// </remarks>
 public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContainer, ParsecConfiguration>
 {
@@ -97,7 +103,25 @@ public sealed class ParsecBuilder : ContainerBuilder<ParsecBuilder, ParsecContai
                 fileMode: Unix.FileMode644);
         }
 
-        return new ParsecContainer(builder.DockerResourceConfiguration);
+        // On a Linux host the socket in the bind mount is the same listening socket, so a client
+        // on this machine connects to it. On another host system the container runs in a virtual
+        // machine, and only the socket file crosses the file system. Such a host needs a bridge.
+        var hostSocketDirectory = ParsecHostSocketDirectory.IsBindMountSupported
+            ? ParsecHostSocketDirectory.Create()
+            : null;
+
+        if (hostSocketDirectory is not null)
+        {
+            builder = builder.WithBindMount(
+                hostSocketDirectory.DirectoryPath,
+                ParsecSocketPath.DirectoryInContainer(DockerResourceConfiguration),
+                AccessMode.ReadWrite);
+        }
+
+        return new ParsecContainer(builder.DockerResourceConfiguration)
+        {
+            HostSocketDirectory = hostSocketDirectory,
+        };
     }
 
     /// <inheritdoc/>

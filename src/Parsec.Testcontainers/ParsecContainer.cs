@@ -39,12 +39,13 @@ public sealed class ParsecContainer : DockerContainer
     /// Unix domain socket. Read the value after <c>StartAsync</c>.
     /// </para>
     /// <para>
-    /// The path is the path in the container while the container makes the socket directly
-    /// available to this machine. When the socket needs a bridge, the container reports the path
-    /// of the bridge instead.
+    /// On a Linux host the container mounts a directory of this machine over the socket directory,
+    /// so the path is a path on this machine, under the temporary area. On another host system the
+    /// socket needs a bridge, and the path is the path of the bridge. Without a bridge the value
+    /// falls back to the path in the container.
     /// </para>
     /// </remarks>
-    public string SocketPath => HostSocketPath ?? ContainerSocketPath;
+    public string SocketPath => HostSocketDirectory?.SocketPath ?? ContainerSocketPath;
 
     /// <summary>
     /// Gets the endpoint of the service as a <c>unix:</c> URI. A Parsec client accepts this form
@@ -64,10 +65,10 @@ public sealed class ParsecContainer : DockerContainer
     internal string ContainerSocketPath { get; }
 
     /// <summary>
-    /// Gets or sets the path of a socket on this machine that forwards to the service, or
-    /// <c>null</c> while no bridge is necessary.
+    /// Gets the directory on this machine that holds the socket a client connects to, or
+    /// <c>null</c> when only the socket in the container exists.
     /// </summary>
-    internal string? HostSocketPath { get; set; }
+    internal ParsecHostSocketDirectory? HostSocketDirectory { get; init; }
 
     /// <summary>
     /// Runs the command line tool of the Parsec project in the container.
@@ -124,6 +125,31 @@ public sealed class ParsecContainer : DockerContainer
                 result.ExitCode,
                 result.Stdout,
                 result.Stderr));
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override async Task UnsafeCreateAsync(CancellationToken ct = default)
+    {
+        // The directory must exist, and it must have full permissions, before Docker makes the
+        // container. Docker makes a missing bind mount source as root, and the service in the
+        // container is not root.
+        HostSocketDirectory?.MakeDirectory();
+
+        await base.UnsafeCreateAsync(ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    protected override async Task UnsafeDeleteAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            await base.UnsafeDeleteAsync(ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            // The container holds the socket, so the directory goes away after the container.
+            HostSocketDirectory?.Remove();
         }
     }
 }

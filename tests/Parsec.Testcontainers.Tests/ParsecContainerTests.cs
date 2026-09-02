@@ -7,21 +7,40 @@ namespace Parsec.Testcontainers.Tests;
 public sealed class ParsecContainerTests
 {
     [Fact]
-    public void SocketPath_WithNoSettings_IsThePathInTheImage()
+    public void ContainerSocketPath_WithNoSettings_IsThePathInTheImage()
     {
         var container = DockerRequirement.CreateBuilder().Build();
 
-        Assert.Equal("/run/parsec/parsec.sock", container.SocketPath);
+        Assert.Equal("/run/parsec/parsec.sock", container.ContainerSocketPath);
     }
 
     [Fact]
-    public void SocketPath_WithASocketDirectory_FollowsTheDirectory()
+    public void ContainerSocketPath_WithASocketDirectory_FollowsTheDirectory()
     {
         var container = DockerRequirement.CreateBuilder()
             .WithSocketDirectory("/run/other/")
             .Build();
 
-        Assert.Equal("/run/other/parsec.sock", container.SocketPath);
+        Assert.Equal("/run/other/parsec.sock", container.ContainerSocketPath);
+    }
+
+    [Fact]
+    public void SocketPath_OnALinuxHost_IsThePathOfTheBindMount()
+    {
+        var container = DockerRequirement.CreateBuilder().Build();
+
+        if (!ParsecHostSocketDirectory.IsBindMountSupported)
+        {
+            // Another host system runs the container in a virtual machine. There the socket of
+            // the container needs a bridge, and the path of the bridge is the path to use.
+            Assert.Equal(container.ContainerSocketPath, container.SocketPath);
+
+            return;
+        }
+
+        Assert.Equal(container.HostSocketDirectory?.SocketPath, container.SocketPath);
+        Assert.NotEqual(container.ContainerSocketPath, container.SocketPath);
+        Assert.True(container.SocketPath.Length <= ParsecHostSocketDirectory.MaxSocketPathLength);
     }
 
     [Fact]
@@ -29,18 +48,66 @@ public sealed class ParsecContainerTests
     {
         var container = DockerRequirement.CreateBuilder().Build();
 
-        Assert.Equal("unix:/run/parsec/parsec.sock", container.Endpoint.OriginalString);
+        Assert.Equal("unix:" + container.SocketPath, container.Endpoint.OriginalString);
         Assert.Equal("unix", container.Endpoint.Scheme);
     }
 
     [Fact]
-    public void Endpoint_WithNoSettings_AgreesWithTheEnvironmentVariable()
+    public void Endpoint_WithNoSettings_AgreesWithTheEnvironmentVariableInTheContainer()
     {
         var container = DockerRequirement.CreateBuilder().Build();
 
+        // The variable tells the service and the tools in the container where the socket is, so
+        // it holds the path in the container. A client on this machine reads SocketPath, which is
+        // the same path only while the container needs no bind mount and no bridge.
         Assert.Equal(
-            container.Configuration.Environments[ParsecBuilder.EndpointEnvironmentVariable],
-            container.Endpoint.OriginalString);
+            "unix:" + container.ContainerSocketPath,
+            container.Configuration.Environments[ParsecBuilder.EndpointEnvironmentVariable]);
+    }
+
+    [Fact]
+    public async Task SocketPath_AfterStart_AnswersAPingFromThisMachine()
+    {
+        await using var container = DockerRequirement.CreateBuilder().Build();
+
+        if (container.HostSocketDirectory is null)
+        {
+            Assert.Skip("This host has no socket on this machine yet. It needs the bridge.");
+
+            return;
+        }
+
+        await container.StartAsync(TestContext.Current.CancellationToken);
+
+        var (status, body) = await RawPing.SendAsync(container.SocketPath, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, (int)status);
+
+        // The body is the protobuf encoding of the version 1.0 of the wire protocol. The minor
+        // version is zero, and protobuf leaves a zero out.
+        Assert.Equal(new byte[] { 0x08, 0x01 }, body);
+    }
+
+    [Fact]
+    public async Task DisposeAsync_RemovesTheSocketDirectoryOfThisMachine()
+    {
+        var container = DockerRequirement.CreateBuilder().Build();
+        var hostSocketDirectory = container.HostSocketDirectory;
+
+        if (hostSocketDirectory is null)
+        {
+            Assert.Skip("This host makes no socket directory yet. It needs the bridge.");
+
+            return;
+        }
+
+        await container.StartAsync(TestContext.Current.CancellationToken);
+
+        Assert.True(Directory.Exists(hostSocketDirectory.DirectoryPath));
+
+        await container.DisposeAsync();
+
+        Assert.False(Directory.Exists(hostSocketDirectory.DirectoryPath));
     }
 
     [Fact]

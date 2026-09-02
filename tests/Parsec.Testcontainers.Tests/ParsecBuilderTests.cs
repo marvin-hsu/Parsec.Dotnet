@@ -138,6 +138,65 @@ public sealed class ParsecBuilderTests
     }
 
     [Fact]
+    public void Build_OnALinuxHost_MountsADirectoryOfThisMachineOverTheSocketDirectory()
+    {
+        var container = DockerRequirement.CreateBuilder().Build();
+
+        var mount = FindSocketMount(container.Configuration, ParsecImage.SocketDirectory);
+
+        if (!ParsecHostSocketDirectory.IsBindMountSupported)
+        {
+            // Another host system runs the container in a virtual machine, where a bind mount
+            // shows the socket file but carries no connection. Such a host gets a bridge.
+            Assert.Null(mount);
+            Assert.Null(container.HostSocketDirectory);
+
+            return;
+        }
+
+        Assert.NotNull(mount);
+        Assert.NotNull(container.HostSocketDirectory);
+        Assert.Equal(MountType.Bind, mount.Type);
+        Assert.Equal(AccessMode.ReadWrite, mount.AccessMode);
+        Assert.Equal(container.HostSocketDirectory.DirectoryPath, mount.Source);
+    }
+
+    [Fact]
+    public void Build_WithASocketDirectory_MountsOverThatDirectory()
+    {
+        if (!ParsecHostSocketDirectory.IsBindMountSupported)
+        {
+            Assert.Skip("This host gets a bridge instead of a bind mount.");
+
+            return;
+        }
+
+        var container = DockerRequirement.CreateBuilder().WithSocketDirectory("/run/other/").Build();
+
+        Assert.NotNull(FindSocketMount(container.Configuration, "/run/other"));
+    }
+
+    [Fact]
+    public void Build_CalledTwice_GivesEachContainerItsOwnHostSocketDirectory()
+    {
+        var builder = DockerRequirement.CreateBuilder();
+
+        var first = builder.Build();
+        var second = builder.Build();
+
+        if (first.HostSocketDirectory is null)
+        {
+            Assert.Skip("This host makes no socket directory yet. It needs the bridge.");
+
+            return;
+        }
+
+        // Two containers must not share a socket, because tests can run at the same time.
+        Assert.NotEqual(first.HostSocketDirectory.DirectoryPath, second.HostSocketDirectory?.DirectoryPath);
+        Assert.NotEqual(first.SocketPath, second.SocketPath);
+    }
+
+    [Fact]
     public void WithImage_ReplacesThePinnedImage()
     {
         var configuration = DockerRequirement.CreateBuilder()
@@ -173,6 +232,9 @@ public sealed class ParsecBuilderTests
             }
         }
     }
+
+    private static IMount? FindSocketMount(ParsecConfiguration configuration, string target)
+        => configuration.Mounts.SingleOrDefault(mount => mount.Target == target);
 
     private static IResourceMapping? FindConfigFile(ParsecConfiguration configuration)
         => configuration.ResourceMappings.SingleOrDefault(
