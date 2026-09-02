@@ -35,7 +35,8 @@
   <PropertyGroup>
     <Authors>Parsec.Dotnet contributors</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/parallaxsecond/parsec-client-dotnet</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/marvin-hsu/Parsec.Dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/marvin-hsu/Parsec.Dotnet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl Condition="'$(CI)' == 'true'">true</PublishRepositoryUrl>

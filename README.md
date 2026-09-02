@@ -1,5 +1,7 @@
 # Parsec.Dotnet
 
+[![CI](https://github.com/marvin-hsu/Parsec.Dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/marvin-hsu/Parsec.Dotnet/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=marvin-hsu_Parsec.Dotnet&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=marvin-hsu_Parsec.Dotnet)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 A .NET client library for [Parsec](https://parsec.community/) — the **P**latform **A**bst**R**action for **SEC**urity, a CNCF project providing a platform-agnostic API to hardware-backed security services (TPM, HSM, PKCS#11, Trusted Applications, …).

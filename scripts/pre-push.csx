@@ -8,7 +8,9 @@ if (build != 0)
     return build;
 }
 
-return Run("dotnet", "test --configuration Release --no-build --nologo");
+// MTP-based `dotnet test`: options after --no-build are forwarded to the test app,
+// so keep the argument list to what Microsoft.Testing.Platform understands.
+return Run("dotnet", "test --configuration Release --no-build");
 
 private static int Run(string file, string arguments)
 {
