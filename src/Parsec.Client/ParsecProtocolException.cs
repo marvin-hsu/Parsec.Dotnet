@@ -66,6 +66,32 @@ public sealed class ParsecProtocolException : ParsecException
             innerException);
 
     /// <summary>
+    /// Makes the exception for an answer that names another operation.
+    /// </summary>
+    /// <param name="expected">The operation of the request.</param>
+    /// <param name="actual">The operation that the header of the answer names.</param>
+    /// <returns>The exception to raise.</returns>
+    internal static ParsecProtocolException MismatchedOpcode(Opcode expected, Opcode actual) =>
+        new(ParsecErrorText.DescribeMismatchedOpcode(expected, actual), expected);
+
+    /// <summary>
+    /// Makes the exception for a value of an answer that is too large for the field it belongs to.
+    /// </summary>
+    /// <param name="operation">The operation of the request.</param>
+    /// <param name="field">The name of the field.</param>
+    /// <param name="value">The value that the service sent.</param>
+    /// <param name="maximum">The largest value that the field holds.</param>
+    /// <returns>The exception to raise.</returns>
+    internal static ParsecProtocolException OutOfRangeField(
+        Opcode operation,
+        string field,
+        uint value,
+        long maximum) =>
+        new(
+            Prefix(operation) + ParsecErrorText.DescribeOutOfRangeField(field, value, maximum),
+            operation);
+
+    /// <summary>
     /// Names the operation at the start of a message.
     /// </summary>
     /// <param name="operation">The operation of the request, or <see langword="null"/> if it is not known.</param>

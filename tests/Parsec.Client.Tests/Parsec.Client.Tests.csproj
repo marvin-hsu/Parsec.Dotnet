@@ -14,6 +14,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Parsec.Client/Parsec.Client.csproj" />
+
+    <!-- The integration tests start the real Parsec service in a container. -->
+    <ProjectReference Include="../../src/Parsec.Testcontainers/Parsec.Testcontainers.csproj" />
   </ItemGroup>
 
 </Project>

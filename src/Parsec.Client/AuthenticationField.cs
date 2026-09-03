@@ -16,29 +16,20 @@ internal static class AuthenticationField
     /// Builds the authentication field for a request.
     /// </summary>
     /// <param name="authentication">The authentication that the application chose.</param>
-    /// <param name="provider">The provider that the request goes to.</param>
     /// <returns>The bytes of the authentication field. It can be empty.</returns>
     /// <exception cref="ParsecConfigurationException">
-    /// The request goes to <see cref="ProviderId.Core"/> with an authentication type other than
-    /// <see cref="AuthType.None"/>, or the field does not fit in the header, or the
-    /// implementation does not report a usable byte count.
+    /// The field does not fit in the header, or the implementation does not report a usable byte
+    /// count.
     /// </exception>
-    public static ReadOnlyMemory<byte> Create(
-        IParsecAuthentication authentication,
-        ProviderId provider)
+    /// <remarks>
+    /// Every provider takes every authentication type, the core provider included. The service
+    /// authenticates a request before it looks at the provider, and two core operations, ListKeys
+    /// and DeleteClient, need the identity of the application. An operation that needs no
+    /// identity, such as Ping, chooses <see cref="NoAuthentication"/> for itself.
+    /// </remarks>
+    public static ReadOnlyMemory<byte> Create(IParsecAuthentication authentication)
     {
         ArgumentNullException.ThrowIfNull(authentication);
-
-        var type = authentication.Type;
-
-        // The core provider reports the state of the service and holds no keys, so it has no
-        // identity to authenticate. The service answers a core request that carries any other
-        // authentication type with NotAuthenticated.
-        if (provider == ProviderId.Core && type != AuthType.None)
-        {
-            throw new ParsecConfigurationException(
-                ParsecErrorText.DescribeCoreProviderAuthentication(type));
-        }
 
         var length = authentication.AuthBytesLength;
 

@@ -164,3 +164,19 @@ Parsec.Client.UnixPeerCredentialsAuthentication.UnixPeerCredentialsAuthenticatio
 Parsec.Client.UnixPeerCredentialsAuthentication.UserId.get -> uint
 Parsec.Client.UnixPeerCredentialsAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
 static Parsec.Client.NoAuthentication.Instance.get -> Parsec.Client.NoAuthentication!
+Parsec.Client.AuthenticatorInfo
+Parsec.Client.AuthenticatorInfo.AuthenticatorInfo(Parsec.Client.AuthType id, string! description, System.Version! version) -> void
+Parsec.Client.AuthenticatorInfo.Description.get -> string!
+Parsec.Client.AuthenticatorInfo.Id.get -> Parsec.Client.AuthType
+Parsec.Client.AuthenticatorInfo.Version.get -> System.Version!
+Parsec.Client.KeyInfo
+Parsec.Client.KeyInfo.KeyInfo(Parsec.Client.ProviderId provider, string! name) -> void
+Parsec.Client.KeyInfo.Name.get -> string!
+Parsec.Client.KeyInfo.Provider.get -> Parsec.Client.ProviderId
+Parsec.Client.ProviderInfo
+Parsec.Client.ProviderInfo.ProviderInfo(Parsec.Client.ProviderId id, string! uuid, string! description, string! vendor, System.Version! version) -> void
+Parsec.Client.ProviderInfo.Description.get -> string!
+Parsec.Client.ProviderInfo.Id.get -> Parsec.Client.ProviderId
+Parsec.Client.ProviderInfo.Uuid.get -> string!
+Parsec.Client.ProviderInfo.Vendor.get -> string!
+Parsec.Client.ProviderInfo.Version.get -> System.Version!

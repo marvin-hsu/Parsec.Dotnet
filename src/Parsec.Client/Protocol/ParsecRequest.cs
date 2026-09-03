@@ -73,8 +73,8 @@ internal readonly record struct ParsecRequest
     /// <param name="body">The encoded body. It can be empty.</param>
     /// <returns>A request that carries the current protocol version and a protobuf body.</returns>
     /// <exception cref="ParsecConfigurationException">
-    /// The authentication does not suit the provider or does not fit in the header. See
-    /// <see cref="AuthenticationField.Create"/>.
+    /// The authentication field does not fit in the header, or the implementation does not report
+    /// a usable byte count. See <see cref="AuthenticationField.Create"/>.
     /// </exception>
     public static ParsecRequest Create(
         Opcode opcode,
@@ -82,7 +82,7 @@ internal readonly record struct ParsecRequest
         IParsecAuthentication authentication,
         ReadOnlyMemory<byte> body)
     {
-        var auth = AuthenticationField.Create(authentication, provider);
+        var auth = AuthenticationField.Create(authentication);
         return Create(opcode, provider, authentication.Type, body, auth);
     }
 

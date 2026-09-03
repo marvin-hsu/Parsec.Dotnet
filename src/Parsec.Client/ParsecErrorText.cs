@@ -59,13 +59,25 @@ internal static class ParsecErrorText
     }
 
     /// <summary>
-    /// Describes a core provider request that carries an authentication type.
+    /// Describes an answer that names another operation than the request.
     /// </summary>
-    /// <param name="type">The authentication type that the application chose.</param>
-    /// <returns>One sentence that names the type and states the rule.</returns>
-    public static string DescribeCoreProviderAuthentication(AuthType type) => string.Create(
+    /// <param name="expected">The operation of the request.</param>
+    /// <param name="actual">The operation that the header of the answer names.</param>
+    /// <returns>One sentence that names both operations.</returns>
+    public static string DescribeMismatchedOpcode(Opcode expected, Opcode actual) => string.Create(
         CultureInfo.InvariantCulture,
-        $"The core provider accepts only authentication type {GetName(AuthType.None)} ({(byte)AuthType.None}), but the request carries {GetName(type)} ({(byte)type}). Use NoAuthentication for a core operation.");
+        $"The client sent the {GetName(expected)} request ({(uint)expected}) but the answer names {GetName(actual)} ({(uint)actual}).");
+
+    /// <summary>
+    /// Describes a value of an answer that is too large for the field it belongs to.
+    /// </summary>
+    /// <param name="field">The name of the field.</param>
+    /// <param name="value">The value that the service sent.</param>
+    /// <param name="maximum">The largest value that the field holds.</param>
+    /// <returns>One sentence that names the field, the value and the limit.</returns>
+    public static string DescribeOutOfRangeField(string field, uint value, long maximum) => string.Create(
+        CultureInfo.InvariantCulture,
+        $"The service reported a {field} of {value}. The field holds a value of 0 to {maximum}.");
 
     /// <summary>
     /// Describes an authentication field that the header cannot state the length of.

@@ -6,9 +6,8 @@ using Parsec.Client.Protocol;
 namespace Parsec.Client.Tests;
 
 /// <summary>
-/// Locks the byte layout of the authentication field and the rule that the core provider takes
-/// no authentication. The expected bytes are written out by hand, so the test does not agree
-/// with a wrong encoder.
+/// Locks the byte layout of the authentication field and the rules that the field must keep.
+/// The expected bytes are written out by hand, so the test does not agree with a wrong encoder.
 /// </summary>
 public sealed class AuthenticationTests
 {
@@ -236,51 +235,34 @@ public sealed class AuthenticationTests
         Assert.Equal(Convert.FromHexString(UnixPeerRequestHex), request.ToArray());
     }
 
-    [Fact]
-    public void CoreRequestRefusesDirectAuthentication()
-    {
-        var fault = Assert.Throws<ParsecConfigurationException>(() => ParsecRequest.Create(
-            Opcode.Ping,
-            ProviderId.Core,
-            new DirectAuthentication("app"),
-            ReadOnlyMemory<byte>.Empty));
-
-        Assert.Contains("Direct", fault.Message, StringComparison.Ordinal);
-        Assert.Contains("None", fault.Message, StringComparison.Ordinal);
-    }
-
     [Theory]
-    [InlineData(AuthType.Direct)]
-    [InlineData(AuthType.Jwt)]
-    [InlineData(AuthType.UnixPeerCredentials)]
-    [InlineData(AuthType.JwtSvid)]
-    [InlineData((AuthType)200)]
-    public void CoreRequestRefusesEveryAuthenticationTypeExceptNone(AuthType type)
-    {
-        var authentication = new StubAuthentication(type, 1, 1);
-
-        Assert.Throws<ParsecConfigurationException>(
-            () => AuthenticationField.Create(authentication, ProviderId.Core));
-    }
-
-    [Theory]
+    [InlineData(ProviderId.Core)]
     [InlineData(ProviderId.MbedCrypto)]
     [InlineData(ProviderId.Pkcs11)]
     [InlineData(ProviderId.Tpm)]
     [InlineData(ProviderId.TrustedService)]
     [InlineData(ProviderId.CryptoAuthLib)]
     [InlineData((ProviderId)200)]
-    public void EveryOtherProviderTakesDirectAuthentication(ProviderId provider)
+    public void EveryProviderTakesDirectAuthentication(ProviderId provider)
     {
-        var field = AuthenticationField.Create(new DirectAuthentication("app"), provider);
+        // The service authenticates a request before it looks at the provider, and the core
+        // operation ListKeys answers NotAuthenticated without an application identity. So the
+        // core provider takes an authentication like every other provider.
+        var request = ParsecRequest.Create(
+            Opcode.ListKeys,
+            provider,
+            new DirectAuthentication("app"),
+            ReadOnlyMemory<byte>.Empty);
 
-        Assert.Equal("617070", Convert.ToHexString(field.Span));
+        Assert.Equal(AuthType.Direct, request.Header.AuthType);
+        Assert.Equal(3, request.Header.AuthLength);
+        Assert.Equal("617070", Convert.ToHexString(request.Auth.Span));
     }
 
     [Fact]
-    public void CoreRequestTakesNoAuthentication()
+    public void NoAuthenticationMakesAnEmptyField()
     {
-        var field = AuthenticationField.Create(NoAuthentication.Instance, ProviderId.Core);
+        var field = AuthenticationField.Create(NoAuthentication.Instance);
 
         Assert.True(field.IsEmpty);
     }
@@ -288,7 +270,7 @@ public sealed class AuthenticationTests
     [Fact]
     public void AuthenticationFieldRejectsANullAuthentication() =>
         Assert.Throws<ArgumentNullException>(
-            () => AuthenticationField.Create(null!, ProviderId.MbedCrypto));
+            () => AuthenticationField.Create(null!));
 
     [Theory]
     [InlineData(-1)]
@@ -298,7 +280,7 @@ public sealed class AuthenticationTests
         var authentication = new StubAuthentication(AuthType.Direct, length, 0);
 
         Assert.Throws<ParsecConfigurationException>(
-            () => AuthenticationField.Create(authentication, ProviderId.MbedCrypto));
+            () => AuthenticationField.Create(authentication));
     }
 
     [Theory]
@@ -311,7 +293,7 @@ public sealed class AuthenticationTests
         var authentication = new StubAuthentication(AuthType.Direct, reportedLength, writtenLength);
 
         var fault = Assert.Throws<ParsecConfigurationException>(
-            () => AuthenticationField.Create(authentication, ProviderId.MbedCrypto));
+            () => AuthenticationField.Create(authentication));
         Assert.Contains(
             reportedLength.ToString(CultureInfo.InvariantCulture),
             fault.Message,
