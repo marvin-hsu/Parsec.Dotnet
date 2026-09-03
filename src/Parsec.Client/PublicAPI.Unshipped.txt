@@ -98,3 +98,19 @@ static Parsec.Client.OpcodeExtensions.IsKnown(this Parsec.Client.Opcode value) -
 static Parsec.Client.ProviderIdExtensions.IsKnown(this Parsec.Client.ProviderId value) -> bool
 static Parsec.Client.ProviderIdExtensions.SupportsCrypto(this Parsec.Client.ProviderId value) -> bool
 static Parsec.Client.ResponseStatusExtensions.IsKnown(this Parsec.Client.ResponseStatus value) -> bool
+Parsec.Client.ParsecConfigurationException
+Parsec.Client.ParsecConfigurationException.ParsecConfigurationException() -> void
+Parsec.Client.ParsecConfigurationException.ParsecConfigurationException(string! message) -> void
+Parsec.Client.ParsecConfigurationException.ParsecConfigurationException(string! message, System.Exception! innerException) -> void
+Parsec.Client.ParsecEndpoint
+Parsec.Client.ParsecException
+Parsec.Client.ParsecException.ParsecException() -> void
+Parsec.Client.ParsecException.ParsecException(string! message) -> void
+Parsec.Client.ParsecException.ParsecException(string! message, System.Exception! innerException) -> void
+const Parsec.Client.ParsecEndpoint.DefaultSocketPath = "/run/parsec/parsec.sock" -> string!
+const Parsec.Client.ParsecEndpoint.EnvironmentVariableName = "PARSEC_SERVICE_ENDPOINT" -> string!
+const Parsec.Client.ParsecEndpoint.UnixScheme = "unix" -> string!
+static Parsec.Client.ParsecEndpoint.Default.get -> System.Uri!
+static Parsec.Client.ParsecEndpoint.GetSocketPath(System.Uri! endpoint) -> string!
+static Parsec.Client.ParsecEndpoint.Resolve() -> System.Uri!
+static Parsec.Client.ParsecEndpoint.Resolve(string? endpoint) -> System.Uri!
