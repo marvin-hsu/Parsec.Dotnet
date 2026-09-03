@@ -1,3 +1,5 @@
+using Parsec.Client.Protocol;
+
 namespace Parsec.Client.Tests;
 
 /// <summary>
