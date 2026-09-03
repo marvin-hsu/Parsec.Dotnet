@@ -15,6 +15,10 @@ internal static class ParsecErrorText
     /// <summary>The name that a value gets when the protocol version of the client does not define it.</summary>
     public const string UnknownName = "Unknown";
 
+    /// <summary>Tells why a platform cannot use Unix peer credentials.</summary>
+    public const string UnavailableUserId =
+        "Unix peer credentials authentication needs a Unix user ID, which this platform does not report.";
+
     /// <summary>Gets the name of a status.</summary>
     /// <param name="status">The status that came off the wire.</param>
     /// <returns>The name of the status, or <see cref="UnknownName"/>.</returns>
@@ -24,6 +28,11 @@ internal static class ParsecErrorText
     /// <param name="operation">The operation that the request asked for.</param>
     /// <returns>The name of the operation, or <see cref="UnknownName"/>.</returns>
     public static string GetName(Opcode operation) => Enum.GetName(operation) ?? UnknownName;
+
+    /// <summary>Gets the name of an authentication type.</summary>
+    /// <param name="type">The authentication type.</param>
+    /// <returns>The name of the type, or <see cref="UnknownName"/>.</returns>
+    public static string GetName(AuthType type) => Enum.GetName(type) ?? UnknownName;
 
     /// <summary>
     /// Describes a failed answer of the service.
@@ -48,6 +57,44 @@ internal static class ParsecErrorText
             CultureInfo.InvariantCulture,
             $"The Parsec service answered the {GetName(operation.Value)} request ({(uint)operation.Value}) with {statusText}.");
     }
+
+    /// <summary>
+    /// Describes a core provider request that carries an authentication type.
+    /// </summary>
+    /// <param name="type">The authentication type that the application chose.</param>
+    /// <returns>One sentence that names the type and states the rule.</returns>
+    public static string DescribeCoreProviderAuthentication(AuthType type) => string.Create(
+        CultureInfo.InvariantCulture,
+        $"The core provider accepts only authentication type {GetName(AuthType.None)} ({(byte)AuthType.None}), but the request carries {GetName(type)} ({(byte)type}). Use NoAuthentication for a core operation.");
+
+    /// <summary>
+    /// Describes an authentication field that the header cannot state the length of.
+    /// </summary>
+    /// <param name="length">The byte count of the field.</param>
+    /// <returns>One sentence that names the byte count and the limit.</returns>
+    public static string DescribeOversizeAuthenticationField(int length) => string.Create(
+        CultureInfo.InvariantCulture,
+        $"The authentication field is {length} bytes. The authentication length field of the header holds two bytes, so the field can be 0 to {ushort.MaxValue} bytes.");
+
+    /// <summary>
+    /// Describes an authentication buffer that is too small.
+    /// </summary>
+    /// <param name="destinationLength">The byte count of the buffer.</param>
+    /// <param name="requiredLength">The byte count that the field needs.</param>
+    /// <returns>One sentence that names both byte counts.</returns>
+    public static string DescribeSmallAuthenticationBuffer(int destinationLength, int requiredLength) => string.Create(
+        CultureInfo.InvariantCulture,
+        $"The buffer holds {destinationLength} bytes, but the authentication field needs {requiredLength} bytes.");
+
+    /// <summary>
+    /// Describes an authentication that wrote a byte count other than the one it reported.
+    /// </summary>
+    /// <param name="reportedLength">The byte count that the implementation reported first.</param>
+    /// <param name="writtenLength">The byte count that the implementation then wrote.</param>
+    /// <returns>One sentence that names both byte counts.</returns>
+    public static string DescribeAuthenticationLengthMismatch(int reportedLength, int writtenLength) => string.Create(
+        CultureInfo.InvariantCulture,
+        $"The authentication reported {reportedLength} bytes but then wrote {writtenLength} bytes. The two counts must match, because the header states the count before the field goes on the wire.");
 
     /// <summary>
     /// Describes a response that the client could not read.

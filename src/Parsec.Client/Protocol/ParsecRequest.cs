@@ -65,6 +65,28 @@ internal readonly record struct ParsecRequest
     }
 
     /// <summary>
+    /// Makes a request and builds its authentication field from an authentication.
+    /// </summary>
+    /// <param name="opcode">The operation to run.</param>
+    /// <param name="provider">The provider that runs the operation.</param>
+    /// <param name="authentication">The authentication that the application chose.</param>
+    /// <param name="body">The encoded body. It can be empty.</param>
+    /// <returns>A request that carries the current protocol version and a protobuf body.</returns>
+    /// <exception cref="ParsecConfigurationException">
+    /// The authentication does not suit the provider or does not fit in the header. See
+    /// <see cref="AuthenticationField.Create"/>.
+    /// </exception>
+    public static ParsecRequest Create(
+        Opcode opcode,
+        ProviderId provider,
+        IParsecAuthentication authentication,
+        ReadOnlyMemory<byte> body)
+    {
+        var auth = AuthenticationField.Create(authentication, provider);
+        return Create(opcode, provider, authentication.Type, body, auth);
+    }
+
+    /// <summary>
     /// Writes the whole message to a buffer.
     /// </summary>
     /// <param name="destination">The buffer. It needs <see cref="Length"/> bytes or more.</param>

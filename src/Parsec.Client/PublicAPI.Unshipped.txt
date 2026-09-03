@@ -137,3 +137,30 @@ Parsec.Client.ParsecTransportException
 Parsec.Client.ParsecTransportException.ParsecTransportException() -> void
 Parsec.Client.ParsecTransportException.ParsecTransportException(string! message) -> void
 Parsec.Client.ParsecTransportException.ParsecTransportException(string! message, System.Exception! innerException) -> void
+Parsec.Client.DirectAuthentication
+Parsec.Client.DirectAuthentication.ApplicationName.get -> string!
+Parsec.Client.DirectAuthentication.AuthBytesLength.get -> int
+Parsec.Client.DirectAuthentication.DirectAuthentication(string! applicationName) -> void
+Parsec.Client.DirectAuthentication.Type.get -> Parsec.Client.AuthType
+Parsec.Client.DirectAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.IParsecAuthentication
+Parsec.Client.IParsecAuthentication.AuthBytesLength.get -> int
+Parsec.Client.IParsecAuthentication.Type.get -> Parsec.Client.AuthType
+Parsec.Client.IParsecAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.JwtSvidAuthentication
+Parsec.Client.JwtSvidAuthentication.AuthBytesLength.get -> int
+Parsec.Client.JwtSvidAuthentication.JwtSvidAuthentication(string! token) -> void
+Parsec.Client.JwtSvidAuthentication.Type.get -> Parsec.Client.AuthType
+Parsec.Client.JwtSvidAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.NoAuthentication
+Parsec.Client.NoAuthentication.AuthBytesLength.get -> int
+Parsec.Client.NoAuthentication.NoAuthentication() -> void
+Parsec.Client.NoAuthentication.Type.get -> Parsec.Client.AuthType
+Parsec.Client.NoAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.UnixPeerCredentialsAuthentication
+Parsec.Client.UnixPeerCredentialsAuthentication.AuthBytesLength.get -> int
+Parsec.Client.UnixPeerCredentialsAuthentication.Type.get -> Parsec.Client.AuthType
+Parsec.Client.UnixPeerCredentialsAuthentication.UnixPeerCredentialsAuthentication() -> void
+Parsec.Client.UnixPeerCredentialsAuthentication.UserId.get -> uint
+Parsec.Client.UnixPeerCredentialsAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+static Parsec.Client.NoAuthentication.Instance.get -> Parsec.Client.NoAuthentication!
