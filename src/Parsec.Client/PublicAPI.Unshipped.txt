@@ -114,3 +114,26 @@ static Parsec.Client.ParsecEndpoint.Default.get -> System.Uri!
 static Parsec.Client.ParsecEndpoint.GetSocketPath(System.Uri! endpoint) -> string!
 static Parsec.Client.ParsecEndpoint.Resolve() -> System.Uri!
 static Parsec.Client.ParsecEndpoint.Resolve(string? endpoint) -> System.Uri!
+Parsec.Client.ParsecServiceException
+Parsec.Client.ParsecServiceException.ParsecServiceException() -> void
+Parsec.Client.ParsecServiceException.ParsecServiceException(Parsec.Client.ResponseStatus status, Parsec.Client.Opcode? operation) -> void
+Parsec.Client.ParsecServiceException.ParsecServiceException(string! message) -> void
+Parsec.Client.ParsecServiceException.ParsecServiceException(string! message, System.Exception! innerException) -> void
+Parsec.Client.ParsecServiceException.Operation.get -> Parsec.Client.Opcode?
+Parsec.Client.ParsecServiceException.Status.get -> Parsec.Client.ResponseStatus
+Parsec.Client.ParsecServiceException.StatusName.get -> string!
+static Parsec.Client.ParsecServiceException.FromStatus(Parsec.Client.ResponseStatus status, Parsec.Client.Opcode? operation = null) -> Parsec.Client.ParsecServiceException!
+Parsec.Client.ParsecPsaException
+Parsec.Client.ParsecPsaException.ParsecPsaException() -> void
+Parsec.Client.ParsecPsaException.ParsecPsaException(Parsec.Client.ResponseStatus status, Parsec.Client.Opcode? operation) -> void
+Parsec.Client.ParsecPsaException.ParsecPsaException(string! message) -> void
+Parsec.Client.ParsecPsaException.ParsecPsaException(string! message, System.Exception! innerException) -> void
+Parsec.Client.ParsecProtocolException
+Parsec.Client.ParsecProtocolException.ParsecProtocolException() -> void
+Parsec.Client.ParsecProtocolException.ParsecProtocolException(string! message) -> void
+Parsec.Client.ParsecProtocolException.ParsecProtocolException(string! message, System.Exception! innerException) -> void
+Parsec.Client.ParsecProtocolException.Operation.get -> Parsec.Client.Opcode?
+Parsec.Client.ParsecTransportException
+Parsec.Client.ParsecTransportException.ParsecTransportException() -> void
+Parsec.Client.ParsecTransportException.ParsecTransportException(string! message) -> void
+Parsec.Client.ParsecTransportException.ParsecTransportException(string! message, System.Exception! innerException) -> void

@@ -12,9 +12,9 @@ namespace Parsec.Client.Transport;
 /// file, and the file permissions decide who can talk to it.
 /// </para>
 /// <para>
-/// A fault of the socket leaves the exception of the platform in place, such as
-/// <see cref="SocketException"/> when the socket file is absent. A connect, send or receive that
-/// passes its time limit raises <see cref="TimeoutException"/>.
+/// A fault of the socket becomes a <see cref="ParsecTransportException"/> that holds the fault of
+/// the platform as its inner exception. A connect, send or receive that passes its time limit
+/// raises <see cref="TimeoutException"/>.
 /// </para>
 /// </remarks>
 internal sealed class UnixDomainSocketTransport : IParsecTransport
@@ -109,9 +109,13 @@ internal sealed class UnixDomainSocketTransport : IParsecTransport
                 cancellationToken)
                 .ConfigureAwait(false);
 
-            var connection = new UnixDomainSocketConnection(socket, IoTimeout, MaxBodyLength);
+            var connection = new UnixDomainSocketConnection(socket, SocketPath, IoTimeout, MaxBodyLength);
             socket = null;
             return connection;
+        }
+        catch (Exception exception) when (exception is SocketException or IOException)
+        {
+            throw ParsecTransportException.FromSocketFault(SocketPath, exception);
         }
         finally
         {

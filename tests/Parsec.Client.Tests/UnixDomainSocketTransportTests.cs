@@ -156,13 +156,17 @@ public sealed class UnixDomainSocketTransportTests
     }
 
     [Fact]
-    public async Task ReportsAMissingSocketFileAsASocketFault()
+    public async Task ReportsAMissingSocketFileAsATransportFault()
     {
         var missing = Path.Combine(Path.GetTempPath(), $"psc-{Guid.NewGuid():N}"[..12] + ".sock");
         var transport = new UnixDomainSocketTransport(new Uri("unix:" + missing), _shortTimeout, _shortTimeout);
 
-        await Assert.ThrowsAsync<SocketException>(
+        var exception = await Assert.ThrowsAsync<ParsecTransportException>(
             async () => await transport.ConnectAsync(TestContext.Current.CancellationToken));
+
+        // The fault of the platform stays reachable, and the message names the socket file.
+        Assert.IsType<SocketException>(exception.InnerException);
+        Assert.Contains(missing, exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]
