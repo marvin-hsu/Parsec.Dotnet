@@ -212,7 +212,22 @@ public sealed class ParsecContainer(ParsecConfiguration configuration) : DockerC
         // directory.
         HostSocketDirectory?.MakeDirectory();
 
-        await base.UnsafeCreateAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await base.UnsafeCreateAsync(ct).ConfigureAwait(false);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            // The Docker client reports a status code and little else. A caller who reads only
+            // the message would not learn which image failed, and the image is the setting they
+            // are most likely to have changed.
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "The Parsec container could not be created from image \"{0}\". Check that the image name and tag are right and that this machine can pull them.",
+                    Configuration.Image.FullName),
+                e);
+        }
     }
 
     /// <inheritdoc/>

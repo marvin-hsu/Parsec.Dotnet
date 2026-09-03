@@ -134,6 +134,38 @@ public sealed class ParsecContainerTests
     }
 
     [Fact]
+    public async Task StartAsync_WithAnImageThatIsNotThere_FailsAndLeavesNothing()
+    {
+        // The earlier dispose test puts the object into the failed state by hand. This one lets
+        // Docker fail for real, so it also covers the message a caller reads and the cleanup that
+        // runs after a start the module did not expect to fail.
+        await using var container = DockerRequirement.CreateBuilder()
+            .WithImage("ghcr.io/marvin-hsu/parsec-testcontainers:no-such-tag-exists")
+            .Build();
+
+        var hostSocketDirectory = container.HostSocketDirectory;
+
+        var exception = await Assert.ThrowsAnyAsync<Exception>(
+            () => container.StartAsync(TestContext.Current.CancellationToken));
+
+        // A caller who reads only the message has to be able to tell that the image is the
+        // problem, without a stack trace and without the Docker logs.
+        var message = exception.ToString();
+
+        Assert.Contains("no-such-tag-exists", message, StringComparison.Ordinal);
+
+        // The container never ran, so nothing of it may stay behind on this machine.
+        await container.DisposeAsync();
+
+        if (hostSocketDirectory is not null)
+        {
+            Assert.False(
+                Directory.Exists(hostSocketDirectory.DirectoryPath),
+                hostSocketDirectory.DirectoryPath + " is still there.");
+        }
+    }
+
+    [Fact]
     public async Task Container_FromStartToDispose_ServesTheServiceAndLeavesNothing()
     {
         var container = DockerRequirement.CreateBuilder().Build();
