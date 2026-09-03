@@ -10,6 +10,8 @@ service to talk to.
 
 > **Status: early development.** The API surface is not yet stable.
 
+> This is a community project. It is not published by the Parsec maintainers.
+
 ## Installation
 
 ```bash

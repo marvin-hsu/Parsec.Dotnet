@@ -8,6 +8,10 @@ A .NET client library for [Parsec](https://parsec.community/) — the **P**latfo
 
 > ⚠️ **Status: early development.** The API surface is not yet stable.
 
+> This is a community project. It is not published by the Parsec maintainers, and the
+> package ids are held in good faith: if the Parsec project ever wants them for an official
+> .NET client, they can have them.
+
 ## Installation
 
 ```bash
