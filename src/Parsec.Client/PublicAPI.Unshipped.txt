@@ -1,3 +1,100 @@
 #nullable enable
+Parsec.Client.AuthType
+Parsec.Client.AuthType.None = 0 -> Parsec.Client.AuthType
+Parsec.Client.AuthType.Direct = 1 -> Parsec.Client.AuthType
+Parsec.Client.AuthType.Jwt = 2 -> Parsec.Client.AuthType
+Parsec.Client.AuthType.UnixPeerCredentials = 3 -> Parsec.Client.AuthType
+Parsec.Client.AuthType.JwtSvid = 4 -> Parsec.Client.AuthType
+Parsec.Client.AuthTypeExtensions
 Parsec.Client.IParsecClient
 Parsec.Client.IParsecClient.ProviderName.get -> string!
+Parsec.Client.Opcode
+Parsec.Client.Opcode.Ping = 1 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaGenerateKey = 2 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaDestroyKey = 3 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaSignHash = 4 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaVerifyHash = 5 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaImportKey = 6 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaExportPublicKey = 7 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.ListProviders = 8 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.ListOpcodes = 9 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaAsymmetricEncrypt = 10 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaAsymmetricDecrypt = 11 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaExportKey = 12 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaGenerateRandom = 13 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.ListAuthenticators = 14 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaHashCompute = 15 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaHashCompare = 16 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaAeadEncrypt = 17 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaAeadDecrypt = 18 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaRawKeyAgreement = 19 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaCipherEncrypt = 20 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaCipherDecrypt = 21 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaMacCompute = 22 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaMacVerify = 23 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaSignMessage = 24 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PsaVerifyMessage = 25 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.ListKeys = 26 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.ListClients = 27 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.DeleteClient = 28 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.AttestKey = 30 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.PrepareKeyAttestation = 31 -> Parsec.Client.Opcode
+Parsec.Client.Opcode.CanDoCrypto = 32 -> Parsec.Client.Opcode
+Parsec.Client.OpcodeExtensions
+Parsec.Client.ProviderId
+Parsec.Client.ProviderId.Core = 0 -> Parsec.Client.ProviderId
+Parsec.Client.ProviderId.MbedCrypto = 1 -> Parsec.Client.ProviderId
+Parsec.Client.ProviderId.Pkcs11 = 2 -> Parsec.Client.ProviderId
+Parsec.Client.ProviderId.Tpm = 3 -> Parsec.Client.ProviderId
+Parsec.Client.ProviderId.TrustedService = 4 -> Parsec.Client.ProviderId
+Parsec.Client.ProviderId.CryptoAuthLib = 5 -> Parsec.Client.ProviderId
+Parsec.Client.ProviderIdExtensions
+Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.Success = 0 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.WrongProviderId = 1 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.ContentTypeNotSupported = 2 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.AcceptTypeNotSupported = 3 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.WireProtocolVersionNotSupported = 4 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.ProviderNotRegistered = 5 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.ProviderDoesNotExist = 6 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.DeserializingBodyFailed = 7 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.SerializingBodyFailed = 8 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.OpcodeDoesNotExist = 9 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.ResponseTooLarge = 10 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.AuthenticationError = 11 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.AuthenticatorDoesNotExist = 12 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.AuthenticatorNotRegistered = 13 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.KeyInfoManagerError = 14 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.ConnectionError = 15 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.InvalidEncoding = 16 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.InvalidHeader = 17 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.WrongProviderUuid = 18 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.NotAuthenticated = 19 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.BodySizeExceedsLimit = 20 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.AdminOperation = 21 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorGenericError = 1132 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorNotPermitted = 1133 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorNotSupported = 1134 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInvalidArgument = 1135 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInvalidHandle = 1136 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorBadState = 1137 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorBufferTooSmall = 1138 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorAlreadyExists = 1139 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorDoesNotExist = 1140 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInsufficientMemory = 1141 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInsufficientStorage = 1142 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInsufficientData = 1143 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorCommunicationFailure = 1145 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorStorageFailure = 1146 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorHardwareFailure = 1147 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInsufficientEntropy = 1148 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInvalidSignature = 1149 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorInvalidPadding = 1150 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorCorruptionDetected = 1151 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatus.PsaErrorDataCorrupt = 1152 -> Parsec.Client.ResponseStatus
+Parsec.Client.ResponseStatusExtensions
+static Parsec.Client.AuthTypeExtensions.IsKnown(this Parsec.Client.AuthType value) -> bool
+static Parsec.Client.OpcodeExtensions.IsKnown(this Parsec.Client.Opcode value) -> bool
+static Parsec.Client.ProviderIdExtensions.IsKnown(this Parsec.Client.ProviderId value) -> bool
+static Parsec.Client.ProviderIdExtensions.SupportsCrypto(this Parsec.Client.ProviderId value) -> bool
+static Parsec.Client.ResponseStatusExtensions.IsKnown(this Parsec.Client.ResponseStatus value) -> bool
