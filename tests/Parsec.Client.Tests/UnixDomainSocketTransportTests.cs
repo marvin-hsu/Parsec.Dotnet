@@ -170,6 +170,34 @@ public sealed class UnixDomainSocketTransportTests
     }
 
     [Fact]
+    public async Task ReportsAFaultOfTheSocketDuringASendAsATransportFault()
+    {
+        await using var server = new UnixSocketServer();
+        var accept = server.AcceptAsync();
+
+        var transport = new UnixDomainSocketTransport(server.Endpoint, _testTimeout, _testTimeout);
+        await using var connection = await transport.ConnectAsync(TestContext.Current.CancellationToken);
+
+        // The service goes away with the connection still open, so the write meets a broken pipe.
+        (await accept).Dispose();
+
+        var request = ParsecRequest.Create(Opcode.Ping, ProviderId.Core, AuthType.None, default, default);
+
+        var fault = await Assert.ThrowsAsync<ParsecTransportException>(
+            async () => await connection.SendAsync(request, TestContext.Current.CancellationToken));
+
+        // The fault of the platform stays reachable, and the message names the socket file.
+        Assert.IsType<IOException>(fault.InnerException);
+        Assert.Contains(server.SocketPath, fault.Message, StringComparison.Ordinal);
+
+        // A read of the same connection reports the end of the stream. A lost peer of a Unix
+        // socket closes the stream, so it does not raise a fault of the platform.
+        var result = await connection.ReceiveAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+    }
+
+    [Fact]
     public void ReadsTheSocketPathOutOfTheEndpoint()
     {
         var transport = new UnixDomainSocketTransport(new Uri("unix:///tmp/parsec-test.sock"));
@@ -220,4 +248,95 @@ public sealed class UnixDomainSocketTransportTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => transport.MaxBodyLength = uint.MaxValue);
     }
+
+    // The guard in this constructor is a duplicate: ParsecEndpoint.GetSocketPath guards again and
+    // throws the same type. The test pins the contract a caller sees; it cannot prove which of
+    // the two guards ran.
+    [Fact]
+    public void TheConstructorRefusesNoEndpoint()
+        => Assert.Throws<ArgumentNullException>(
+            () => new UnixDomainSocketTransport(null!, _testTimeout, _testTimeout));
+
+    [Fact]
+    public async Task AConnectThatFailsClosesTheSocketItOpened()
+    {
+        // A socket that stays open after every failed connect exhausts the descriptors of the
+        // process, and the caller then fails for a reason that has nothing to do with its own
+        // work. Counting descriptors is the only way to see it from outside.
+        var endpoint = new Uri("unix:" + Path.Combine(Path.GetTempPath(), "parsec-no-listener.sock"));
+        var transport = new UnixDomainSocketTransport(endpoint, _shortTimeout, _shortTimeout);
+
+        var before = OpenDescriptorCount();
+
+        for (var i = 0; i < 40; i++)
+        {
+            _ = await Assert.ThrowsAsync<ParsecTransportException>(
+                async () => await transport.ConnectAsync(TestContext.Current.CancellationToken));
+        }
+
+        var after = OpenDescriptorCount();
+
+        // The count moves a little on its own, so the check leaves room. A leak of one per
+        // attempt would show as forty.
+        Assert.True(
+            after - before < 20,
+            $"The descriptor count went from {before} to {after} over 40 failed connects.");
+    }
+
+    [Fact]
+    public async Task AFaultOfTheSocketDuringAReceiveIsATransportFault()
+    {
+        await using var server = new UnixSocketServer();
+
+        var accepted = Task.Run(
+            async () =>
+            {
+                using var client = await server.AcceptAsync();
+
+                // The peer goes away in the middle of the answer, so the read fails.
+                await client.SendAsync(new byte[] { 0x10, 0xA7, 0xC0, 0x5E });
+                client.Shutdown(SocketShutdown.Both);
+            },
+            TestContext.Current.CancellationToken);
+
+        var transport = new UnixDomainSocketTransport(server.Endpoint, _testTimeout, _testTimeout);
+        await using var connection = await transport.ConnectAsync(TestContext.Current.CancellationToken);
+
+        var result = await connection.ReceiveAsync(TestContext.Current.CancellationToken);
+
+        // A short answer is a framing fault, not a transport fault. Either way the caller gets a
+        // Parsec exception and never a raw socket exception.
+        Assert.False(result.IsSuccess);
+
+        await accepted;
+    }
+
+    [Fact]
+    public async Task AnInfiniteTimeoutRunsTheOperationWithTheTokenOfTheCaller()
+    {
+        // Timeout.InfiniteTimeSpan takes a path of its own that installs no timer. Without a
+        // test the whole branch could go and nothing would notice.
+        using var stop = new CancellationTokenSource();
+
+        var seen = CancellationToken.None;
+
+        var answer = await TimeoutOperation.RunAsync(
+            Timeout.InfiniteTimeSpan,
+            token =>
+            {
+                seen = token;
+                return ValueTask.FromResult(7);
+            },
+            stop.Token);
+
+        Assert.Equal(7, answer);
+        Assert.Equal(stop.Token, seen);
+    }
+
+    /// <summary>
+    /// Counts the file descriptors that this process holds open.
+    /// </summary>
+    /// <returns>The count, or -1 when the platform does not report it.</returns>
+    private static int OpenDescriptorCount()
+        => Directory.Exists("/dev/fd") ? Directory.GetFileSystemEntries("/dev/fd").Length : -1;
 }

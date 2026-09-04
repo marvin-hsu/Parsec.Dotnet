@@ -129,10 +129,13 @@ public sealed class ParsecCoreOperationsTests
     }
 
     [Theory]
-    [InlineData(256u, 0u)]
-    [InlineData(0u, 256u)]
-    [InlineData(uint.MaxValue, 0u)]
-    public async Task PingRefusesAVersionNumberThatTheHeaderCannotCarry(uint major, uint minor)
+    [InlineData(256u, 0u, "wire protocol major version")]
+    [InlineData(0u, 256u, "wire protocol minor version")]
+    [InlineData(uint.MaxValue, 0u, "wire protocol major version")]
+    public async Task PingRefusesAVersionNumberThatTheHeaderCannotCarry(
+        uint major,
+        uint minor,
+        string expectedField)
     {
         // Each number travels in one byte of the header of every other message.
         var body = new Ping.Result { WireProtocolVersionMaj = major, WireProtocolVersionMin = minor }.ToByteArray();
@@ -143,6 +146,7 @@ public sealed class ParsecCoreOperationsTests
             () => operations.PingAsync(TestContext.Current.CancellationToken));
 
         Assert.Equal(Opcode.Ping, fault.Operation);
+        Assert.Contains(expectedField, fault.Message, StringComparison.Ordinal);
         Assert.Null(operations.NegotiatedWireProtocolVersion);
     }
 
@@ -252,6 +256,7 @@ public sealed class ParsecCoreOperationsTests
 
         Assert.Equal(Opcode.ListProviders, fault.Operation);
         Assert.Contains("256", fault.Message, StringComparison.Ordinal);
+        Assert.Contains("provider identifier", fault.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -357,6 +362,7 @@ public sealed class ParsecCoreOperationsTests
             () => operations.ListAuthenticatorsAsync(TestContext.Current.CancellationToken));
 
         Assert.Equal(Opcode.ListAuthenticators, fault.Operation);
+        Assert.Contains("authenticator identifier", fault.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -616,6 +622,77 @@ public sealed class ParsecCoreOperationsTests
     [Fact]
     public void TheOperationsRefuseANullAuthentication() =>
         Assert.Throws<ArgumentNullException>(() => new ParsecCoreOperations(new ScriptedTransport(), null!));
+
+    [Fact]
+    public async Task ListProvidersTakesTheLargestIdentifierThatTheHeaderCanCarry()
+    {
+        // 255 is the last value that the one-byte provider field of the header holds, so it is
+        // an answer that the client must keep and not refuse.
+        var body = new ListProviders.Result
+        {
+            Providers = { new ListProviders.ProviderInfo { Id = 255 } },
+        }.ToByteArray();
+
+        var transport = new ScriptedTransport().EnqueueResponse(Opcode.ListProviders, ResponseStatus.Success, body);
+
+        var providers = await CreateOperations(transport).ListProvidersAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal((ProviderId)255, Assert.Single(providers).Id);
+        Assert.False(providers[0].Id.IsKnown());
+    }
+
+    [Fact]
+    public async Task ListProvidersTakesTheLargestVersionNumberThatAVersionHolds()
+    {
+        // A version number is a 32-bit value on the wire and a signed number in Version, so the
+        // last value that both hold is int.MaxValue.
+        var body = new ListProviders.Result
+        {
+            Providers = { new ListProviders.ProviderInfo { VersionMaj = int.MaxValue } },
+        }.ToByteArray();
+
+        var transport = new ScriptedTransport().EnqueueResponse(Opcode.ListProviders, ResponseStatus.Success, body);
+
+        var providers = await CreateOperations(transport).ListProvidersAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(new Version(int.MaxValue, 0, 0), Assert.Single(providers).Version);
+    }
+
+    [Fact]
+    public async Task ListProvidersRefusesAVersionNumberThatAVersionCannotHold()
+    {
+        var body = new ListProviders.Result
+        {
+            Providers = { new ListProviders.ProviderInfo { VersionMaj = (uint)int.MaxValue + 1 } },
+        }.ToByteArray();
+
+        var transport = new ScriptedTransport().EnqueueResponse(Opcode.ListProviders, ResponseStatus.Success, body);
+        var operations = CreateOperations(transport);
+
+        var fault = await Assert.ThrowsAsync<ParsecProtocolException>(
+            () => operations.ListProvidersAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(Opcode.ListProviders, fault.Operation);
+        Assert.Contains("version number", fault.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ListKeysRefusesAProviderIdThatTheHeaderCannotCarry()
+    {
+        var body = new ListKeys.Result
+        {
+            Keys = { new ListKeys.KeyInfo { ProviderId = 256, Name = "signing-key" } },
+        }.ToByteArray();
+
+        var transport = new ScriptedTransport().EnqueueResponse(Opcode.ListKeys, ResponseStatus.Success, body);
+        var operations = CreateOperations(transport);
+
+        var fault = await Assert.ThrowsAsync<ParsecProtocolException>(
+            () => operations.ListKeysAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(Opcode.ListKeys, fault.Operation);
+        Assert.Contains("provider identifier", fault.Message, StringComparison.Ordinal);
+    }
 
     [Fact]
     public void TheOperationsRefuseANullTransport() =>

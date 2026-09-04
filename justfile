@@ -121,8 +121,22 @@ sonar:
 # Settings live in stryker-config.json. The Microsoft.Testing.Platform runner is
 # still in preview upstream, so read a surviving mutant before you act on it.
 # Mutation testing over the types whose behaviour this package decides.
-mutate:
+mutate: mutate-testcontainers mutate-client
+
+# Mutation testing over the container module.
+mutate-testcontainers:
     cd tests/Parsec.Testcontainers.Tests && dotnet dotnet-stryker --config-file ../../stryker-config.json
+
+# Mutation testing over the client. The generated protobuf types are not ours, so the
+# configuration keeps the mutants inside src/Parsec.Client. Interop/LibC.cs is left out
+# because it holds one p/invoke declaration and a platform guard that no test on a Unix
+# machine can reach. DOCKER_HOST points at a socket that does not exist, so the integration
+# tests skip: Stryker has no test filter, and a container start for each mutant would take
+# hours.
+mutate-client:
+    cd tests/Parsec.Client.Tests && \
+        DOCKER_HOST=unix:///nonexistent/parsec-mutation-testing.sock \
+        dotnet dotnet-stryker --config-file ../../stryker-config.client.json
 
 # Delete build output, test results and the generated API reference.
 clean:

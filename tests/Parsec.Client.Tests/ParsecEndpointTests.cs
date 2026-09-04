@@ -120,6 +120,20 @@ public sealed class ParsecEndpointTests
     }
 
     [Fact]
+    public void GetSocketPathRefusesASchemeThatIsNotUnix()
+    {
+        // Resolve checks the scheme too, but an application can hand an endpoint straight to
+        // this method, so the check belongs here as well. The endpoints below hold a path and no
+        // host, so the scheme is the only thing that is wrong with them.
+        var fault = Assert.Throws<ParsecConfigurationException>(
+            () => ParsecEndpoint.GetSocketPath(new Uri("tcp:/run/parsec/parsec.sock")));
+
+        Assert.Contains("tcp", fault.Message, StringComparison.Ordinal);
+        Assert.Throws<ParsecConfigurationException>(
+            () => ParsecEndpoint.GetSocketPath(new Uri("unixgram:/run/parsec/parsec.sock")));
+    }
+
+    [Fact]
     public void GetSocketPathRefusesAnEndpointWithNoPath()
     {
         Assert.Throws<ParsecConfigurationException>(() => ParsecEndpoint.GetSocketPath(new Uri("unix:")));

@@ -190,6 +190,34 @@ public sealed class AuthenticationTests
         Assert.Throws<ArgumentException>(() => new JwtSvidAuthentication(token));
 
     [Fact]
+    public void JwtSvidAuthenticationRejectsABufferThatIsTooSmall()
+    {
+        var authentication = new JwtSvidAuthentication("eyJhbGciOiJSUzI1NiJ9.e30.sig");
+        var needed = authentication.AuthBytesLength;
+
+        // The message names both byte counts. A copy into a short buffer also throws, so the
+        // message is what tells the two apart.
+        var fault = Assert.Throws<ArgumentException>(
+            () => authentication.WriteAuthBytes(new byte[needed - 1]));
+        Assert.Contains(
+            (needed - 1).ToString(CultureInfo.InvariantCulture) + " bytes",
+            fault.Message,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            needed.ToString(CultureInfo.InvariantCulture) + " bytes",
+            fault.Message,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void JwtSvidAuthenticationTakesTheLongestTokenThatTheHeaderCanDescribe()
+    {
+        var longest = new JwtSvidAuthentication(new string('a', ushort.MaxValue));
+
+        Assert.Equal(ushort.MaxValue, longest.AuthBytesLength);
+    }
+
+    [Fact]
     public void JwtSvidAuthenticationRejectsATokenThatTheHeaderCannotDescribe() =>
         Assert.Throws<ArgumentException>(() => new JwtSvidAuthentication(new string('a', ushort.MaxValue + 1)));
 
@@ -271,6 +299,18 @@ public sealed class AuthenticationTests
     public void AuthenticationFieldRejectsANullAuthentication() =>
         Assert.Throws<ArgumentNullException>(
             () => AuthenticationField.Create(null!));
+
+    [Fact]
+    public void AuthenticationFieldTakesTheLargestByteCountThatTheHeaderCanDescribe()
+    {
+        // The auth length field of the header holds two bytes, so 65535 is the last count that
+        // a request can state. It must be accepted and not refused.
+        var authentication = new StubAuthentication(AuthType.Direct, ushort.MaxValue, ushort.MaxValue);
+
+        var field = AuthenticationField.Create(authentication);
+
+        Assert.Equal(ushort.MaxValue, field.Length);
+    }
 
     [Theory]
     [InlineData(-1)]

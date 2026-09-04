@@ -29,11 +29,6 @@ internal static class ParsecErrorText
     /// <returns>The name of the operation, or <see cref="UnknownName"/>.</returns>
     public static string GetName(Opcode operation) => Enum.GetName(operation) ?? UnknownName;
 
-    /// <summary>Gets the name of an authentication type.</summary>
-    /// <param name="type">The authentication type.</param>
-    /// <returns>The name of the type, or <see cref="UnknownName"/>.</returns>
-    public static string GetName(AuthType type) => Enum.GetName(type) ?? UnknownName;
-
     /// <summary>
     /// Describes a failed answer of the service.
     /// </summary>

@@ -217,6 +217,30 @@ public sealed class ErrorModelTests
         Assert.Equal(messages.Count, messages.Distinct(StringComparer.Ordinal).Count());
     }
 
+    [Theory]
+    [InlineData(1, "The connection closed")]
+    [InlineData(2, "magic number")]
+    [InlineData(3, "The header of the response is smaller")]
+    [InlineData(4, "The body of the response is larger")]
+    public void EachFrameFaultTellsWhatIsWrong(int error, string expected)
+    {
+        // The cause is an internal type, so it travels as its number and not as itself.
+        var exception = ParsecProtocolException.FromFrameError((ParsecFrameError)error, Opcode.Ping);
+
+        Assert.Contains(expected, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(200)]
+    public void AFrameFaultWithNoOwnSentenceFallsBackToTheGeneralOne(int error)
+    {
+        // A later version can add a cause. An unnamed cause must still make a readable message.
+        var exception = ParsecProtocolException.FromFrameError((ParsecFrameError)error, Opcode.Ping);
+
+        Assert.Contains("did not parse", exception.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void AFrameFaultWithNoOperationNamesNoOperation()
     {
