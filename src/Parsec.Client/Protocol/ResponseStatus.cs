@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Protocol;
 
 /// <summary>
 /// Reports the outcome of a request.

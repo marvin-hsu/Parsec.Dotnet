@@ -1,4 +1,4 @@
-namespace Parsec.Client;
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// The base of every exception that this library raises on purpose.

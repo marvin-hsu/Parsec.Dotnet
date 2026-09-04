@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// The client could not talk to the Parsec service.

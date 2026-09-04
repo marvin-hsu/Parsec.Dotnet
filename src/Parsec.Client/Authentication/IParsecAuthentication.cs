@@ -1,4 +1,6 @@
-namespace Parsec.Client;
+using Parsec.Client.Protocol;
+
+namespace Parsec.Client.Authentication;
 
 /// <summary>
 /// Supplies the authentication field of a request.

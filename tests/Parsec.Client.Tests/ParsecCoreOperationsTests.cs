@@ -1,5 +1,8 @@
 using Google.Protobuf;
+using Parsec.Client.Authentication;
+using Parsec.Client.Errors;
 using Parsec.Client.Operations;
+using Parsec.Client.Protocol;
 
 namespace Parsec.Client.Tests;
 

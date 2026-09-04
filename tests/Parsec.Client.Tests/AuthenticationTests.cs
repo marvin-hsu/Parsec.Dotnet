@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Parsec.Client.Authentication;
+using Parsec.Client.Errors;
 using Parsec.Client.Protocol;
 
 namespace Parsec.Client.Tests;

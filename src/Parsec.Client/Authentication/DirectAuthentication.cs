@@ -1,6 +1,8 @@
 using System.Text;
+using Parsec.Client.Errors;
+using Parsec.Client.Protocol;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Authentication;
 
 /// <summary>
 /// Sends the application identity as plain text.

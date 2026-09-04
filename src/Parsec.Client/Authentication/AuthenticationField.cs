@@ -1,4 +1,6 @@
-namespace Parsec.Client;
+using Parsec.Client.Errors;
+
+namespace Parsec.Client.Authentication;
 
 /// <summary>
 /// Renders the authentication field of a request and applies the rules of the protocol to it.

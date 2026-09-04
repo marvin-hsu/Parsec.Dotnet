@@ -1,4 +1,6 @@
-namespace Parsec.Client;
+using Parsec.Client.Protocol;
+
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// The Parsec service answered a request with a failure status.

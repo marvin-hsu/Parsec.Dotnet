@@ -1,4 +1,6 @@
-namespace Parsec.Client;
+using Parsec.Client.Protocol;
+
+namespace Parsec.Client.Models;
 
 /// <summary>
 /// Names one key of the application.

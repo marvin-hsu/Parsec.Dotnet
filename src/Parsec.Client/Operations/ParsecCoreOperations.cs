@@ -1,3 +1,7 @@
+using Parsec.Client.Authentication;
+using Parsec.Client.Errors;
+using Parsec.Client.Models;
+using Parsec.Client.Protocol;
 using Parsec.Client.Transport;
 
 namespace Parsec.Client.Operations;

@@ -1,4 +1,6 @@
-namespace Parsec.Client;
+using Parsec.Client.Protocol;
+
+namespace Parsec.Client.Models;
 
 /// <summary>
 /// Describes one provider of the Parsec service.

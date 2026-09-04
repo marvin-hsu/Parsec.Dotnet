@@ -1,7 +1,7 @@
 using System.Globalization;
 using Parsec.Client.Protocol;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// Builds the text of the exceptions of the library.

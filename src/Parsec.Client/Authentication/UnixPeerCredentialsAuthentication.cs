@@ -1,7 +1,9 @@
 using System.Buffers.Binary;
+using Parsec.Client.Errors;
 using Parsec.Client.Interop;
+using Parsec.Client.Protocol;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Authentication;
 
 /// <summary>
 /// Sends the user ID of the calling process.

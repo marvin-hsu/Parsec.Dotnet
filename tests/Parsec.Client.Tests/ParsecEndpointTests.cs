@@ -1,5 +1,7 @@
 using System.Net.Sockets;
 using System.Text;
+using Parsec.Client.Errors;
+using Parsec.Client.Transport;
 
 namespace Parsec.Client.Tests;
 

@@ -1,182 +1,182 @@
 #nullable enable
-Parsec.Client.AuthType
-Parsec.Client.AuthType.None = 0 -> Parsec.Client.AuthType
-Parsec.Client.AuthType.Direct = 1 -> Parsec.Client.AuthType
-Parsec.Client.AuthType.Jwt = 2 -> Parsec.Client.AuthType
-Parsec.Client.AuthType.UnixPeerCredentials = 3 -> Parsec.Client.AuthType
-Parsec.Client.AuthType.JwtSvid = 4 -> Parsec.Client.AuthType
-Parsec.Client.AuthTypeExtensions
+Parsec.Client.Authentication.DirectAuthentication
+Parsec.Client.Authentication.DirectAuthentication.ApplicationName.get -> string!
+Parsec.Client.Authentication.DirectAuthentication.AuthBytesLength.get -> int
+Parsec.Client.Authentication.DirectAuthentication.DirectAuthentication(string! applicationName) -> void
+Parsec.Client.Authentication.DirectAuthentication.Type.get -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Authentication.DirectAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.Authentication.IParsecAuthentication
+Parsec.Client.Authentication.IParsecAuthentication.AuthBytesLength.get -> int
+Parsec.Client.Authentication.IParsecAuthentication.Type.get -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Authentication.IParsecAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.Authentication.JwtSvidAuthentication
+Parsec.Client.Authentication.JwtSvidAuthentication.AuthBytesLength.get -> int
+Parsec.Client.Authentication.JwtSvidAuthentication.JwtSvidAuthentication(string! token) -> void
+Parsec.Client.Authentication.JwtSvidAuthentication.Type.get -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Authentication.JwtSvidAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.Authentication.NoAuthentication
+Parsec.Client.Authentication.NoAuthentication.AuthBytesLength.get -> int
+Parsec.Client.Authentication.NoAuthentication.NoAuthentication() -> void
+Parsec.Client.Authentication.NoAuthentication.Type.get -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Authentication.NoAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.Authentication.UnixPeerCredentialsAuthentication
+Parsec.Client.Authentication.UnixPeerCredentialsAuthentication.AuthBytesLength.get -> int
+Parsec.Client.Authentication.UnixPeerCredentialsAuthentication.Type.get -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Authentication.UnixPeerCredentialsAuthentication.UnixPeerCredentialsAuthentication() -> void
+Parsec.Client.Authentication.UnixPeerCredentialsAuthentication.UserId.get -> uint
+Parsec.Client.Authentication.UnixPeerCredentialsAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
+Parsec.Client.Errors.ParsecConfigurationException
+Parsec.Client.Errors.ParsecConfigurationException.ParsecConfigurationException() -> void
+Parsec.Client.Errors.ParsecConfigurationException.ParsecConfigurationException(string! message) -> void
+Parsec.Client.Errors.ParsecConfigurationException.ParsecConfigurationException(string! message, System.Exception! innerException) -> void
+Parsec.Client.Errors.ParsecException
+Parsec.Client.Errors.ParsecException.ParsecException() -> void
+Parsec.Client.Errors.ParsecException.ParsecException(string! message) -> void
+Parsec.Client.Errors.ParsecException.ParsecException(string! message, System.Exception! innerException) -> void
+Parsec.Client.Errors.ParsecProtocolException
+Parsec.Client.Errors.ParsecProtocolException.Operation.get -> Parsec.Client.Protocol.Opcode?
+Parsec.Client.Errors.ParsecProtocolException.ParsecProtocolException() -> void
+Parsec.Client.Errors.ParsecProtocolException.ParsecProtocolException(string! message) -> void
+Parsec.Client.Errors.ParsecProtocolException.ParsecProtocolException(string! message, System.Exception! innerException) -> void
+Parsec.Client.Errors.ParsecPsaException
+Parsec.Client.Errors.ParsecPsaException.ParsecPsaException() -> void
+Parsec.Client.Errors.ParsecPsaException.ParsecPsaException(Parsec.Client.Protocol.ResponseStatus status, Parsec.Client.Protocol.Opcode? operation) -> void
+Parsec.Client.Errors.ParsecPsaException.ParsecPsaException(string! message) -> void
+Parsec.Client.Errors.ParsecPsaException.ParsecPsaException(string! message, System.Exception! innerException) -> void
+Parsec.Client.Errors.ParsecServiceException
+Parsec.Client.Errors.ParsecServiceException.Operation.get -> Parsec.Client.Protocol.Opcode?
+Parsec.Client.Errors.ParsecServiceException.ParsecServiceException() -> void
+Parsec.Client.Errors.ParsecServiceException.ParsecServiceException(Parsec.Client.Protocol.ResponseStatus status, Parsec.Client.Protocol.Opcode? operation) -> void
+Parsec.Client.Errors.ParsecServiceException.ParsecServiceException(string! message) -> void
+Parsec.Client.Errors.ParsecServiceException.ParsecServiceException(string! message, System.Exception! innerException) -> void
+Parsec.Client.Errors.ParsecServiceException.Status.get -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Errors.ParsecServiceException.StatusName.get -> string!
+Parsec.Client.Errors.ParsecTransportException
+Parsec.Client.Errors.ParsecTransportException.ParsecTransportException() -> void
+Parsec.Client.Errors.ParsecTransportException.ParsecTransportException(string! message) -> void
+Parsec.Client.Errors.ParsecTransportException.ParsecTransportException(string! message, System.Exception! innerException) -> void
 Parsec.Client.IParsecClient
 Parsec.Client.IParsecClient.ProviderName.get -> string!
-Parsec.Client.Opcode
-Parsec.Client.Opcode.Ping = 1 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaGenerateKey = 2 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaDestroyKey = 3 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaSignHash = 4 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaVerifyHash = 5 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaImportKey = 6 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaExportPublicKey = 7 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.ListProviders = 8 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.ListOpcodes = 9 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaAsymmetricEncrypt = 10 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaAsymmetricDecrypt = 11 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaExportKey = 12 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaGenerateRandom = 13 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.ListAuthenticators = 14 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaHashCompute = 15 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaHashCompare = 16 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaAeadEncrypt = 17 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaAeadDecrypt = 18 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaRawKeyAgreement = 19 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaCipherEncrypt = 20 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaCipherDecrypt = 21 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaMacCompute = 22 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaMacVerify = 23 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaSignMessage = 24 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PsaVerifyMessage = 25 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.ListKeys = 26 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.ListClients = 27 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.DeleteClient = 28 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.AttestKey = 30 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.PrepareKeyAttestation = 31 -> Parsec.Client.Opcode
-Parsec.Client.Opcode.CanDoCrypto = 32 -> Parsec.Client.Opcode
-Parsec.Client.OpcodeExtensions
-Parsec.Client.ProviderId
-Parsec.Client.ProviderId.Core = 0 -> Parsec.Client.ProviderId
-Parsec.Client.ProviderId.MbedCrypto = 1 -> Parsec.Client.ProviderId
-Parsec.Client.ProviderId.Pkcs11 = 2 -> Parsec.Client.ProviderId
-Parsec.Client.ProviderId.Tpm = 3 -> Parsec.Client.ProviderId
-Parsec.Client.ProviderId.TrustedService = 4 -> Parsec.Client.ProviderId
-Parsec.Client.ProviderId.CryptoAuthLib = 5 -> Parsec.Client.ProviderId
-Parsec.Client.ProviderIdExtensions
-Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.Success = 0 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.WrongProviderId = 1 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.ContentTypeNotSupported = 2 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.AcceptTypeNotSupported = 3 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.WireProtocolVersionNotSupported = 4 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.ProviderNotRegistered = 5 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.ProviderDoesNotExist = 6 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.DeserializingBodyFailed = 7 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.SerializingBodyFailed = 8 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.OpcodeDoesNotExist = 9 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.ResponseTooLarge = 10 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.AuthenticationError = 11 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.AuthenticatorDoesNotExist = 12 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.AuthenticatorNotRegistered = 13 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.KeyInfoManagerError = 14 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.ConnectionError = 15 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.InvalidEncoding = 16 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.InvalidHeader = 17 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.WrongProviderUuid = 18 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.NotAuthenticated = 19 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.BodySizeExceedsLimit = 20 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.AdminOperation = 21 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorGenericError = 1132 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorNotPermitted = 1133 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorNotSupported = 1134 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInvalidArgument = 1135 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInvalidHandle = 1136 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorBadState = 1137 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorBufferTooSmall = 1138 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorAlreadyExists = 1139 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorDoesNotExist = 1140 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInsufficientMemory = 1141 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInsufficientStorage = 1142 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInsufficientData = 1143 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorCommunicationFailure = 1145 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorStorageFailure = 1146 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorHardwareFailure = 1147 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInsufficientEntropy = 1148 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInvalidSignature = 1149 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorInvalidPadding = 1150 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorCorruptionDetected = 1151 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatus.PsaErrorDataCorrupt = 1152 -> Parsec.Client.ResponseStatus
-Parsec.Client.ResponseStatusExtensions
-static Parsec.Client.AuthTypeExtensions.IsKnown(this Parsec.Client.AuthType value) -> bool
-static Parsec.Client.OpcodeExtensions.IsKnown(this Parsec.Client.Opcode value) -> bool
-static Parsec.Client.ProviderIdExtensions.IsKnown(this Parsec.Client.ProviderId value) -> bool
-static Parsec.Client.ProviderIdExtensions.SupportsCrypto(this Parsec.Client.ProviderId value) -> bool
-static Parsec.Client.ResponseStatusExtensions.IsKnown(this Parsec.Client.ResponseStatus value) -> bool
-Parsec.Client.ParsecConfigurationException
-Parsec.Client.ParsecConfigurationException.ParsecConfigurationException() -> void
-Parsec.Client.ParsecConfigurationException.ParsecConfigurationException(string! message) -> void
-Parsec.Client.ParsecConfigurationException.ParsecConfigurationException(string! message, System.Exception! innerException) -> void
-Parsec.Client.ParsecEndpoint
-Parsec.Client.ParsecException
-Parsec.Client.ParsecException.ParsecException() -> void
-Parsec.Client.ParsecException.ParsecException(string! message) -> void
-Parsec.Client.ParsecException.ParsecException(string! message, System.Exception! innerException) -> void
-const Parsec.Client.ParsecEndpoint.DefaultSocketPath = "/run/parsec/parsec.sock" -> string!
-const Parsec.Client.ParsecEndpoint.EnvironmentVariableName = "PARSEC_SERVICE_ENDPOINT" -> string!
-const Parsec.Client.ParsecEndpoint.UnixScheme = "unix" -> string!
-static Parsec.Client.ParsecEndpoint.Default.get -> System.Uri!
-static Parsec.Client.ParsecEndpoint.GetSocketPath(System.Uri! endpoint) -> string!
-static Parsec.Client.ParsecEndpoint.Resolve() -> System.Uri!
-static Parsec.Client.ParsecEndpoint.Resolve(string? endpoint) -> System.Uri!
-Parsec.Client.ParsecServiceException
-Parsec.Client.ParsecServiceException.ParsecServiceException() -> void
-Parsec.Client.ParsecServiceException.ParsecServiceException(Parsec.Client.ResponseStatus status, Parsec.Client.Opcode? operation) -> void
-Parsec.Client.ParsecServiceException.ParsecServiceException(string! message) -> void
-Parsec.Client.ParsecServiceException.ParsecServiceException(string! message, System.Exception! innerException) -> void
-Parsec.Client.ParsecServiceException.Operation.get -> Parsec.Client.Opcode?
-Parsec.Client.ParsecServiceException.Status.get -> Parsec.Client.ResponseStatus
-Parsec.Client.ParsecServiceException.StatusName.get -> string!
-static Parsec.Client.ParsecServiceException.FromStatus(Parsec.Client.ResponseStatus status, Parsec.Client.Opcode? operation = null) -> Parsec.Client.ParsecServiceException!
-Parsec.Client.ParsecPsaException
-Parsec.Client.ParsecPsaException.ParsecPsaException() -> void
-Parsec.Client.ParsecPsaException.ParsecPsaException(Parsec.Client.ResponseStatus status, Parsec.Client.Opcode? operation) -> void
-Parsec.Client.ParsecPsaException.ParsecPsaException(string! message) -> void
-Parsec.Client.ParsecPsaException.ParsecPsaException(string! message, System.Exception! innerException) -> void
-Parsec.Client.ParsecProtocolException
-Parsec.Client.ParsecProtocolException.ParsecProtocolException() -> void
-Parsec.Client.ParsecProtocolException.ParsecProtocolException(string! message) -> void
-Parsec.Client.ParsecProtocolException.ParsecProtocolException(string! message, System.Exception! innerException) -> void
-Parsec.Client.ParsecProtocolException.Operation.get -> Parsec.Client.Opcode?
-Parsec.Client.ParsecTransportException
-Parsec.Client.ParsecTransportException.ParsecTransportException() -> void
-Parsec.Client.ParsecTransportException.ParsecTransportException(string! message) -> void
-Parsec.Client.ParsecTransportException.ParsecTransportException(string! message, System.Exception! innerException) -> void
-Parsec.Client.DirectAuthentication
-Parsec.Client.DirectAuthentication.ApplicationName.get -> string!
-Parsec.Client.DirectAuthentication.AuthBytesLength.get -> int
-Parsec.Client.DirectAuthentication.DirectAuthentication(string! applicationName) -> void
-Parsec.Client.DirectAuthentication.Type.get -> Parsec.Client.AuthType
-Parsec.Client.DirectAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
-Parsec.Client.IParsecAuthentication
-Parsec.Client.IParsecAuthentication.AuthBytesLength.get -> int
-Parsec.Client.IParsecAuthentication.Type.get -> Parsec.Client.AuthType
-Parsec.Client.IParsecAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
-Parsec.Client.JwtSvidAuthentication
-Parsec.Client.JwtSvidAuthentication.AuthBytesLength.get -> int
-Parsec.Client.JwtSvidAuthentication.JwtSvidAuthentication(string! token) -> void
-Parsec.Client.JwtSvidAuthentication.Type.get -> Parsec.Client.AuthType
-Parsec.Client.JwtSvidAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
-Parsec.Client.NoAuthentication
-Parsec.Client.NoAuthentication.AuthBytesLength.get -> int
-Parsec.Client.NoAuthentication.NoAuthentication() -> void
-Parsec.Client.NoAuthentication.Type.get -> Parsec.Client.AuthType
-Parsec.Client.NoAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
-Parsec.Client.UnixPeerCredentialsAuthentication
-Parsec.Client.UnixPeerCredentialsAuthentication.AuthBytesLength.get -> int
-Parsec.Client.UnixPeerCredentialsAuthentication.Type.get -> Parsec.Client.AuthType
-Parsec.Client.UnixPeerCredentialsAuthentication.UnixPeerCredentialsAuthentication() -> void
-Parsec.Client.UnixPeerCredentialsAuthentication.UserId.get -> uint
-Parsec.Client.UnixPeerCredentialsAuthentication.WriteAuthBytes(System.Span<byte> destination) -> int
-static Parsec.Client.NoAuthentication.Instance.get -> Parsec.Client.NoAuthentication!
-Parsec.Client.AuthenticatorInfo
-Parsec.Client.AuthenticatorInfo.AuthenticatorInfo(Parsec.Client.AuthType id, string! description, System.Version! version) -> void
-Parsec.Client.AuthenticatorInfo.Description.get -> string!
-Parsec.Client.AuthenticatorInfo.Id.get -> Parsec.Client.AuthType
-Parsec.Client.AuthenticatorInfo.Version.get -> System.Version!
-Parsec.Client.KeyInfo
-Parsec.Client.KeyInfo.KeyInfo(Parsec.Client.ProviderId provider, string! name) -> void
-Parsec.Client.KeyInfo.Name.get -> string!
-Parsec.Client.KeyInfo.Provider.get -> Parsec.Client.ProviderId
-Parsec.Client.ProviderInfo
-Parsec.Client.ProviderInfo.ProviderInfo(Parsec.Client.ProviderId id, string! uuid, string! description, string! vendor, System.Version! version) -> void
-Parsec.Client.ProviderInfo.Description.get -> string!
-Parsec.Client.ProviderInfo.Id.get -> Parsec.Client.ProviderId
-Parsec.Client.ProviderInfo.Uuid.get -> string!
-Parsec.Client.ProviderInfo.Vendor.get -> string!
-Parsec.Client.ProviderInfo.Version.get -> System.Version!
+Parsec.Client.Models.AuthenticatorInfo
+Parsec.Client.Models.AuthenticatorInfo.AuthenticatorInfo(Parsec.Client.Protocol.AuthType id, string! description, System.Version! version) -> void
+Parsec.Client.Models.AuthenticatorInfo.Description.get -> string!
+Parsec.Client.Models.AuthenticatorInfo.Id.get -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Models.AuthenticatorInfo.Version.get -> System.Version!
+Parsec.Client.Models.KeyInfo
+Parsec.Client.Models.KeyInfo.KeyInfo(Parsec.Client.Protocol.ProviderId provider, string! name) -> void
+Parsec.Client.Models.KeyInfo.Name.get -> string!
+Parsec.Client.Models.KeyInfo.Provider.get -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Models.ProviderInfo
+Parsec.Client.Models.ProviderInfo.Description.get -> string!
+Parsec.Client.Models.ProviderInfo.Id.get -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Models.ProviderInfo.ProviderInfo(Parsec.Client.Protocol.ProviderId id, string! uuid, string! description, string! vendor, System.Version! version) -> void
+Parsec.Client.Models.ProviderInfo.Uuid.get -> string!
+Parsec.Client.Models.ProviderInfo.Vendor.get -> string!
+Parsec.Client.Models.ProviderInfo.Version.get -> System.Version!
+Parsec.Client.Protocol.AuthType
+Parsec.Client.Protocol.AuthType.Direct = 1 -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Protocol.AuthType.Jwt = 2 -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Protocol.AuthType.JwtSvid = 4 -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Protocol.AuthType.None = 0 -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Protocol.AuthType.UnixPeerCredentials = 3 -> Parsec.Client.Protocol.AuthType
+Parsec.Client.Protocol.AuthTypeExtensions
+Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.AttestKey = 30 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.CanDoCrypto = 32 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.DeleteClient = 28 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.ListAuthenticators = 14 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.ListClients = 27 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.ListKeys = 26 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.ListOpcodes = 9 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.ListProviders = 8 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.Ping = 1 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PrepareKeyAttestation = 31 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaAeadDecrypt = 18 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaAeadEncrypt = 17 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaAsymmetricDecrypt = 11 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaAsymmetricEncrypt = 10 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaCipherDecrypt = 21 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaCipherEncrypt = 20 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaDestroyKey = 3 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaExportKey = 12 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaExportPublicKey = 7 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaGenerateKey = 2 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaGenerateRandom = 13 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaHashCompare = 16 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaHashCompute = 15 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaImportKey = 6 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaMacCompute = 22 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaMacVerify = 23 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaRawKeyAgreement = 19 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaSignHash = 4 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaSignMessage = 24 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaVerifyHash = 5 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.Opcode.PsaVerifyMessage = 25 -> Parsec.Client.Protocol.Opcode
+Parsec.Client.Protocol.OpcodeExtensions
+Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderId.Core = 0 -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderId.CryptoAuthLib = 5 -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderId.MbedCrypto = 1 -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderId.Pkcs11 = 2 -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderId.Tpm = 3 -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderId.TrustedService = 4 -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.Protocol.ProviderIdExtensions
+Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.AcceptTypeNotSupported = 3 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.AdminOperation = 21 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.AuthenticationError = 11 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.AuthenticatorDoesNotExist = 12 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.AuthenticatorNotRegistered = 13 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.BodySizeExceedsLimit = 20 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.ConnectionError = 15 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.ContentTypeNotSupported = 2 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.DeserializingBodyFailed = 7 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.InvalidEncoding = 16 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.InvalidHeader = 17 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.KeyInfoManagerError = 14 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.NotAuthenticated = 19 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.OpcodeDoesNotExist = 9 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.ProviderDoesNotExist = 6 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.ProviderNotRegistered = 5 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorAlreadyExists = 1139 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorBadState = 1137 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorBufferTooSmall = 1138 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorCommunicationFailure = 1145 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorCorruptionDetected = 1151 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorDataCorrupt = 1152 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorDoesNotExist = 1140 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorGenericError = 1132 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorHardwareFailure = 1147 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInsufficientData = 1143 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInsufficientEntropy = 1148 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInsufficientMemory = 1141 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInsufficientStorage = 1142 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInvalidArgument = 1135 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInvalidHandle = 1136 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInvalidPadding = 1150 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorInvalidSignature = 1149 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorNotPermitted = 1133 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorNotSupported = 1134 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.PsaErrorStorageFailure = 1146 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.ResponseTooLarge = 10 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.SerializingBodyFailed = 8 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.Success = 0 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.WireProtocolVersionNotSupported = 4 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.WrongProviderId = 1 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatus.WrongProviderUuid = 18 -> Parsec.Client.Protocol.ResponseStatus
+Parsec.Client.Protocol.ResponseStatusExtensions
+Parsec.Client.Transport.ParsecEndpoint
+const Parsec.Client.Transport.ParsecEndpoint.DefaultSocketPath = "/run/parsec/parsec.sock" -> string!
+const Parsec.Client.Transport.ParsecEndpoint.EnvironmentVariableName = "PARSEC_SERVICE_ENDPOINT" -> string!
+const Parsec.Client.Transport.ParsecEndpoint.UnixScheme = "unix" -> string!
+static Parsec.Client.Authentication.NoAuthentication.Instance.get -> Parsec.Client.Authentication.NoAuthentication!
+static Parsec.Client.Errors.ParsecServiceException.FromStatus(Parsec.Client.Protocol.ResponseStatus status, Parsec.Client.Protocol.Opcode? operation = null) -> Parsec.Client.Errors.ParsecServiceException!
+static Parsec.Client.Protocol.AuthTypeExtensions.IsKnown(this Parsec.Client.Protocol.AuthType value) -> bool
+static Parsec.Client.Protocol.OpcodeExtensions.IsKnown(this Parsec.Client.Protocol.Opcode value) -> bool
+static Parsec.Client.Protocol.ProviderIdExtensions.IsKnown(this Parsec.Client.Protocol.ProviderId value) -> bool
+static Parsec.Client.Protocol.ProviderIdExtensions.SupportsCrypto(this Parsec.Client.Protocol.ProviderId value) -> bool
+static Parsec.Client.Protocol.ResponseStatusExtensions.IsKnown(this Parsec.Client.Protocol.ResponseStatus value) -> bool
+static Parsec.Client.Transport.ParsecEndpoint.Default.get -> System.Uri!
+static Parsec.Client.Transport.ParsecEndpoint.GetSocketPath(System.Uri! endpoint) -> string!
+static Parsec.Client.Transport.ParsecEndpoint.Resolve() -> System.Uri!
+static Parsec.Client.Transport.ParsecEndpoint.Resolve(string? endpoint) -> System.Uri!

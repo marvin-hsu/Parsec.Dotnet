@@ -1,4 +1,6 @@
-namespace Parsec.Client;
+using Parsec.Client.Protocol;
+
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// The PSA Crypto layer of a provider refused a request.

@@ -1,4 +1,4 @@
-namespace Parsec.Client;
+namespace Parsec.Client.Protocol;
 
 /// <summary>
 /// Helper methods for <see cref="Opcode"/>.

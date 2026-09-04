@@ -1,7 +1,7 @@
 using System.Globalization;
 using Parsec.Client.Protocol;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// The answer of the Parsec service does not follow the wire protocol.

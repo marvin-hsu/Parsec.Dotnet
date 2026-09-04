@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using Parsec.Client.Errors;
 using Parsec.Client.Protocol;
 using Parsec.Client.Transport;
 

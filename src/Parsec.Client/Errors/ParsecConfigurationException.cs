@@ -1,4 +1,4 @@
-namespace Parsec.Client;
+namespace Parsec.Client.Errors;
 
 /// <summary>
 /// The configuration of the client is not usable.

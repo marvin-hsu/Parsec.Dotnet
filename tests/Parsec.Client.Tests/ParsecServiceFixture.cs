@@ -1,5 +1,6 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
+using Parsec.Client.Authentication;
 using Parsec.Client.Transport;
 using Parsec.Testcontainers;
 

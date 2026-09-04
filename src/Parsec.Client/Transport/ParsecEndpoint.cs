@@ -1,7 +1,8 @@
 using System.Globalization;
 using System.Text;
+using Parsec.Client.Errors;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Transport;
 
 /// <summary>
 /// Finds the address of the Parsec service.

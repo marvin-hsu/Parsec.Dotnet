@@ -1,3 +1,6 @@
+using Parsec.Client.Authentication;
+using Parsec.Client.Errors;
+
 namespace Parsec.Client.Protocol;
 
 /// <summary>

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Parsec.Client;
+namespace Parsec.Client.Protocol;
 
 /// <summary>
 /// Identifies an operation in the Parsec wire protocol.
