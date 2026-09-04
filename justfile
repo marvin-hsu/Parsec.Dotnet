@@ -121,7 +121,7 @@ sonar:
 # Settings live in stryker-config.json. The Microsoft.Testing.Platform runner is
 # still in preview upstream, so read a surviving mutant before you act on it.
 # Mutation testing over the types whose behaviour this package decides.
-mutate: mutate-testcontainers mutate-client
+mutate: mutate-testcontainers mutate-client mutate-di
 
 # Mutation testing over the container module.
 mutate-testcontainers:
@@ -137,6 +137,11 @@ mutate-client:
     cd tests/Parsec.Client.Tests && \
         DOCKER_HOST=unix:///nonexistent/parsec-mutation-testing.sock \
         dotnet dotnet-stryker --config-file ../../stryker-config.client.json
+
+# Mutation testing over the dependency injection package.
+mutate-di:
+    cd tests/Parsec.Client.DependencyInjection.Tests && \
+        dotnet dotnet-stryker --config-file ../../stryker-config.di.json
 
 # Delete build output, test results and the generated API reference.
 clean:

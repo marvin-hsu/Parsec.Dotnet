@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Parsec.Client.DependencyInjection</RootNamespace>
+    <AssemblyName>Parsec.Client.DependencyInjection</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <PackageId>Parsec.Client.DependencyInjection</PackageId>
+    <Description>Dependency injection for Parsec.Client: registers IParsecClient with Microsoft.Extensions.DependencyInjection and connects on first use.</Description>
+    <PackageTags>parsec;security;dependencyinjection;hsm;tpm;cncf</PackageTags>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <!-- SourceLink needs a git remote; enable it only in CI so fresh local clones still build -->
+  <ItemGroup Condition="'$(CI)' == 'true'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- The reason this is a package of its own: Parsec.Client stays free of every dependency
+       except the protobuf runtime, so an application that does not use a container is not made
+       to carry one. A di-v* tag moves this version and leaves the other two alone. -->
+  <PropertyGroup>
+    <MinVerTagPrefix>di-v</MinVerTagPrefix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)../../THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <ProjectReference Include="../Parsec.Client/Parsec.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Parsec.Client.DependencyInjection.Tests" />
+  </ItemGroup>
+
+</Project>

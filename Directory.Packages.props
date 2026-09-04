@@ -20,6 +20,17 @@
     <PackageVersion Include="MinVer" Version="7.0.0" />
   </ItemGroup>
 
+  <!-- A floor rather than a pin: an application picks the version its host already brings, and
+       the package must not drag a newer one in behind it. 8.0.2 rather than 8.0.0 because
+       Testcontainers reaches that version transitively, and central package management makes one
+       number serve every project here. -->
+  <ItemGroup Label="Dependency injection">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+
+    <!-- The container itself, for the tests only. The package ships against the abstractions. -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
   <ItemGroup Label="Testcontainers">
     <PackageVersion Include="Testcontainers" Version="4.14.0" />
   </ItemGroup>

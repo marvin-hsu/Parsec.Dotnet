@@ -16,8 +16,13 @@ A .NET client library for [Parsec](https://parsec.community/) — the **P**latfo
 
 ```bash
 dotnet add package Parsec.Client
-dotnet add package Parsec.Testcontainers   # for integration tests
+dotnet add package Parsec.Client.DependencyInjection   # for Microsoft.Extensions hosts
+dotnet add package Parsec.Testcontainers               # for integration tests
 ```
+
+`Parsec.Client` depends on the protobuf runtime and nothing else. The other two
+are optional and carry their own dependencies, so an application that wants
+neither is not made to bring them along.
 
 ## Quick start
 
@@ -53,6 +58,39 @@ is enough to ask the service what it can do and not enough to own a key.
 This sample is compiled and run against a real service by
 `TheQuickStartOfTheReadmeRuns` in `tests/Parsec.Client.Tests`, so it cannot
 drift out of date without a test failing.
+
+## With Microsoft.Extensions.DependencyInjection
+
+```csharp
+builder.Services.AddParsecClient(new ParsecClientOptions
+{
+    Authentication = new DirectAuthentication("my-application"),
+});
+```
+
+Building a client asks the service for its protocol version and its providers,
+and a service collection cannot await, so what gets registered is an
+`IParsecClientFactory` rather than the client itself:
+
+```csharp
+public sealed class Signer(IParsecClientFactory factory)
+{
+    public async Task<byte[]> SignAsync(byte[] digest, CancellationToken cancellationToken)
+    {
+        var client = await factory.GetAsync(cancellationToken);
+
+        return await client.Crypto.SignHashAsync(
+            "my-key",
+            SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256),
+            digest,
+            cancellationToken);
+    }
+}
+```
+
+The client connects on the first call and is shared afterwards. Registration
+touches no network, so an application still starts when the service is briefly
+down, and a connect that fails is not remembered.
 
 ## Testing against a real service
 

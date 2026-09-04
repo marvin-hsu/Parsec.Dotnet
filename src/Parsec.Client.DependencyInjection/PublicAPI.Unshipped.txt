@@ -1,0 +1,7 @@
+#nullable enable
+Parsec.Client.DependencyInjection.IParsecClientFactory
+Parsec.Client.DependencyInjection.IParsecClientFactory.GetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<Parsec.Client.IParsecClient!>
+Parsec.Client.DependencyInjection.ParsecClientServiceCollectionExtensions
+static Parsec.Client.DependencyInjection.ParsecClientServiceCollectionExtensions.AddParsecClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Parsec.Client.DependencyInjection.ParsecClientServiceCollectionExtensions.AddParsecClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Parsec.Client.ParsecClientOptions! options) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Parsec.Client.DependencyInjection.ParsecClientServiceCollectionExtensions.AddParsecClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<System.IServiceProvider!, Parsec.Client.ParsecClientOptions!>! options) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

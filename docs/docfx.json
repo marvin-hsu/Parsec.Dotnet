@@ -6,6 +6,7 @@
         {
           "files": [
             "Parsec.Client/Parsec.Client.csproj",
+          "Parsec.Client.DependencyInjection/Parsec.Client.DependencyInjection.csproj",
             "Parsec.Testcontainers/Parsec.Testcontainers.csproj"
           ],
           "src": "../src"
