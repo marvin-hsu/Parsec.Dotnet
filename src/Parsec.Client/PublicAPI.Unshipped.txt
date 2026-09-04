@@ -451,6 +451,10 @@ static Parsec.Client.Algorithms.SignatureAlgorithm.operator !=(Parsec.Client.Alg
 static Parsec.Client.Algorithms.SignatureAlgorithm.operator ==(Parsec.Client.Algorithms.SignatureAlgorithm? left, Parsec.Client.Algorithms.SignatureAlgorithm? right) -> bool
 static Parsec.Client.Authentication.NoAuthentication.Instance.get -> Parsec.Client.Authentication.NoAuthentication!
 static Parsec.Client.Errors.ParsecServiceException.FromStatus(Parsec.Client.Protocol.ResponseStatus status, Parsec.Client.Protocol.Opcode? operation = null) -> Parsec.Client.Errors.ParsecServiceException!
+static Parsec.Client.Keys.KeyAttributes.AesKey(uint bits = 256, Parsec.Client.Algorithms.AeadAlgorithm? algorithm = null) -> Parsec.Client.Keys.KeyAttributes!
+static Parsec.Client.Keys.KeyAttributes.EccSigningKey(Parsec.Client.Keys.EccFamily family = Parsec.Client.Keys.EccFamily.SecpR1, uint bits = 256, Parsec.Client.Algorithms.SignatureAlgorithm? algorithm = null, bool exportable = false) -> Parsec.Client.Keys.KeyAttributes!
+static Parsec.Client.Keys.KeyAttributes.RsaEncryptionKey(uint bits = 2048, Parsec.Client.Algorithms.EncryptionAlgorithm? algorithm = null) -> Parsec.Client.Keys.KeyAttributes!
+static Parsec.Client.Keys.KeyAttributes.RsaSigningKey(uint bits = 2048, Parsec.Client.Algorithms.SignatureAlgorithm? algorithm = null, bool exportable = false) -> Parsec.Client.Keys.KeyAttributes!
 static Parsec.Client.Keys.KeyAttributes.operator !=(Parsec.Client.Keys.KeyAttributes? left, Parsec.Client.Keys.KeyAttributes? right) -> bool
 static Parsec.Client.Keys.KeyAttributes.operator ==(Parsec.Client.Keys.KeyAttributes? left, Parsec.Client.Keys.KeyAttributes? right) -> bool
 static Parsec.Client.Keys.KeyPolicy.operator !=(Parsec.Client.Keys.KeyPolicy? left, Parsec.Client.Keys.KeyPolicy? right) -> bool

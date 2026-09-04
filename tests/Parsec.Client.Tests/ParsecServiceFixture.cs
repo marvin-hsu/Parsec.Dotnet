@@ -1,6 +1,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using Parsec.Client.Authentication;
+using Parsec.Client.Protocol;
 using Parsec.Client.Transport;
 using Parsec.Testcontainers;
 
@@ -75,4 +76,17 @@ public sealed class ParsecServiceFixture : IAsyncLifetime
     internal Operations.ParsecCoreOperations CreateOperations() => new(
         new UnixDomainSocketTransport(Endpoint),
         new DirectAuthentication(ApplicationName));
+
+    /// <summary>
+    /// Makes the key operations that talk to the software provider of the service.
+    /// </summary>
+    /// <returns>The key operations, with the direct authentication of the tests.</returns>
+    /// <remarks>
+    /// The image carries Mbed Crypto and nothing else, so every key test runs against the
+    /// software provider. What that provider supports is what these tests can cover.
+    /// </remarks>
+    internal Operations.ParsecKeyOperations CreateKeyOperations() => new(
+        new UnixDomainSocketTransport(Endpoint),
+        new DirectAuthentication(ApplicationName),
+        ProviderId.MbedCrypto);
 }

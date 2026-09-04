@@ -250,6 +250,24 @@ public sealed class KeyAttributesCodecTests
         Assert.Throws<ArgumentNullException>(() => new KeyPolicy(KeyUsages.None, null!));
     }
 
+    [Fact]
+    public void EncodingRefusesNullAttributes()
+    {
+        var fault = Assert.Throws<ArgumentNullException>(() => KeyAttributesCodec.ToWire(null!));
+
+        Assert.Equal("attributes", fault.ParamName);
+    }
+
+    [Fact]
+    public void AMissingAttributesMessageNamesTheKeyRatherThanAField()
+    {
+        var fault = Assert.Throws<ParsecProtocolException>(
+            () => KeyAttributesCodec.FromWire(Opcode.ListKeys, null));
+
+        Assert.Contains("reported a key that", fault.Message, StringComparison.Ordinal);
+        Assert.Contains("carries no attributes", fault.Message, StringComparison.Ordinal);
+    }
+
     private static KeyAttributes RoundTrip(KeyAttributes attributes)
     {
         var bytes = KeyAttributesCodec.ToWire(attributes).ToByteArray();
