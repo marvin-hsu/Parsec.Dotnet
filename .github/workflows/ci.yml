@@ -77,6 +77,19 @@ jobs:
       - name: Verify formatting
         run: dotnet format --verify-no-changes --no-restore
 
+      # The site is not published anywhere yet, so this proves it still builds rather than
+      # shipping it. Warnings are errors here as everywhere else, which is what catches a
+      # cref pointing at a type that was renamed and a link to a page that was moved.
+      # DocFX writes new .yml for the API reference without removing the old ones, so a
+      # stale file from a previous run would be picked up as a duplicate uid; a fresh
+      # checkout has none, and `just clean` is what clears them locally.
+      - name: Build the documentation
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          dotnet tool restore
+          dotnet docfx docs/docfx.json --warningsAsErrors
+          dotnet docfx docs/docfx.zh-tw.json --warningsAsErrors
+
       - name: Pack
         if: matrix.os == 'ubuntu-latest'
         run: dotnet pack --no-build --configuration Release
