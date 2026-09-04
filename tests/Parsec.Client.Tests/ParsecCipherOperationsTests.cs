@@ -14,20 +14,20 @@ public sealed class ParsecCipherOperationsTests
 {
     private const string ApplicationName = "app";
 
-    private static readonly byte[] Plaintext = "hello"u8.ToArray();
+    private static readonly byte[] _plaintext = "hello"u8.ToArray();
 
-    private static readonly byte[] Ciphertext = [0x11, 0x22, 0x33];
+    private static readonly byte[] _ciphertext = [0x11, 0x22, 0x33];
 
-    private static readonly byte[] Nonce = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+    private static readonly byte[] _nonce = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 
-    private static readonly byte[] Aad = "header"u8.ToArray();
+    private static readonly byte[] _aad = "header"u8.ToArray();
 
     [Fact]
     public async Task AsymmetricEncryptSendsTheAlgorithmThePlaintextAndTheSalt()
     {
         var body = new PsaAsymmetricEncrypt.Result
         {
-            Ciphertext = ByteString.CopyFrom(Ciphertext),
+            Ciphertext = ByteString.CopyFrom(_ciphertext),
         }.ToByteArray();
         var transport = Script(Opcode.PsaAsymmetricEncrypt, ResponseStatus.Success, body);
         var algorithm = EncryptionAlgorithm.RsaOaep(Hash.Sha256);
@@ -36,18 +36,18 @@ public sealed class ParsecCipherOperationsTests
         var answer = await CreateOperations(transport).AsymmetricEncryptAsync(
             "encryption-key",
             algorithm,
-            Plaintext,
+            _plaintext,
             salt,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Ciphertext, answer);
+        Assert.Equal(_ciphertext, answer);
 
         var request = Assert.Single(transport.SentRequests);
         Assert.Equal(Opcode.PsaAsymmetricEncrypt, request.Header.Opcode);
 
         var sent = PsaAsymmetricEncrypt.Operation.Parser.ParseFrom(request.Body.Span);
         Assert.Equal("encryption-key", sent.KeyName);
-        Assert.Equal(Plaintext, sent.Plaintext.ToByteArray());
+        Assert.Equal(_plaintext, sent.Plaintext.ToByteArray());
         Assert.Equal(salt, sent.Salt.ToByteArray());
         Assert.Equal(AlgorithmCodec.ToWireEncryptionAlgorithm(algorithm), sent.Alg);
     }
@@ -57,74 +57,74 @@ public sealed class ParsecCipherOperationsTests
     {
         var body = new PsaAsymmetricDecrypt.Result
         {
-            Plaintext = ByteString.CopyFrom(Plaintext),
+            Plaintext = ByteString.CopyFrom(_plaintext),
         }.ToByteArray();
         var transport = Script(Opcode.PsaAsymmetricDecrypt, ResponseStatus.Success, body);
 
         var answer = await CreateOperations(transport).AsymmetricDecryptAsync(
             "encryption-key",
             EncryptionAlgorithm.RsaPkcs1v15Crypt,
-            Ciphertext,
+            _ciphertext,
             default,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Plaintext, answer);
+        Assert.Equal(_plaintext, answer);
 
         var sent = PsaAsymmetricDecrypt.Operation.Parser.ParseFrom(
             Assert.Single(transport.SentRequests).Body.Span);
 
-        Assert.Equal(Ciphertext, sent.Ciphertext.ToByteArray());
+        Assert.Equal(_ciphertext, sent.Ciphertext.ToByteArray());
         Assert.Empty(sent.Salt.ToByteArray());
     }
 
     [Fact]
     public async Task AeadEncryptSendsTheNonceTheAdditionalDataAndThePlaintext()
     {
-        var body = new PsaAeadEncrypt.Result { Ciphertext = ByteString.CopyFrom(Ciphertext) }.ToByteArray();
+        var body = new PsaAeadEncrypt.Result { Ciphertext = ByteString.CopyFrom(_ciphertext) }.ToByteArray();
         var transport = Script(Opcode.PsaAeadEncrypt, ResponseStatus.Success, body);
 
         var answer = await CreateOperations(transport).AeadEncryptAsync(
             "aes-key",
             AeadAlgorithm.Gcm,
-            Nonce,
-            Aad,
-            Plaintext,
+            _nonce,
+            _aad,
+            _plaintext,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Ciphertext, answer);
+        Assert.Equal(_ciphertext, answer);
 
         var sent = PsaAeadEncrypt.Operation.Parser.ParseFrom(
             Assert.Single(transport.SentRequests).Body.Span);
 
         Assert.Equal("aes-key", sent.KeyName);
-        Assert.Equal(Nonce, sent.Nonce.ToByteArray());
-        Assert.Equal(Aad, sent.AdditionalData.ToByteArray());
-        Assert.Equal(Plaintext, sent.Plaintext.ToByteArray());
+        Assert.Equal(_nonce, sent.Nonce.ToByteArray());
+        Assert.Equal(_aad, sent.AdditionalData.ToByteArray());
+        Assert.Equal(_plaintext, sent.Plaintext.ToByteArray());
         Assert.Equal(AlgorithmCodec.ToWireAeadAlgorithm(AeadAlgorithm.Gcm), sent.Alg);
     }
 
     [Fact]
     public async Task AeadDecryptSendsTheSameFieldsAndReadsThePlaintextBack()
     {
-        var body = new PsaAeadDecrypt.Result { Plaintext = ByteString.CopyFrom(Plaintext) }.ToByteArray();
+        var body = new PsaAeadDecrypt.Result { Plaintext = ByteString.CopyFrom(_plaintext) }.ToByteArray();
         var transport = Script(Opcode.PsaAeadDecrypt, ResponseStatus.Success, body);
 
         var answer = await CreateOperations(transport).AeadDecryptAsync(
             "aes-key",
             AeadAlgorithm.Ccm.WithTagLength(12),
-            Nonce,
-            Aad,
-            Ciphertext,
+            _nonce,
+            _aad,
+            _ciphertext,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Plaintext, answer);
+        Assert.Equal(_plaintext, answer);
 
         var sent = PsaAeadDecrypt.Operation.Parser.ParseFrom(
             Assert.Single(transport.SentRequests).Body.Span);
 
-        Assert.Equal(Nonce, sent.Nonce.ToByteArray());
-        Assert.Equal(Aad, sent.AdditionalData.ToByteArray());
-        Assert.Equal(Ciphertext, sent.Ciphertext.ToByteArray());
+        Assert.Equal(_nonce, sent.Nonce.ToByteArray());
+        Assert.Equal(_aad, sent.AdditionalData.ToByteArray());
+        Assert.Equal(_ciphertext, sent.Ciphertext.ToByteArray());
         Assert.Equal(
             AlgorithmCodec.ToWireAeadAlgorithm(AeadAlgorithm.Ccm.WithTagLength(12)),
             sent.Alg);
@@ -141,9 +141,9 @@ public sealed class ParsecCipherOperationsTests
         var fault = await Assert.ThrowsAsync<ParsecPsaException>(() => operations.AeadDecryptAsync(
             "aes-key",
             AeadAlgorithm.Gcm,
-            Nonce,
-            Aad,
-            Ciphertext,
+            _nonce,
+            _aad,
+            _ciphertext,
             TestContext.Current.CancellationToken));
 
         Assert.Equal(ResponseStatus.PsaErrorInvalidSignature, fault.Status);
@@ -197,17 +197,17 @@ public sealed class ParsecCipherOperationsTests
     {
         var encryptBody = new PsaCipherEncrypt.Result
         {
-            Ciphertext = ByteString.CopyFrom(Ciphertext),
+            Ciphertext = ByteString.CopyFrom(_ciphertext),
         }.ToByteArray();
         var encrypt = Script(Opcode.PsaCipherEncrypt, ResponseStatus.Success, encryptBody);
 
         var encrypted = await CreateOperations(encrypt).CipherEncryptAsync(
             "aes-key",
             Cipher.CbcPkcs7,
-            Plaintext,
+            _plaintext,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Ciphertext, encrypted);
+        Assert.Equal(_ciphertext, encrypted);
 
         var sentEncrypt = PsaCipherEncrypt.Operation.Parser.ParseFrom(
             Assert.Single(encrypt.SentRequests).Body.Span);
@@ -216,23 +216,23 @@ public sealed class ParsecCipherOperationsTests
 
         var decryptBody = new PsaCipherDecrypt.Result
         {
-            Plaintext = ByteString.CopyFrom(Plaintext),
+            Plaintext = ByteString.CopyFrom(_plaintext),
         }.ToByteArray();
         var decrypt = Script(Opcode.PsaCipherDecrypt, ResponseStatus.Success, decryptBody);
 
         var decrypted = await CreateOperations(decrypt).CipherDecryptAsync(
             "aes-key",
             Cipher.Ctr,
-            Ciphertext,
+            _ciphertext,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Plaintext, decrypted);
+        Assert.Equal(_plaintext, decrypted);
 
         var sentDecrypt = PsaCipherDecrypt.Operation.Parser.ParseFrom(
             Assert.Single(decrypt.SentRequests).Body.Span);
 
         Assert.Equal(AlgorithmCodec.ToWireCipherMode(Cipher.Ctr), sentDecrypt.Alg);
-        Assert.Equal(Ciphertext, sentDecrypt.Ciphertext.ToByteArray());
+        Assert.Equal(_ciphertext, sentDecrypt.Ciphertext.ToByteArray());
     }
 
     [Fact]
@@ -246,7 +246,7 @@ public sealed class ParsecCipherOperationsTests
         var answer = await CreateOperations(transport).MacComputeAsync(
             "hmac-key",
             algorithm,
-            Plaintext,
+            _plaintext,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(code, answer);
@@ -255,7 +255,7 @@ public sealed class ParsecCipherOperationsTests
             Assert.Single(transport.SentRequests).Body.Span);
 
         Assert.Equal("hmac-key", sent.KeyName);
-        Assert.Equal(Plaintext, sent.Input.ToByteArray());
+        Assert.Equal(_plaintext, sent.Input.ToByteArray());
         Assert.Equal(AlgorithmCodec.ToWireMacAlgorithm(algorithm), sent.Alg);
     }
 
@@ -268,20 +268,20 @@ public sealed class ParsecCipherOperationsTests
         Assert.True(await CreateOperations(match).MacVerifyAsync(
             "hmac-key",
             MacAlgorithm.Cmac,
-            Plaintext,
+            _plaintext,
             code,
             TestContext.Current.CancellationToken));
 
         var sent = PsaMacVerify.Operation.Parser.ParseFrom(Assert.Single(match.SentRequests).Body.Span);
         Assert.Equal(code, sent.Mac.ToByteArray());
-        Assert.Equal(Plaintext, sent.Input.ToByteArray());
+        Assert.Equal(_plaintext, sent.Input.ToByteArray());
 
         var mismatch = Script(Opcode.PsaMacVerify, ResponseStatus.PsaErrorInvalidSignature);
 
         Assert.False(await CreateOperations(mismatch).MacVerifyAsync(
             "hmac-key",
             MacAlgorithm.Cmac,
-            Plaintext,
+            _plaintext,
             code,
             TestContext.Current.CancellationToken));
     }
@@ -295,8 +295,8 @@ public sealed class ParsecCipherOperationsTests
         var fault = await Assert.ThrowsAnyAsync<ParsecServiceException>(() => operations.MacVerifyAsync(
             "hmac-key",
             MacAlgorithm.Cmac,
-            Plaintext,
-            Ciphertext,
+            _plaintext,
+            _ciphertext,
             TestContext.Current.CancellationToken));
 
         Assert.Equal(ResponseStatus.PsaErrorNotSupported, fault.Status);
@@ -309,23 +309,23 @@ public sealed class ParsecCipherOperationsTests
         var token = TestContext.Current.CancellationToken;
 
         await AssertRefuses("name", () => operations.AsymmetricEncryptAsync(
-            null!, EncryptionAlgorithm.RsaPkcs1v15Crypt, Plaintext, default, token));
+            null!, EncryptionAlgorithm.RsaPkcs1v15Crypt, _plaintext, default, token));
         await AssertRefuses("name", () => operations.AsymmetricDecryptAsync(
-            null!, EncryptionAlgorithm.RsaPkcs1v15Crypt, Ciphertext, default, token));
+            null!, EncryptionAlgorithm.RsaPkcs1v15Crypt, _ciphertext, default, token));
         await AssertRefuses("name", () => operations.AeadEncryptAsync(
-            null!, AeadAlgorithm.Gcm, Nonce, Aad, Plaintext, token));
+            null!, AeadAlgorithm.Gcm, _nonce, _aad, _plaintext, token));
         await AssertRefuses("name", () => operations.AeadDecryptAsync(
-            null!, AeadAlgorithm.Gcm, Nonce, Aad, Ciphertext, token));
+            null!, AeadAlgorithm.Gcm, _nonce, _aad, _ciphertext, token));
         await AssertRefuses("name", () => operations.RawKeyAgreementAsync(
             null!, KeyAgreementKind.Ecdh, default, token));
         await AssertRefuses("name", () => operations.CipherEncryptAsync(
-            null!, Cipher.Ctr, Plaintext, token));
+            null!, Cipher.Ctr, _plaintext, token));
         await AssertRefuses("name", () => operations.CipherDecryptAsync(
-            null!, Cipher.Ctr, Ciphertext, token));
+            null!, Cipher.Ctr, _ciphertext, token));
         await AssertRefuses("name", () => operations.MacComputeAsync(
-            null!, MacAlgorithm.Cmac, Plaintext, token));
+            null!, MacAlgorithm.Cmac, _plaintext, token));
         await AssertRefuses("name", () => operations.MacVerifyAsync(
-            null!, MacAlgorithm.Cmac, Plaintext, Ciphertext, token));
+            null!, MacAlgorithm.Cmac, _plaintext, _ciphertext, token));
     }
 
     [Fact]
@@ -335,16 +335,16 @@ public sealed class ParsecCipherOperationsTests
         var token = TestContext.Current.CancellationToken;
 
         await AssertRefuses("encryption", () => operations.AsymmetricEncryptAsync(
-            "k", null!, Plaintext, default, token));
+            "k", null!, _plaintext, default, token));
         await AssertRefuses("encryption", () => operations.AsymmetricDecryptAsync(
-            "k", null!, Ciphertext, default, token));
+            "k", null!, _ciphertext, default, token));
         await AssertRefuses("aead", () => operations.AeadEncryptAsync(
-            "k", null!, Nonce, Aad, Plaintext, token));
+            "k", null!, _nonce, _aad, _plaintext, token));
         await AssertRefuses("aead", () => operations.AeadDecryptAsync(
-            "k", null!, Nonce, Aad, Ciphertext, token));
-        await AssertRefuses("mac", () => operations.MacComputeAsync("k", null!, Plaintext, token));
+            "k", null!, _nonce, _aad, _ciphertext, token));
+        await AssertRefuses("mac", () => operations.MacComputeAsync("k", null!, _plaintext, token));
         await AssertRefuses("mac", () => operations.MacVerifyAsync(
-            "k", null!, Plaintext, Ciphertext, token));
+            "k", null!, _plaintext, _ciphertext, token));
     }
 
     private static async Task AssertRefuses(string parameter, Func<Task> call)

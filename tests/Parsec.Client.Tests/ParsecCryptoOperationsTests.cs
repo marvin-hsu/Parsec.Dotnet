@@ -14,14 +14,14 @@ public sealed class ParsecCryptoOperationsTests
 {
     private const string ApplicationName = "app";
 
-    private static readonly byte[] Digest = [0x01, 0x02, 0x03, 0x04];
+    private static readonly byte[] _digest = [0x01, 0x02, 0x03, 0x04];
 
-    private static readonly byte[] Signature = [0xAA, 0xBB, 0xCC];
+    private static readonly byte[] _signature = [0xAA, 0xBB, 0xCC];
 
     [Fact]
     public async Task SignHashSendsTheKeyTheAlgorithmAndTheHash()
     {
-        var body = new PsaSignHash.Result { Signature = ByteString.CopyFrom(Signature) }.ToByteArray();
+        var body = new PsaSignHash.Result { Signature = ByteString.CopyFrom(_signature) }.ToByteArray();
         var transport = new ScriptedTransport().EnqueueResponse(
             Opcode.PsaSignHash,
             ResponseStatus.Success,
@@ -32,10 +32,10 @@ public sealed class ParsecCryptoOperationsTests
         var answer = await CreateOperations(transport).SignHashAsync(
             "signing-key",
             algorithm,
-            Digest,
+            _digest,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Signature, answer);
+        Assert.Equal(_signature, answer);
 
         var request = Assert.Single(transport.SentRequests);
         Assert.Equal(Opcode.PsaSignHash, request.Header.Opcode);
@@ -43,7 +43,7 @@ public sealed class ParsecCryptoOperationsTests
 
         var sent = PsaSignHash.Operation.Parser.ParseFrom(request.Body.Span);
         Assert.Equal("signing-key", sent.KeyName);
-        Assert.Equal(Digest, sent.Hash.ToByteArray());
+        Assert.Equal(_digest, sent.Hash.ToByteArray());
         Assert.Equal(AlgorithmCodec.ToWireSignature(algorithm), sent.Alg);
     }
 
@@ -59,8 +59,8 @@ public sealed class ParsecCryptoOperationsTests
         Assert.True(await CreateOperations(transport).VerifyHashAsync(
             "signing-key",
             SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256),
-            Digest,
-            Signature,
+            _digest,
+            _signature,
             TestContext.Current.CancellationToken));
     }
 
@@ -79,8 +79,8 @@ public sealed class ParsecCryptoOperationsTests
         Assert.False(await CreateOperations(transport).VerifyHashAsync(
             "signing-key",
             SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256),
-            Digest,
-            Signature,
+            _digest,
+            _signature,
             TestContext.Current.CancellationToken));
     }
 
@@ -100,8 +100,8 @@ public sealed class ParsecCryptoOperationsTests
         var fault = await Assert.ThrowsAnyAsync<ParsecServiceException>(() => operations.VerifyHashAsync(
             "signing-key",
             SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256),
-            Digest,
-            Signature,
+            _digest,
+            _signature,
             TestContext.Current.CancellationToken));
 
         Assert.Equal(status, fault.Status);
@@ -119,23 +119,23 @@ public sealed class ParsecCryptoOperationsTests
         await CreateOperations(transport).VerifyHashAsync(
             "signing-key",
             SignatureAlgorithm.EcdsaAny,
-            Digest,
-            Signature,
+            _digest,
+            _signature,
             TestContext.Current.CancellationToken);
 
         var sent = PsaVerifyHash.Operation.Parser.ParseFrom(
             Assert.Single(transport.SentRequests).Body.Span);
 
         Assert.Equal("signing-key", sent.KeyName);
-        Assert.Equal(Digest, sent.Hash.ToByteArray());
-        Assert.Equal(Signature, sent.Signature.ToByteArray());
+        Assert.Equal(_digest, sent.Hash.ToByteArray());
+        Assert.Equal(_signature, sent.Signature.ToByteArray());
     }
 
     [Fact]
     public async Task SignMessageCarriesTheMessageRatherThanAHash()
     {
         var message = "sign me"u8.ToArray();
-        var body = new PsaSignMessage.Result { Signature = ByteString.CopyFrom(Signature) }.ToByteArray();
+        var body = new PsaSignMessage.Result { Signature = ByteString.CopyFrom(_signature) }.ToByteArray();
         var transport = new ScriptedTransport().EnqueueResponse(
             Opcode.PsaSignMessage,
             ResponseStatus.Success,
@@ -148,7 +148,7 @@ public sealed class ParsecCryptoOperationsTests
             message,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Signature, answer);
+        Assert.Equal(_signature, answer);
 
         var request = Assert.Single(transport.SentRequests);
         Assert.Equal(Opcode.PsaSignMessage, request.Header.Opcode);
@@ -170,7 +170,7 @@ public sealed class ParsecCryptoOperationsTests
             "signing-key",
             SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256),
             "sign me"u8.ToArray(),
-            Signature,
+            _signature,
             TestContext.Current.CancellationToken));
     }
 
@@ -188,14 +188,14 @@ public sealed class ParsecCryptoOperationsTests
             "signing-key",
             SignatureAlgorithm.RsaPss(Hash.Sha384),
             message,
-            Signature,
+            _signature,
             TestContext.Current.CancellationToken));
 
         var sent = PsaVerifyMessage.Operation.Parser.ParseFrom(
             Assert.Single(transport.SentRequests).Body.Span);
 
         Assert.Equal(message, sent.Message.ToByteArray());
-        Assert.Equal(Signature, sent.Signature.ToByteArray());
+        Assert.Equal(_signature, sent.Signature.ToByteArray());
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public sealed class ParsecCryptoOperationsTests
         Assert.False(await CreateOperations(transport).HashCompareAsync(
             Hash.Sha256,
             "hash me"u8.ToArray(),
-            Digest,
+            _digest,
             TestContext.Current.CancellationToken));
     }
 
@@ -251,14 +251,14 @@ public sealed class ParsecCryptoOperationsTests
         Assert.True(await CreateOperations(transport).HashCompareAsync(
             Hash.Sha256,
             "hash me"u8.ToArray(),
-            Digest,
+            _digest,
             TestContext.Current.CancellationToken));
 
         var sent = PsaHashCompare.Operation.Parser.ParseFrom(
             Assert.Single(transport.SentRequests).Body.Span);
 
         Assert.Equal("hash me"u8.ToArray(), sent.Input.ToByteArray());
-        Assert.Equal(Digest, sent.Hash.ToByteArray());
+        Assert.Equal(_digest, sent.Hash.ToByteArray());
     }
 
     [Fact]
@@ -339,12 +339,12 @@ public sealed class ParsecCryptoOperationsTests
         var algorithm = SignatureAlgorithm.EcdsaAny;
         var token = TestContext.Current.CancellationToken;
 
-        await AssertRefuses("name", () => operations.SignHashAsync(null!, algorithm, Digest, token));
-        await AssertRefuses("name", () => operations.VerifyHashAsync(null!, algorithm, Digest, Signature, token));
-        await AssertRefuses("name", () => operations.SignMessageAsync(null!, algorithm, Digest, token));
+        await AssertRefuses("name", () => operations.SignHashAsync(null!, algorithm, _digest, token));
+        await AssertRefuses("name", () => operations.VerifyHashAsync(null!, algorithm, _digest, _signature, token));
+        await AssertRefuses("name", () => operations.SignMessageAsync(null!, algorithm, _digest, token));
         await AssertRefuses(
             "name",
-            () => operations.VerifyMessageAsync(null!, algorithm, Digest, Signature, token));
+            () => operations.VerifyMessageAsync(null!, algorithm, _digest, _signature, token));
     }
 
     [Fact]
@@ -353,12 +353,12 @@ public sealed class ParsecCryptoOperationsTests
         var operations = CreateOperations(new ScriptedTransport());
         var token = TestContext.Current.CancellationToken;
 
-        await AssertRefuses("signature", () => operations.SignHashAsync("k", null!, Digest, token));
-        await AssertRefuses("signature", () => operations.VerifyHashAsync("k", null!, Digest, Signature, token));
-        await AssertRefuses("signature", () => operations.SignMessageAsync("k", null!, Digest, token));
+        await AssertRefuses("signature", () => operations.SignHashAsync("k", null!, _digest, token));
+        await AssertRefuses("signature", () => operations.VerifyHashAsync("k", null!, _digest, _signature, token));
+        await AssertRefuses("signature", () => operations.SignMessageAsync("k", null!, _digest, token));
         await AssertRefuses(
             "signature",
-            () => operations.VerifyMessageAsync("k", null!, Digest, Signature, token));
+            () => operations.VerifyMessageAsync("k", null!, _digest, _signature, token));
     }
 
     [Fact]
@@ -382,7 +382,7 @@ public sealed class ParsecCryptoOperationsTests
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => operations.HashComputeAsync(
             (Hash)99,
-            Digest,
+            _digest,
             TestContext.Current.CancellationToken));
 
         Assert.Empty(transport.SentRequests);

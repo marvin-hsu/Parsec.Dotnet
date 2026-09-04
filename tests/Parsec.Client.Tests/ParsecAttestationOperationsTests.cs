@@ -18,11 +18,11 @@ public sealed class ParsecAttestationOperationsTests
 {
     private const string ApplicationName = "app";
 
-    private static readonly byte[] KeyName = [0x00, 0x0B, 0x01];
+    private static readonly byte[] _keyName = [0x00, 0x0B, 0x01];
 
-    private static readonly byte[] PublicArea = [0x01, 0x16];
+    private static readonly byte[] _publicArea = [0x01, 0x16];
 
-    private static readonly byte[] AttestingPublicArea = [0x02, 0x27];
+    private static readonly byte[] _attestingPublicArea = [0x02, 0x27];
 
     [Fact]
     public async Task PrepareSendsBothKeyNamesAndReadsTheThreeBlobsBack()
@@ -33,9 +33,9 @@ public sealed class ParsecAttestationOperationsTests
             {
                 ActivateCredential = new PrepareKeyAttestation.PrepareKeyAttestationOutput.Types.ActivateCredential
                 {
-                    Name = ByteString.CopyFrom(KeyName),
-                    Public = ByteString.CopyFrom(PublicArea),
-                    AttestingKeyPub = ByteString.CopyFrom(AttestingPublicArea),
+                    Name = ByteString.CopyFrom(_keyName),
+                    Public = ByteString.CopyFrom(_publicArea),
+                    AttestingKeyPub = ByteString.CopyFrom(_attestingPublicArea),
                 },
             },
         }.ToByteArray();
@@ -46,9 +46,9 @@ public sealed class ParsecAttestationOperationsTests
             "attesting",
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(KeyName, answer.Name.ToArray());
-        Assert.Equal(PublicArea, answer.PublicKey.ToArray());
-        Assert.Equal(AttestingPublicArea, answer.AttestingKeyPublicKey.ToArray());
+        Assert.Equal(_keyName, answer.Name.ToArray());
+        Assert.Equal(_publicArea, answer.PublicKey.ToArray());
+        Assert.Equal(_attestingPublicArea, answer.AttestingKeyPublicKey.ToArray());
 
         var request = Assert.Single(transport.SentRequests);
         Assert.Equal(Opcode.PrepareKeyAttestation, request.Header.Opcode);
