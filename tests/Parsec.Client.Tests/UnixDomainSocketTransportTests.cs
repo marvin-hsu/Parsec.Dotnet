@@ -9,6 +9,7 @@ namespace Parsec.Client.Tests;
 /// Covers the Unix domain socket transport against a real listener. The golden bytes are the
 /// Ping exchange that a real Parsec 1.5.0 service answered.
 /// </summary>
+[Collection(nameof(SocketTestGroup))]
 public sealed class UnixDomainSocketTransportTests
 {
     /// <summary>The 36 bytes of a Ping request for the core provider with no authentication.</summary>
@@ -124,6 +125,12 @@ public sealed class UnixDomainSocketTransportTests
     [Fact]
     public async Task ReportsACancellationOfTheCallerAsACancellationAndNotATimeout()
     {
+        // A write to a Unix socket whose peer has gone reports a broken pipe on a Unix platform.
+        // Windows buffers the write and reports nothing, so there is no fault to surface there.
+        Assert.SkipWhen(
+            OperatingSystem.IsWindows(),
+            "A lost peer of a Unix socket faults a write only on a Unix platform.");
+
         await using var server = new UnixSocketServer();
         var accept = server.AcceptAsync();
 
@@ -143,6 +150,12 @@ public sealed class UnixDomainSocketTransportTests
     [Fact]
     public async Task ClosesTheSocketWhenTheConnectionIsDisposed()
     {
+        // A write to a Unix socket whose peer has gone reports a broken pipe on a Unix platform.
+        // Windows buffers the write and reports nothing, so there is no fault to surface there.
+        Assert.SkipWhen(
+            OperatingSystem.IsWindows(),
+            "A lost peer of a Unix socket faults a write only on a Unix platform.");
+
         await using var server = new UnixSocketServer();
         var accept = server.AcceptAsync();
 
@@ -159,7 +172,12 @@ public sealed class UnixDomainSocketTransportTests
     [Fact]
     public async Task ReportsAMissingSocketFileAsATransportFault()
     {
-        var missing = Path.Combine(Path.GetTempPath(), $"psc-{Guid.NewGuid():N}"[..12] + ".sock");
+        // A Uri turns a separator of Windows into a forward slash, so the path that reaches the
+        // socket is not the one that Path.Combine wrote. The test compares against the same
+        // shape the endpoint carries.
+        var missing = Path
+            .Combine(Path.GetTempPath(), $"psc-{Guid.NewGuid():N}"[..12] + ".sock")
+            .Replace('\\', '/');
         var transport = new UnixDomainSocketTransport(new Uri("unix:" + missing), _shortTimeout, _shortTimeout);
 
         var exception = await Assert.ThrowsAsync<ParsecTransportException>(
@@ -173,6 +191,12 @@ public sealed class UnixDomainSocketTransportTests
     [Fact]
     public async Task ReportsAFaultOfTheSocketDuringASendAsATransportFault()
     {
+        // A write to a Unix socket whose peer has gone reports a broken pipe on a Unix platform.
+        // Windows buffers the write and reports nothing, so there is no fault to surface there.
+        Assert.SkipWhen(
+            OperatingSystem.IsWindows(),
+            "A lost peer of a Unix socket faults a write only on a Unix platform.");
+
         await using var server = new UnixSocketServer();
         var accept = server.AcceptAsync();
 

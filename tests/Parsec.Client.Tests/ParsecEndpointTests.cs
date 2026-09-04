@@ -163,7 +163,7 @@ public sealed class ParsecEndpointTests
     /// <param name="longest">The byte count of the longest path that fits in the field.</param>
     [Theory]
     [InlineData(ParsecEndpoint.SocketPathFieldBytesElsewhere, 103)]
-    [InlineData(ParsecEndpoint.SocketPathFieldBytesOnLinux, 107)]
+    [InlineData(ParsecEndpoint.SocketPathFieldBytesOnLinuxAndWindows, 107)]
     public void GetSocketPathAcceptsTheLongestPathOfTheFieldAndRefusesOneMore(int fieldBytes, int longest)
     {
         var accepted = "/" + new string('a', longest - 1);

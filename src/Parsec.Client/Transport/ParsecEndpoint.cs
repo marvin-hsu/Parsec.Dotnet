@@ -31,14 +31,14 @@ public static class ParsecEndpoint
     public const string DefaultSocketPath = "/run/parsec/parsec.sock";
 
     /// <summary>
-    /// The byte count of the socket path field of an address on Linux. One byte of the field
-    /// holds the terminator, so a path can use one byte less.
+    /// The byte count of the socket path field of an address on Linux and on Windows. One byte
+    /// of the field holds the terminator, so a path can use one byte less.
     /// </summary>
-    internal const int SocketPathFieldBytesOnLinux = 108;
+    internal const int SocketPathFieldBytesOnLinuxAndWindows = 108;
 
     /// <summary>
-    /// The byte count of the socket path field of an address on every other platform, macOS
-    /// included. One byte of the field holds the terminator.
+    /// The byte count of the socket path field of an address on macOS and on the BSDs. One byte
+    /// of the field holds the terminator.
     /// </summary>
     internal const int SocketPathFieldBytesElsewhere = 104;
 
@@ -49,7 +49,9 @@ public static class ParsecEndpoint
     /// Gets the byte count of the socket path field of an address on this platform.
     /// </summary>
     internal static int SocketPathFieldBytes =>
-        OperatingSystem.IsLinux() ? SocketPathFieldBytesOnLinux : SocketPathFieldBytesElsewhere;
+        OperatingSystem.IsLinux() || OperatingSystem.IsWindows()
+            ? SocketPathFieldBytesOnLinuxAndWindows
+            : SocketPathFieldBytesElsewhere;
 
     /// <summary>
     /// Finds the address of the service from the environment.

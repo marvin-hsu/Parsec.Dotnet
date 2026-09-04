@@ -12,6 +12,7 @@ namespace Parsec.Client.Tests;
 /// </remarks>
 /// <param name="service">The service that the fixture started.</param>
 [Trait("Category", "IntegrationTests")]
+[Collection(nameof(SocketTestGroup))]
 public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture service)
     : IClassFixture<ParsecServiceFixture>
 {
