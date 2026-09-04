@@ -125,4 +125,14 @@ public sealed class ParsecServiceFixture : IAsyncLifetime
         new UnixDomainSocketTransport(Endpoint),
         new DirectAuthentication(ApplicationName),
         ProviderId.MbedCrypto);
+
+    /// <summary>
+    /// Makes the attestation operations against one provider of the service.
+    /// </summary>
+    /// <param name="provider">The provider to ask.</param>
+    /// <returns>The attestation operations, with the direct authentication of the tests.</returns>
+    internal Operations.ParsecAttestationOperations CreateAttestationOperations(ProviderId provider) => new(
+        new UnixDomainSocketTransport(Endpoint),
+        new DirectAuthentication(ApplicationName),
+        provider);
 }

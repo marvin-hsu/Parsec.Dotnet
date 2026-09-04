@@ -1,6 +1,6 @@
 # Surviving mutants in Parsec.Client, and why they stay
 
-Score 95.61% over 1002 mutants, between 8 and 11 surviving depending on the run. The ones that
+Score 95.79% over 1069 mutants, between 8 and 11 surviving depending on the run. The ones that
 come and go are the equivalent mutants below, which Stryker reaches through different tests each
 time it picks a covering set. Each one below was read and judged. None of them
 is a missing test that would catch a real defect.

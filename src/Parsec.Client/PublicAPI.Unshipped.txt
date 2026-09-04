@@ -105,6 +105,11 @@ Parsec.Client.Algorithms.SignatureKind.None = 0 -> Parsec.Client.Algorithms.Sign
 Parsec.Client.Algorithms.SignatureKind.RsaPkcs1v15Sign = 1 -> Parsec.Client.Algorithms.SignatureKind
 Parsec.Client.Algorithms.SignatureKind.RsaPkcs1v15SignRaw = 2 -> Parsec.Client.Algorithms.SignatureKind
 Parsec.Client.Algorithms.SignatureKind.RsaPss = 3 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Attestation.ActivateCredentialPreparation
+Parsec.Client.Attestation.ActivateCredentialPreparation.ActivateCredentialPreparation(System.ReadOnlyMemory<byte> name, System.ReadOnlyMemory<byte> publicKey, System.ReadOnlyMemory<byte> attestingKeyPublicKey) -> void
+Parsec.Client.Attestation.ActivateCredentialPreparation.AttestingKeyPublicKey.get -> System.ReadOnlyMemory<byte>
+Parsec.Client.Attestation.ActivateCredentialPreparation.Name.get -> System.ReadOnlyMemory<byte>
+Parsec.Client.Attestation.ActivateCredentialPreparation.PublicKey.get -> System.ReadOnlyMemory<byte>
 Parsec.Client.Authentication.DirectAuthentication
 Parsec.Client.Authentication.DirectAuthentication.ApplicationName.get -> string!
 Parsec.Client.Authentication.DirectAuthentication.AuthBytesLength.get -> int
