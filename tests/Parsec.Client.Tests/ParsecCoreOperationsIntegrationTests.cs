@@ -16,12 +16,11 @@ namespace Parsec.Client.Tests;
 [Trait("Category", "IntegrationTests")]
 [Collection(nameof(SocketTestGroup))]
 public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture service)
-    : IClassFixture<ParsecServiceFixture>
 {
     [Fact]
     public async Task PingAnswersTheVersionOfTheWireProtocol()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var operations = service.CreateOperations();
 
@@ -34,7 +33,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task ListProvidersHoldsTheMbedCryptoProvider()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var providers = await service.CreateOperations().ListProvidersAsync(TestContext.Current.CancellationToken);
 
@@ -49,7 +48,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task ListOpcodesHoldsTheOperationsOfTheMbedCryptoProvider()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var opcodes = await service.CreateOperations().ListOpcodesAsync(
             ProviderId.MbedCrypto,
@@ -63,7 +62,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task ListOpcodesHoldsPingForTheCoreProvider()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var opcodes = await service.CreateOperations().ListOpcodesAsync(
             ProviderId.Core,
@@ -76,7 +75,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task ListAuthenticatorsHoldsTheDirectAuthenticator()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var authenticators = await service.CreateOperations().ListAuthenticatorsAsync(
             TestContext.Current.CancellationToken);
@@ -88,7 +87,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task ListKeysAnswersTheKeysOfThisApplication()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         // The application made no key, so the answer is empty. It must still be an answer and not
         // a fault: the request carries the identity of the application, so the service does not
@@ -101,7 +100,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task CanDoCryptoAnswersTrueForAKeyThatTheProviderSupports()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var answer = await service.CreateOperations().CanDoCryptoAsync(
             ProviderId.MbedCrypto,
@@ -115,7 +114,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     [Fact]
     public async Task CanDoCryptoAnswersFalseForACheckThatTheProviderDoesNotSupport()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         // The service supports no key derivation, so it answers PsaErrorNotSupported. The client
         // turns that answer into false, because it is the normal way to say no.

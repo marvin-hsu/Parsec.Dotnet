@@ -18,12 +18,11 @@ namespace Parsec.Client.Tests;
 [Trait("Category", "IntegrationTests")]
 [Collection(nameof(SocketTestGroup))]
 public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture service)
-    : IClassFixture<ParsecServiceFixture>
 {
     [Fact]
     public async Task AnRsaKeyIsCreatedListedExportedAndRemoved()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
         var name = UniqueName();
@@ -73,7 +72,7 @@ public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture ser
     [Fact]
     public async Task AnEllipticCurveKeyIsCreatedAndExported()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
         var name = UniqueName();
@@ -100,7 +99,7 @@ public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture ser
     [Fact]
     public async Task ANameThatIsAlreadyTakenIsRefused()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
         var name = UniqueName();
@@ -128,7 +127,7 @@ public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture ser
     [Fact]
     public async Task RemovingAKeyThatIsNotThereIsRefused()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
 
@@ -143,7 +142,7 @@ public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture ser
     {
         // This is the check that matters most in this file. A provider that hands out a private
         // key without the permission has lost the property the whole service exists to keep.
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
         var name = UniqueName();
@@ -169,7 +168,7 @@ public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture ser
     [Fact]
     public async Task AKeyWithExportPermissionComesBackAndMatchesItsPublicHalf()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
         var name = UniqueName();
@@ -200,7 +199,7 @@ public sealed class ParsecKeyOperationsIntegrationTests(ParsecServiceFixture ser
     [Fact]
     public async Task AnImportedKeyComesBackAsTheKeyThatWentIn()
     {
-        service.SkipWhenTheServiceDoesNotRun();
+        await service.StartOrSkipAsync(TestContext.Current.CancellationToken);
 
         var keys = service.CreateKeyOperations();
         var name = UniqueName();

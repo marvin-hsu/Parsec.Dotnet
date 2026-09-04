@@ -37,7 +37,7 @@ internal static class AlgorithmCodec
         MacAlgorithm mac => new WireAlgorithm { Mac = ToWireMac(mac) },
         AeadAlgorithm aead => new WireAlgorithm { Aead = ToWireAead(aead) },
         SignatureAlgorithm signature =>
-            new WireAlgorithm { AsymmetricSignature = ToWireSignature(signature) },
+            new WireAlgorithm { AsymmetricSignature = ToWireSignatureCore(signature) },
         EncryptionAlgorithm encryption =>
             new WireAlgorithm { AsymmetricEncryption = ToWireEncryption(encryption) },
         KeyAgreementAlgorithm agreement =>
@@ -87,10 +87,34 @@ internal static class AlgorithmCodec
         };
     }
 
-    private static Wire.Hash ToWireHash(Hash hash) =>
+    /// <summary>
+    /// Encodes a hash for an operation that names one on its own.
+    /// </summary>
+    /// <param name="hash">The hash to encode.</param>
+    /// <returns>The value that the wire carries.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The specification does not define <paramref name="hash"/>.
+    /// </exception>
+    public static Wire.Hash ToWireHash(Hash hash) =>
         hash is >= Hash.None and <= Hash.Sha3512
             ? (Wire.Hash)hash
             : throw new ArgumentOutOfRangeException(nameof(hash), hash, null);
+
+    /// <summary>
+    /// Encodes a signature algorithm for an operation that names one on its own.
+    /// </summary>
+    /// <param name="signature">The algorithm to encode.</param>
+    /// <returns>The message that the wire carries.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="signature"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The algorithm carries a value that the specification does not define.
+    /// </exception>
+    public static Wire.AsymmetricSignature ToWireSignature(SignatureAlgorithm signature)
+    {
+        ArgumentNullException.ThrowIfNull(signature);
+
+        return ToWireSignatureCore(signature);
+    }
 
     private static Hash FromWireHash(Opcode operation, Wire.Hash hash) =>
         hash is >= Wire.Hash.None and <= Wire.Hash.Sha3512
@@ -201,7 +225,7 @@ internal static class AlgorithmCodec
                 "authenticated encryption",
                 Number(kind));
 
-    private static Wire.AsymmetricSignature ToWireSignature(SignatureAlgorithm signature) => signature.Kind switch
+    private static Wire.AsymmetricSignature ToWireSignatureCore(SignatureAlgorithm signature) => signature.Kind switch
     {
         SignatureKind.RsaPkcs1v15Sign => new Wire.AsymmetricSignature
         {

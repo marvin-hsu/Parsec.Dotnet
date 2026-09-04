@@ -1,12 +1,14 @@
 # Surviving mutants in Parsec.Client, and why they stay
 
-Score 95.15% over 671 mutants, 8 surviving. Each one below was read and judged. None of them
+Score 95.15% over 803 mutants, between 8 and 9 surviving depending on the run. The two
+that come and go are the ones below whose branches this machine never takes. Each one below was read and judged. None of them
 is a missing test that would catch a real defect.
 
 ## Equivalent: the mutant changes nothing a caller can observe
 
 | File | Line | Mutation | Why it survives |
 |---|---|---|---|
+| `KeyAttributesCodec` | 110 | `GroupFamily = ToWireDh(...)` dropped from the initializer | RFC 7919 is the only Diffie-Hellman family the specification defines and it is the zero value, so proto3 leaves the field out whether it is assigned or not. The bytes are identical. The assignment stays because a second family would make it matter. |
 | `KeyAttributesCodec` | 224 | `flags \|= flag` becomes `flags ^= flag` | `Set` runs once per flag over a value that starts at `None`, so no flag is ever set twice. Exclusive or and or agree on every input the method can receive. |
 | `ParsecFrameReader` | 98 | `ContentLength == 0 ? [] : new byte[n]` always allocates | `new byte[0]` and `[]` are the same array. The branch is an allocation shortcut. |
 | `UnixDomainSocketConnection` | 29 | `ownsSocket: false` becomes `true` | `DisposeAsync` disposes the stream and then the socket. `Socket.Dispose` is idempotent, so a second dispose from the stream changes nothing. |
@@ -17,6 +19,7 @@ is a missing test that would catch a real defect.
 
 | File | Line | Mutation | Why it survives |
 |---|---|---|---|
+| `UnixPeerCredentialsAuthentication` | 39 | `\|\|` becomes `&&` | Both operands are false on Linux and macOS, so the branch behaves the same. Only a Windows or browser host separates them, and CI covers those. |
 | `ParsecEndpoint` | 52 | `IsLinux() \|\| IsWindows()` becomes `&&`, and the conditional forced to its second branch | The socket path field is 108 bytes on Linux and on Windows and 104 on macOS and the BSDs. On this machine only the macOS branch runs, so nothing separates the two operands. CI covers the other side: `TheAcceptedPathLengthMatchesThePlatform` checks the constant against `UnixDomainSocketEndPoint` on all four runners, and it is the test that caught the wrong Windows value in the first place. |
 
 ## Left alone on purpose
