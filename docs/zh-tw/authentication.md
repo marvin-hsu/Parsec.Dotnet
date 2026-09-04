@@ -45,6 +45,15 @@ Ping、ListProviders、ListOpcodes、ListAuthenticators 都不需要身分，而
 > 驗證身分，再看 provider，所以 core provider 接受任何驗證型別。做選擇的是個別操作，不是
 > provider。
 
+## 用錯會在很早的地方失敗
+
+設定了服務並未執行的驗證型別的用戶端，根本建立不起來。`ParsecClient.CreateAsync` 會發出
+ListProviders，服務拒絕它，而失敗會帶著 `AuthenticatorNotRegistered` 並指名那個操作。這是對
+一個設定為 peer credentials 的服務送出 Direct 身分實測出來的，不是推論。
+
+Ping 是例外，而且是刻意的：不管用戶端怎麼設定，Ping 一律不帶驗證，這正是讓應用程式能在還不
+知道怎麼向服務表明身分之前先找到服務的原因。
+
 ## Direct
 
 ```csharp

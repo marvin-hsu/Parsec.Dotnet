@@ -51,6 +51,18 @@ and `ListKeys` answers `NotAuthenticated`.
 > what the service does: it checks the identity before it looks at the provider, so the core
 > provider takes any authentication type. Individual operations choose, not providers.
 
+## Getting it wrong fails early
+
+A client configured with an authentication type the service does not run cannot be built at
+all. <xref:Parsec.Client.ParsecClient.CreateAsync*> asks ListProviders, the service refuses it,
+and the failure carries <xref:Parsec.Client.Protocol.ResponseStatus.AuthenticatorNotRegistered>
+naming that operation. This is measured against a service configured for peer credentials and
+sent a Direct identity, not inferred.
+
+Ping is the exception, and deliberately so: it carries no authentication whatever the client is
+configured with, which is what lets an application find a service before it knows how to
+identify itself to it.
+
 ## Direct
 
 ```csharp

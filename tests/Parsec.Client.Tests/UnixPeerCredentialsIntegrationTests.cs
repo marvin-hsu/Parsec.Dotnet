@@ -167,34 +167,47 @@ public sealed class UnixPeerCredentialsIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AnIdentityTheKernelDoesNotBackIsRefused()
+    public async Task AnIdentityTheKernelDoesNotBackIsRefusedBeforeTheClientExists()
     {
         // Direct authentication sends a name the service has no way to check. Under a peer
-        // credentials authenticator the service should refuse it rather than fall back.
+        // credentials authenticator the service refuses it rather than falling back, and it
+        // does so at the ListProviders that building a client makes: an application configured
+        // with the wrong authentication type cannot get a client at all, which is a better
+        // place to find out than the first operation that happens to touch a key.
+        SkipWhenThisHostCannotCarryPeerCredentials();
+
+        var fault = await Assert.ThrowsAnyAsync<Errors.ParsecServiceException>(
+            () => ParsecClient.CreateAsync(
+                new ParsecClientOptions
+                {
+                    Endpoint = _container!.Endpoint,
+                    Authentication = new DirectAuthentication("not-a-user-id"),
+                },
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(ResponseStatus.AuthenticatorNotRegistered, fault.Status);
+        Assert.Equal(Opcode.ListProviders, fault.Operation);
+    }
+
+    [Fact]
+    public async Task PingStillAnswersWhateverTheAuthenticatorIs()
+    {
+        // Ping carries no authentication whatever the client is configured with, which is what
+        // lets an application find a service before it knows how to identify itself to it. If
+        // that ever changed, the test above would be the only way to reach this service at all.
         SkipWhenThisHostCannotCarryPeerCredentials();
 
         await using var client = await ParsecClient.CreateAsync(
             new ParsecClientOptions
             {
                 Endpoint = _container!.Endpoint,
-                Authentication = new DirectAuthentication("not-a-user-id"),
+                Authentication = new UnixPeerCredentialsAuthentication(),
             },
             TestContext.Current.CancellationToken);
 
-        var fault = await Assert.ThrowsAnyAsync<Errors.ParsecServiceException>(
-            () => client.ListKeysAsync(TestContext.Current.CancellationToken));
-
-        // Which of these the service picks is its business; that it refuses for an
-        // authentication reason rather than accepting the name is the claim being made.
-        Assert.Contains(
-            fault.Status,
-            new[]
-            {
-                ResponseStatus.AuthenticationError,
-                ResponseStatus.AuthenticatorDoesNotExist,
-                ResponseStatus.AuthenticatorNotRegistered,
-                ResponseStatus.NotAuthenticated,
-            });
+        Assert.Equal(
+            new Version(1, 0),
+            await client.PingAsync(TestContext.Current.CancellationToken));
     }
 
     private void SkipWhenThisHostCannotCarryPeerCredentials()
