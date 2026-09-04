@@ -104,6 +104,9 @@ sonar-check:
     if [ $status -eq 0 ]; then echo "No SonarCloud finding."; fi
     exit $status
 
+# The coverage exclusions have to match the ones in ci.yml. The protobuf code that protoc
+# generates lands under artifacts/obj, and counting it drags the reported number down by
+# tens of points over code nobody wrote.
 # Analyse with SonarCloud. Reads SONAR_TOKEN from .env.
 sonar:
     dotnet dotnet-sonarscanner begin \
@@ -112,7 +115,7 @@ sonar:
         /d:sonar.host.url="https://sonarcloud.io" \
         /d:sonar.token="$SONAR_TOKEN" \
         /d:sonar.cs.vscoveragexml.reportsPaths="TestResults/**/*.xml" \
-        /d:sonar.coverage.exclusions="tests/**"
+        /d:sonar.coverage.exclusions="tests/**,artifacts/**"
     dotnet build --configuration Release
     dotnet test --no-build --configuration Release --results-directory TestResults \
         --coverage --coverage-output-format xml
