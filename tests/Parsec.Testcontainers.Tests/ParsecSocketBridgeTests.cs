@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using Parsec.Testcontainers.Sockets;
 
 namespace Parsec.Testcontainers.Tests;
 

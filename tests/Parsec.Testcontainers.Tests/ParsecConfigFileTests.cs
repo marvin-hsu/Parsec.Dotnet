@@ -1,3 +1,5 @@
+using Parsec.Testcontainers.Configuration;
+
 namespace Parsec.Testcontainers.Tests;
 
 public sealed class ParsecConfigFileTests

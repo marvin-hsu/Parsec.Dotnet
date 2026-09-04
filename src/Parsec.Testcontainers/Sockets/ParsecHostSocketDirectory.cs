@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Parsec.Testcontainers;
+namespace Parsec.Testcontainers.Sockets;
 
 /// <summary>
 /// A short-lived directory on this machine that holds the socket a client connects to.

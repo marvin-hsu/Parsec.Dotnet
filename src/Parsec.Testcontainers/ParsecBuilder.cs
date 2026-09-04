@@ -2,6 +2,8 @@ using System.Text;
 using Docker.DotNet.Models;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
+using Parsec.Testcontainers.Configuration;
+using Parsec.Testcontainers.Sockets;
 
 namespace Parsec.Testcontainers;
 

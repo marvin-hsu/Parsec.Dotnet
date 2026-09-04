@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 
-namespace Parsec.Testcontainers;
+namespace Parsec.Testcontainers.Sockets;
 
 /// <summary>
 /// Carries the connections of a client on this machine to the service in the container.

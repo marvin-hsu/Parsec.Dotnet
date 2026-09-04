@@ -1,6 +1,6 @@
 using DotNet.Testcontainers;
 
-namespace Parsec.Testcontainers;
+namespace Parsec.Testcontainers.Sockets;
 
 /// <summary>
 /// Finds the socket of the service in the container.

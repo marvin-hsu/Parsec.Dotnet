@@ -1,3 +1,5 @@
+using Parsec.Testcontainers.Sockets;
+
 namespace Parsec.Testcontainers.Tests;
 
 // These tests need no Docker endpoint. They only look at a path, and two of them make a

@@ -1,5 +1,6 @@
 using System.Net.Sockets;
 using Docker.DotNet;
+using Parsec.Testcontainers.Sockets;
 
 namespace Parsec.Testcontainers.Tests;
 

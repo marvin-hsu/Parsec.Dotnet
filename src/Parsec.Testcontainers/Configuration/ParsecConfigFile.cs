@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Parsec.Testcontainers;
+namespace Parsec.Testcontainers.Configuration;
 
 /// <summary>
 /// Writes the service configuration file that the container reads at start.

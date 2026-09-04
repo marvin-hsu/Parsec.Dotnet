@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using DotNet.Testcontainers.Containers;
+using Parsec.Testcontainers.Sockets;
 
 namespace Parsec.Testcontainers;
 
