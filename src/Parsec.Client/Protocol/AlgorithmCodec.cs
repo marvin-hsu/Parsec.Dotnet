@@ -116,6 +116,75 @@ internal static class AlgorithmCodec
         return ToWireSignatureCore(signature);
     }
 
+    /// <summary>
+    /// Encodes a cipher mode for an operation that names one on its own.
+    /// </summary>
+    /// <param name="cipher">The mode to encode.</param>
+    /// <returns>The value that the wire carries.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The specification does not define <paramref name="cipher"/>.
+    /// </exception>
+    public static Wire.Cipher ToWireCipherMode(Cipher cipher) => ToWireCipher(cipher);
+
+    /// <summary>
+    /// Encodes an asymmetric encryption algorithm for an operation that names one on its own.
+    /// </summary>
+    /// <param name="encryption">The algorithm to encode.</param>
+    /// <returns>The message that the wire carries.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="encryption"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The algorithm carries a value that the specification does not define.
+    /// </exception>
+    public static Wire.AsymmetricEncryption ToWireEncryptionAlgorithm(EncryptionAlgorithm encryption)
+    {
+        ArgumentNullException.ThrowIfNull(encryption);
+
+        return ToWireEncryption(encryption);
+    }
+
+    /// <summary>
+    /// Encodes an authenticated encryption algorithm for an operation that names one on its own.
+    /// </summary>
+    /// <param name="aead">The algorithm to encode.</param>
+    /// <returns>The message that the wire carries.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="aead"/> is <see langword="null"/>.</exception>
+    public static Wire.Aead ToWireAeadAlgorithm(AeadAlgorithm aead)
+    {
+        ArgumentNullException.ThrowIfNull(aead);
+
+        return ToWireAead(aead);
+    }
+
+    /// <summary>
+    /// Encodes a message authentication code for an operation that names one on its own.
+    /// </summary>
+    /// <param name="mac">The algorithm to encode.</param>
+    /// <returns>The message that the wire carries.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="mac"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The algorithm carries a value that the specification does not define.
+    /// </exception>
+    public static Wire.Mac ToWireMacAlgorithm(MacAlgorithm mac)
+    {
+        ArgumentNullException.ThrowIfNull(mac);
+
+        return ToWireMac(mac);
+    }
+
+    /// <summary>
+    /// Encodes the raw part of a key agreement, which is the part that produces the shared secret.
+    /// </summary>
+    /// <param name="kind">The algorithm to encode.</param>
+    /// <returns>The value that the wire carries.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The specification does not define <paramref name="kind"/>, or it is the value it tells
+    /// everyone not to use.
+    /// </exception>
+    public static Wire.KeyAgreement.Types.Raw ToWireKeyAgreementKind(KeyAgreementKind kind) =>
+        kind is > KeyAgreementKind.None and <= KeyAgreementKind.Ecdh
+            ? (Wire.KeyAgreement.Types.Raw)kind
+            : throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
+
     private static Hash FromWireHash(Opcode operation, Wire.Hash hash) =>
         hash is >= Wire.Hash.None and <= Wire.Hash.Sha3512
             ? (Hash)hash

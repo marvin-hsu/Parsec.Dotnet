@@ -297,6 +297,390 @@ internal sealed class ParsecCryptoOperations(
     }
 
     /// <summary>
+    /// Encrypts with the public half of an asymmetric key.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
+    /// <param name="plaintext">The bytes to encrypt. An asymmetric algorithm takes only a few.</param>
+    /// <param name="salt">
+    /// The label for OAEP, which both sides must agree on. Leave it empty for PKCS#1 v1.5, which
+    /// has no label.
+    /// </param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The ciphertext.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> AsymmetricEncryptAsync(
+        string name,
+        EncryptionAlgorithm algorithm,
+        ReadOnlyMemory<byte> plaintext,
+        ReadOnlyMemory<byte> salt = default,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaAsymmetricEncrypt.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireEncryptionAlgorithm(algorithm),
+            Plaintext = UnsafeByteOperations.UnsafeWrap(plaintext),
+            Salt = UnsafeByteOperations.UnsafeWrap(salt),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaAsymmetricEncrypt,
+            provider,
+            _authentication,
+            operation,
+            PsaAsymmetricEncrypt.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Ciphertext.ToByteArray();
+    }
+
+    /// <summary>
+    /// Decrypts with the private half of an asymmetric key.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
+    /// <param name="ciphertext">The bytes to decrypt.</param>
+    /// <param name="salt">The label that the encryption used.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The plaintext.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> AsymmetricDecryptAsync(
+        string name,
+        EncryptionAlgorithm algorithm,
+        ReadOnlyMemory<byte> ciphertext,
+        ReadOnlyMemory<byte> salt = default,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaAsymmetricDecrypt.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireEncryptionAlgorithm(algorithm),
+            Ciphertext = UnsafeByteOperations.UnsafeWrap(ciphertext),
+            Salt = UnsafeByteOperations.UnsafeWrap(salt),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaAsymmetricDecrypt,
+            provider,
+            _authentication,
+            operation,
+            PsaAsymmetricDecrypt.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Plaintext.ToByteArray();
+    }
+
+    /// <summary>
+    /// Encrypts and authenticates in one pass.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
+    /// <param name="nonce">
+    /// The nonce. It must never repeat for one key, and for most algorithms repeating it loses
+    /// the key rather than only the message.
+    /// </param>
+    /// <param name="additionalData">
+    /// Bytes to authenticate without encrypting. The decryption must be given the same bytes.
+    /// </param>
+    /// <param name="plaintext">The bytes to encrypt.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The ciphertext with the authentication tag on the end.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> AeadEncryptAsync(
+        string name,
+        AeadAlgorithm algorithm,
+        ReadOnlyMemory<byte> nonce,
+        ReadOnlyMemory<byte> additionalData,
+        ReadOnlyMemory<byte> plaintext,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaAeadEncrypt.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireAeadAlgorithm(algorithm),
+            Nonce = UnsafeByteOperations.UnsafeWrap(nonce),
+            AdditionalData = UnsafeByteOperations.UnsafeWrap(additionalData),
+            Plaintext = UnsafeByteOperations.UnsafeWrap(plaintext),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaAeadEncrypt,
+            provider,
+            _authentication,
+            operation,
+            PsaAeadEncrypt.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Ciphertext.ToByteArray();
+    }
+
+    /// <summary>
+    /// Decrypts and checks the authentication tag in one pass.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
+    /// <param name="nonce">The nonce that the encryption used.</param>
+    /// <param name="additionalData">The bytes that the encryption authenticated.</param>
+    /// <param name="ciphertext">The ciphertext with its tag.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The plaintext.</returns>
+    /// <remarks>
+    /// A tag that does not match raises rather than answering false, unlike the two verify
+    /// operations. There is no plaintext to hand back in that case, and returning nothing
+    /// alongside a boolean invites a caller to read the nothing.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">
+    /// The provider refused. <see cref="ResponseStatus.PsaErrorInvalidSignature"/> means the tag
+    /// did not match, so the ciphertext or the additional data was changed.
+    /// </exception>
+    public async Task<byte[]> AeadDecryptAsync(
+        string name,
+        AeadAlgorithm algorithm,
+        ReadOnlyMemory<byte> nonce,
+        ReadOnlyMemory<byte> additionalData,
+        ReadOnlyMemory<byte> ciphertext,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaAeadDecrypt.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireAeadAlgorithm(algorithm),
+            Nonce = UnsafeByteOperations.UnsafeWrap(nonce),
+            AdditionalData = UnsafeByteOperations.UnsafeWrap(additionalData),
+            Ciphertext = UnsafeByteOperations.UnsafeWrap(ciphertext),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaAeadDecrypt,
+            provider,
+            _authentication,
+            operation,
+            PsaAeadDecrypt.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Plaintext.ToByteArray();
+    }
+
+    /// <summary>
+    /// Agrees a shared secret with another party.
+    /// </summary>
+    /// <param name="name">The name of the private key of this side.</param>
+    /// <param name="algorithm">The algorithm that produces the shared secret.</param>
+    /// <param name="peerKey">The public key of the other side.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The shared secret.</returns>
+    /// <remarks>
+    /// The secret comes back raw. It is not a key: feed it through a derivation function before
+    /// using it as one, because the bytes of a Diffie-Hellman result are not uniformly random.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The specification does not define <paramref name="algorithm"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> RawKeyAgreementAsync(
+        string name,
+        KeyAgreementKind algorithm,
+        ReadOnlyMemory<byte> peerKey,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaRawKeyAgreement.Operation
+        {
+            PrivateKeyName = name,
+            Alg = AlgorithmCodec.ToWireKeyAgreementKind(algorithm),
+            PeerKey = UnsafeByteOperations.UnsafeWrap(peerKey),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaRawKeyAgreement,
+            provider,
+            _authentication,
+            operation,
+            PsaRawKeyAgreement.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.SharedSecret.ToByteArray();
+    }
+
+    /// <summary>
+    /// Encrypts with a symmetric key.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The cipher mode. It must be the one the key binds to.</param>
+    /// <param name="plaintext">The bytes to encrypt.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The initialisation vector followed by the ciphertext.</returns>
+    /// <remarks>
+    /// This encrypts and does not authenticate, so a change to the ciphertext goes unnoticed.
+    /// Reach for <see cref="AeadEncryptAsync"/> unless something outside this call authenticates
+    /// the result. The Mbed Crypto provider offers no cipher operation.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> CipherEncryptAsync(
+        string name,
+        Cipher algorithm,
+        ReadOnlyMemory<byte> plaintext,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaCipherEncrypt.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireCipherMode(algorithm),
+            Plaintext = UnsafeByteOperations.UnsafeWrap(plaintext),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaCipherEncrypt,
+            provider,
+            _authentication,
+            operation,
+            PsaCipherEncrypt.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Ciphertext.ToByteArray();
+    }
+
+    /// <summary>
+    /// Decrypts with a symmetric key.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The cipher mode. It must be the one the key binds to.</param>
+    /// <param name="ciphertext">The initialisation vector followed by the ciphertext.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The plaintext.</returns>
+    /// <remarks>The Mbed Crypto provider offers no cipher operation.</remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> CipherDecryptAsync(
+        string name,
+        Cipher algorithm,
+        ReadOnlyMemory<byte> ciphertext,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaCipherDecrypt.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireCipherMode(algorithm),
+            Ciphertext = UnsafeByteOperations.UnsafeWrap(ciphertext),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaCipherDecrypt,
+            provider,
+            _authentication,
+            operation,
+            PsaCipherDecrypt.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Plaintext.ToByteArray();
+    }
+
+    /// <summary>
+    /// Computes a message authentication code.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
+    /// <param name="input">The bytes to authenticate.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>The code.</returns>
+    /// <remarks>The Mbed Crypto provider offers no code operation.</remarks>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    public async Task<byte[]> MacComputeAsync(
+        string name,
+        MacAlgorithm algorithm,
+        ReadOnlyMemory<byte> input,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaMacCompute.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireMacAlgorithm(algorithm),
+            Input = UnsafeByteOperations.UnsafeWrap(input),
+        };
+
+        var result = await _client.ExecuteAsync(
+            Opcode.PsaMacCompute,
+            provider,
+            _authentication,
+            operation,
+            PsaMacCompute.Result.Parser,
+            cancellationToken).ConfigureAwait(false);
+
+        return result.Mac.ToByteArray();
+    }
+
+    /// <summary>
+    /// Checks a message authentication code.
+    /// </summary>
+    /// <param name="name">The name of the key.</param>
+    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
+    /// <param name="input">The bytes that were authenticated.</param>
+    /// <param name="mac">The code to check.</param>
+    /// <param name="cancellationToken">Stops the exchange.</param>
+    /// <returns>
+    /// <see langword="true"/> when the code matches, and <see langword="false"/> when it does not.
+    /// </returns>
+    /// <remarks>The Mbed Crypto provider offers no code operation.</remarks>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ParsecServiceException">
+    /// The provider refused for a reason other than a code that does not match.
+    /// </exception>
+    public async Task<bool> MacVerifyAsync(
+        string name,
+        MacAlgorithm algorithm,
+        ReadOnlyMemory<byte> input,
+        ReadOnlyMemory<byte> mac,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        var operation = new PsaMacVerify.Operation
+        {
+            KeyName = name,
+            Alg = AlgorithmCodec.ToWireMacAlgorithm(algorithm),
+            Input = UnsafeByteOperations.UnsafeWrap(input),
+            Mac = UnsafeByteOperations.UnsafeWrap(mac),
+        };
+
+        return await VerifyAsync(Opcode.PsaMacVerify, operation, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Runs an operation whose failure to match is an answer rather than a fault.
     /// </summary>
     /// <param name="opcode">The operation to run.</param>

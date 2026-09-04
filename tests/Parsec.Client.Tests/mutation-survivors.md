@@ -1,7 +1,8 @@
 # Surviving mutants in Parsec.Client, and why they stay
 
-Score 95.15% over 803 mutants, between 8 and 9 surviving depending on the run. The two
-that come and go are the ones below whose branches this machine never takes. Each one below was read and judged. None of them
+Score 95.61% over 1002 mutants, between 8 and 11 surviving depending on the run. The ones that
+come and go are the equivalent mutants below, which Stryker reaches through different tests each
+time it picks a covering set. Each one below was read and judged. None of them
 is a missing test that would catch a real defect.
 
 ## Equivalent: the mutant changes nothing a caller can observe
@@ -10,6 +11,8 @@ is a missing test that would catch a real defect.
 |---|---|---|---|
 | `KeyAttributesCodec` | 110 | `GroupFamily = ToWireDh(...)` dropped from the initializer | RFC 7919 is the only Diffie-Hellman family the specification defines and it is the zero value, so proto3 leaves the field out whether it is assigned or not. The bytes are identical. The assignment stays because a second family would make it matter. |
 | `KeyAttributesCodec` | 224 | `flags \|= flag` becomes `flags ^= flag` | `Set` runs once per flag over a value that starts at `None`, so no flag is ever set twice. Exclusive or and or agree on every input the method can receive. |
+| `AuthenticationField` | 45 | the `length == 0` block removed | Without the shortcut the method allocates an empty array, asks the authentication to write nothing into it and hands back an empty memory. Same answer, one allocation. |
+| `ParsecFrameReader` | 76 | `<` becomes `<=` | The buffer is resized to the length it already has. Wasteful for one call, identical in behaviour. |
 | `ParsecFrameReader` | 98 | `ContentLength == 0 ? [] : new byte[n]` always allocates | `new byte[0]` and `[]` are the same array. The branch is an allocation shortcut. |
 | `UnixDomainSocketConnection` | 29 | `ownsSocket: false` becomes `true` | `DisposeAsync` disposes the stream and then the socket. `Socket.Dispose` is idempotent, so a second dispose from the stream changes nothing. |
 | `UnixDomainSocketConnection` | 57 | `??=` becomes `=` | The reader keeps no state between frames. `FillAsync` reads exactly the bytes it asks for, so it never over-reads and never leaves a partial frame in the buffer. A new reader only costs one allocation. |
