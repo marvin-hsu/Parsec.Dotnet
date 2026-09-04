@@ -1,3 +1,5 @@
+using Parsec.Client.Algorithms;
+using Parsec.Client.Keys;
 using Parsec.Client.Protocol;
 
 namespace Parsec.Client.Tests;
@@ -103,7 +105,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
 
         var answer = await service.CreateOperations().CanDoCryptoAsync(
             ProviderId.MbedCrypto,
-            CanDoCrypto.CheckType.Use,
+            KeyCheckType.Use,
             CreateRsaSigningAttributes(),
             TestContext.Current.CancellationToken);
 
@@ -119,7 +121,7 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
         // turns that answer into false, because it is the normal way to say no.
         var answer = await service.CreateOperations().CanDoCryptoAsync(
             ProviderId.MbedCrypto,
-            CanDoCrypto.CheckType.Derive,
+            KeyCheckType.Derive,
             CreateRsaSigningAttributes(),
             TestContext.Current.CancellationToken);
 
@@ -130,29 +132,10 @@ public sealed class ParsecCoreOperationsIntegrationTests(ParsecServiceFixture se
     /// Builds the attributes of an RSA key of 2048 bits that signs a SHA-256 hash.
     /// </summary>
     /// <returns>Attributes that the Mbed Crypto provider supports.</returns>
-    private static PsaKeyAttributes.KeyAttributes CreateRsaSigningAttributes() => new()
-    {
-        KeyType = new PsaKeyAttributes.KeyType
-        {
-            RsaKeyPair = new PsaKeyAttributes.KeyType.Types.RsaKeyPair(),
-        },
-        KeyBits = 2048,
-        KeyPolicy = new PsaKeyAttributes.KeyPolicy
-        {
-            KeyUsageFlags = new PsaKeyAttributes.UsageFlags { SignHash = true, VerifyHash = true },
-            KeyAlgorithm = new PsaAlgorithm.Algorithm
-            {
-                AsymmetricSignature = new PsaAlgorithm.Algorithm.Types.AsymmetricSignature
-                {
-                    RsaPkcs1V15Sign = new PsaAlgorithm.Algorithm.Types.AsymmetricSignature.Types.RsaPkcs1v15Sign
-                    {
-                        HashAlg = new PsaAlgorithm.Algorithm.Types.AsymmetricSignature.Types.SignHash
-                        {
-                            Specific = PsaAlgorithm.Algorithm.Types.Hash.Sha256,
-                        },
-                    },
-                },
-            },
-        },
-    };
+    private static KeyAttributes CreateRsaSigningAttributes() => new(
+        KeyType.RsaKeyPair,
+        2048,
+        new KeyPolicy(
+            KeyUsages.SignHash | KeyUsages.VerifyHash,
+            SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256)));
 }

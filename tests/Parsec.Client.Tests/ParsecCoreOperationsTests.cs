@@ -1,6 +1,8 @@
 using Google.Protobuf;
+using Parsec.Client.Algorithms;
 using Parsec.Client.Authentication;
 using Parsec.Client.Errors;
+using Parsec.Client.Keys;
 using Parsec.Client.Operations;
 using Parsec.Client.Protocol;
 
@@ -65,16 +67,22 @@ public sealed class ParsecCoreOperationsTests
         "617070";
 
     /// <summary>
-    /// A CanDoCrypto request for the Mbed Crypto provider. This question goes to the provider
-    /// itself, so the provider field of the header holds 1. The body is field 1 with the check
-    /// type Use, which is 08 01, and field 2 with an empty attributes message, which is 12 00.
-    /// The header states content length 4, auth type 1, auth length 3 and opcode 32, which is
-    /// 0x20.
+    /// A CanDoCrypto request for the Mbed Crypto provider, asking whether it can use a raw data
+    /// key that binds to no algorithm. This question goes to the provider itself, so the provider
+    /// field of the header holds 1. The header states content length 16, auth type 1, auth length
+    /// 3 and opcode 32, which is 0x20.
     /// </summary>
+    /// <remarks>
+    /// The body is read off the two proto files rather than off the encoder. Field 1 is the check
+    /// type Use, which is 08 01. Field 2 is the attributes, 12 0C over twelve bytes: field 1 is
+    /// the key type, 0A 02 over the empty raw data message 0A 00; field 3 is the policy, 1A 06
+    /// over the empty usage flags 0A 00 and the algorithm 12 02 holding the empty none message
+    /// 0A 00. The key size is zero, which proto3 leaves out.
+    /// </remarks>
     private const string CanDoCryptoRequestHex =
         "10A7C05E" + "1E00" + "01" + "00" + "0000" + "01" + "0000000000000000" +
-        "00" + "00" + "01" + "04000000" + "0300" + "20000000" + "0000" + "0000" +
-        "08011200" + "617070";
+        "00" + "00" + "01" + "10000000" + "0300" + "20000000" + "0000" + "0000" +
+        "0801" + "120C" + "0A020A00" + "1A060A0012020A00" + "617070";
 
     /// <summary>
     /// The body of the Ping answer of the real service. It holds the major version 1. The minor
@@ -385,8 +393,18 @@ public sealed class ParsecCoreOperationsTests
         {
             Keys =
             {
-                new ListKeys.KeyInfo { ProviderId = 1, Name = "signing-key" },
-                new ListKeys.KeyInfo { ProviderId = 3, Name = "密鑰" },
+                new ListKeys.KeyInfo
+                {
+                    ProviderId = 1,
+                    Name = "signing-key",
+                    Attributes = KeyAttributesCodec.ToWire(CreateRsaSigningAttributes()),
+                },
+                new ListKeys.KeyInfo
+                {
+                    ProviderId = 3,
+                    Name = "密鑰",
+                    Attributes = KeyAttributesCodec.ToWire(CreateRawDataAttributes()),
+                },
             },
         }.ToByteArray();
 
@@ -397,8 +415,30 @@ public sealed class ParsecCoreOperationsTests
         Assert.Equal(2, keys.Count);
         Assert.Equal(ProviderId.MbedCrypto, keys[0].Provider);
         Assert.Equal("signing-key", keys[0].Name);
+        Assert.Equal(CreateRsaSigningAttributes(), keys[0].Attributes);
         Assert.Equal(ProviderId.Tpm, keys[1].Provider);
         Assert.Equal("密鑰", keys[1].Name);
+        Assert.Equal(CreateRawDataAttributes(), keys[1].Attributes);
+    }
+
+    [Fact]
+    public async Task ListKeysRaisesWhenTheServiceSendsAKeyWithNoAttributes()
+    {
+        // KeyInfo.Attributes is not nullable, and the client has nothing to put there if the
+        // service leaves the field out. Inventing a value would report a key policy that nobody
+        // set, so the answer is refused instead.
+        var body = new ListKeys.Result
+        {
+            Keys = { new ListKeys.KeyInfo { ProviderId = 1, Name = "signing-key" } },
+        }.ToByteArray();
+
+        var transport = new ScriptedTransport().EnqueueResponse(Opcode.ListKeys, ResponseStatus.Success, body);
+        var operations = CreateOperations(transport);
+
+        var fault = await Assert.ThrowsAsync<ParsecProtocolException>(
+            () => operations.ListKeysAsync(TestContext.Current.CancellationToken));
+
+        Assert.Contains("carries no attributes", fault.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -412,8 +452,8 @@ public sealed class ParsecCoreOperationsTests
 
         await CreateOperations(transport).CanDoCryptoAsync(
             ProviderId.MbedCrypto,
-            CanDoCrypto.CheckType.Use,
-            new PsaKeyAttributes.KeyAttributes(),
+            KeyCheckType.Use,
+            CreateRawDataAttributes(),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(CanDoCryptoRequestHex, Convert.ToHexString(Assert.Single(transport.SentRequestBytes)));
@@ -430,8 +470,8 @@ public sealed class ParsecCoreOperationsTests
 
         Assert.True(await CreateOperations(transport).CanDoCryptoAsync(
             ProviderId.MbedCrypto,
-            CanDoCrypto.CheckType.Generate,
-            new PsaKeyAttributes.KeyAttributes(),
+            KeyCheckType.Generate,
+            CreateRawDataAttributes(),
             TestContext.Current.CancellationToken));
     }
 
@@ -448,8 +488,8 @@ public sealed class ParsecCoreOperationsTests
 
         Assert.False(await CreateOperations(transport).CanDoCryptoAsync(
             ProviderId.MbedCrypto,
-            CanDoCrypto.CheckType.Generate,
-            new PsaKeyAttributes.KeyAttributes(),
+            KeyCheckType.Generate,
+            CreateRawDataAttributes(),
             TestContext.Current.CancellationToken));
     }
 
@@ -468,8 +508,8 @@ public sealed class ParsecCoreOperationsTests
 
         var fault = await Assert.ThrowsAnyAsync<ParsecServiceException>(() => operations.CanDoCryptoAsync(
             ProviderId.MbedCrypto,
-            CanDoCrypto.CheckType.Use,
-            new PsaKeyAttributes.KeyAttributes(),
+            KeyCheckType.Use,
+            CreateRawDataAttributes(),
             TestContext.Current.CancellationToken));
 
         Assert.Equal(status, fault.Status);
@@ -700,6 +740,26 @@ public sealed class ParsecCoreOperationsTests
     [Fact]
     public void TheOperationsRefuseANullTransport() =>
         Assert.Throws<ArgumentNullException>(() => new ParsecCoreOperations(null!, new DirectAuthentication("app")));
+
+    /// <summary>
+    /// Makes the attributes of an RSA signing key, which is the shape a caller reaches for most.
+    /// </summary>
+    /// <returns>The attributes of a 2048 bit RSA key that signs and verifies a SHA-256 hash.</returns>
+    private static KeyAttributes CreateRsaSigningAttributes() => new(
+        KeyType.RsaKeyPair,
+        2048,
+        new KeyPolicy(
+            KeyUsages.SignHash | KeyUsages.VerifyHash,
+            SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256)));
+
+    /// <summary>
+    /// Makes the simplest set of attributes the public model can express: a raw data key of no
+    /// stated size that binds to no algorithm and permits nothing. The golden request bytes
+    /// encode this.
+    /// </summary>
+    /// <returns>The attributes to ask about.</returns>
+    private static KeyAttributes CreateRawDataAttributes() =>
+        new(KeyType.RawData, 0, new KeyPolicy(KeyUsages.None, Algorithm.None));
 
     /// <summary>
     /// Makes the operations with the direct authentication that the golden request bytes hold.

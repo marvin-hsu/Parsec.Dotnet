@@ -1,3 +1,4 @@
+using Parsec.Client.Keys;
 using Parsec.Client.Protocol;
 
 namespace Parsec.Client.Models;
@@ -12,11 +13,15 @@ namespace Parsec.Client.Models;
 /// </remarks>
 /// <param name="provider">The provider that holds the key.</param>
 /// <param name="name">The name of the key.</param>
-public sealed class KeyInfo(ProviderId provider, string name)
+/// <param name="attributes">What the key holds and what may be done with it.</param>
+public sealed class KeyInfo(ProviderId provider, string name, KeyAttributes attributes)
 {
     /// <summary>Gets the provider that holds the key.</summary>
     public ProviderId Provider { get; } = provider;
 
     /// <summary>Gets the name of the key.</summary>
     public string Name { get; } = name;
+
+    /// <summary>Gets what the key holds and what may be done with it.</summary>
+    public KeyAttributes Attributes { get; } = attributes;
 }

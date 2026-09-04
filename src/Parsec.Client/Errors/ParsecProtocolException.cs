@@ -92,6 +92,19 @@ public sealed class ParsecProtocolException : ParsecException
             operation);
 
     /// <summary>
+    /// Makes the exception for a field of an answer that the client cannot read back.
+    /// </summary>
+    /// <param name="operation">The operation of the request.</param>
+    /// <param name="field">The name of the field.</param>
+    /// <param name="detail">What the field carried, in a form a reader can act on.</param>
+    /// <returns>The exception to raise.</returns>
+    internal static ParsecProtocolException UnreadableField(
+        Opcode operation,
+        string field,
+        string detail) =>
+        new(Prefix(operation) + ParsecErrorText.DescribeUnreadableField(field, detail), operation);
+
+    /// <summary>
     /// Names the operation at the start of a message.
     /// </summary>
     /// <param name="operation">The operation of the request, or <see langword="null"/> if it is not known.</param>

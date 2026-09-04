@@ -1,4 +1,110 @@
 #nullable enable
+Parsec.Client.Algorithms.Aead
+Parsec.Client.Algorithms.Aead.Ccm = 1 -> Parsec.Client.Algorithms.Aead
+Parsec.Client.Algorithms.Aead.ChaCha20Poly1305 = 3 -> Parsec.Client.Algorithms.Aead
+Parsec.Client.Algorithms.Aead.Gcm = 2 -> Parsec.Client.Algorithms.Aead
+Parsec.Client.Algorithms.Aead.None = 0 -> Parsec.Client.Algorithms.Aead
+Parsec.Client.Algorithms.AeadAlgorithm
+Parsec.Client.Algorithms.AeadAlgorithm.Aead.get -> Parsec.Client.Algorithms.Aead
+Parsec.Client.Algorithms.AeadAlgorithm.Equals(Parsec.Client.Algorithms.AeadAlgorithm? other) -> bool
+Parsec.Client.Algorithms.AeadAlgorithm.TagLength.get -> uint?
+Parsec.Client.Algorithms.AeadAlgorithm.WithTagLength(uint length) -> Parsec.Client.Algorithms.AeadAlgorithm!
+Parsec.Client.Algorithms.Algorithm
+Parsec.Client.Algorithms.Algorithm.Algorithm(Parsec.Client.Algorithms.Algorithm! original) -> void
+Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.CbcNoPadding = 7 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.CbcPkcs7 = 8 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.Cfb = 3 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.Ctr = 2 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.EcbNoPadding = 6 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.None = 0 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.Ofb = 4 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.StreamCipher = 1 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.Cipher.Xts = 5 -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.CipherAlgorithm
+Parsec.Client.Algorithms.CipherAlgorithm.Cipher.get -> Parsec.Client.Algorithms.Cipher
+Parsec.Client.Algorithms.CipherAlgorithm.Cipher.init -> void
+Parsec.Client.Algorithms.CipherAlgorithm.CipherAlgorithm(Parsec.Client.Algorithms.Cipher Cipher) -> void
+Parsec.Client.Algorithms.CipherAlgorithm.Deconstruct(out Parsec.Client.Algorithms.Cipher Cipher) -> void
+Parsec.Client.Algorithms.CipherAlgorithm.Equals(Parsec.Client.Algorithms.CipherAlgorithm? other) -> bool
+Parsec.Client.Algorithms.EncryptionAlgorithm
+Parsec.Client.Algorithms.EncryptionAlgorithm.Equals(Parsec.Client.Algorithms.EncryptionAlgorithm? other) -> bool
+Parsec.Client.Algorithms.EncryptionAlgorithm.Hash.get -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.EncryptionAlgorithm.Kind.get -> Parsec.Client.Algorithms.EncryptionKind
+Parsec.Client.Algorithms.EncryptionKind
+Parsec.Client.Algorithms.EncryptionKind.None = 0 -> Parsec.Client.Algorithms.EncryptionKind
+Parsec.Client.Algorithms.EncryptionKind.RsaOaep = 2 -> Parsec.Client.Algorithms.EncryptionKind
+Parsec.Client.Algorithms.EncryptionKind.RsaPkcs1v15Crypt = 1 -> Parsec.Client.Algorithms.EncryptionKind
+Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Md2 = 1 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Md4 = 2 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Md5 = 3 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.None = 0 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.RipeMd160 = 4 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha1 = 5 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha224 = 6 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha256 = 7 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha3224 = 12 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha3256 = 13 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha3384 = 14 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha3512 = 15 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha384 = 8 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha512 = 9 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha512Truncated224 = 10 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.Hash.Sha512Truncated256 = 11 -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.HashAlgorithm
+Parsec.Client.Algorithms.HashAlgorithm.Deconstruct(out Parsec.Client.Algorithms.Hash Hash) -> void
+Parsec.Client.Algorithms.HashAlgorithm.Equals(Parsec.Client.Algorithms.HashAlgorithm? other) -> bool
+Parsec.Client.Algorithms.HashAlgorithm.Hash.get -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.HashAlgorithm.Hash.init -> void
+Parsec.Client.Algorithms.HashAlgorithm.HashAlgorithm(Parsec.Client.Algorithms.Hash Hash) -> void
+Parsec.Client.Algorithms.KeyAgreementAlgorithm
+Parsec.Client.Algorithms.KeyAgreementAlgorithm.Derivation.get -> Parsec.Client.Algorithms.KeyDerivationAlgorithm?
+Parsec.Client.Algorithms.KeyAgreementAlgorithm.Equals(Parsec.Client.Algorithms.KeyAgreementAlgorithm? other) -> bool
+Parsec.Client.Algorithms.KeyAgreementAlgorithm.Kind.get -> Parsec.Client.Algorithms.KeyAgreementKind
+Parsec.Client.Algorithms.KeyAgreementAlgorithm.WithDerivation(Parsec.Client.Algorithms.KeyDerivationAlgorithm! derivation) -> Parsec.Client.Algorithms.KeyAgreementAlgorithm!
+Parsec.Client.Algorithms.KeyAgreementKind
+Parsec.Client.Algorithms.KeyAgreementKind.Ecdh = 2 -> Parsec.Client.Algorithms.KeyAgreementKind
+Parsec.Client.Algorithms.KeyAgreementKind.Ffdh = 1 -> Parsec.Client.Algorithms.KeyAgreementKind
+Parsec.Client.Algorithms.KeyAgreementKind.None = 0 -> Parsec.Client.Algorithms.KeyAgreementKind
+Parsec.Client.Algorithms.KeyDerivationAlgorithm
+Parsec.Client.Algorithms.KeyDerivationAlgorithm.Equals(Parsec.Client.Algorithms.KeyDerivationAlgorithm? other) -> bool
+Parsec.Client.Algorithms.KeyDerivationAlgorithm.Hash.get -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.KeyDerivationAlgorithm.Kind.get -> Parsec.Client.Algorithms.KeyDerivationKind
+Parsec.Client.Algorithms.KeyDerivationKind
+Parsec.Client.Algorithms.KeyDerivationKind.Hkdf = 1 -> Parsec.Client.Algorithms.KeyDerivationKind
+Parsec.Client.Algorithms.KeyDerivationKind.None = 0 -> Parsec.Client.Algorithms.KeyDerivationKind
+Parsec.Client.Algorithms.KeyDerivationKind.Tls12Prf = 2 -> Parsec.Client.Algorithms.KeyDerivationKind
+Parsec.Client.Algorithms.KeyDerivationKind.Tls12PskToMs = 3 -> Parsec.Client.Algorithms.KeyDerivationKind
+Parsec.Client.Algorithms.MacAlgorithm
+Parsec.Client.Algorithms.MacAlgorithm.Equals(Parsec.Client.Algorithms.MacAlgorithm? other) -> bool
+Parsec.Client.Algorithms.MacAlgorithm.Hash.get -> Parsec.Client.Algorithms.Hash
+Parsec.Client.Algorithms.MacAlgorithm.Kind.get -> Parsec.Client.Algorithms.MacKind
+Parsec.Client.Algorithms.MacAlgorithm.Length.get -> uint?
+Parsec.Client.Algorithms.MacAlgorithm.Truncate(uint length) -> Parsec.Client.Algorithms.MacAlgorithm!
+Parsec.Client.Algorithms.MacKind
+Parsec.Client.Algorithms.MacKind.CbcMac = 2 -> Parsec.Client.Algorithms.MacKind
+Parsec.Client.Algorithms.MacKind.Cmac = 3 -> Parsec.Client.Algorithms.MacKind
+Parsec.Client.Algorithms.MacKind.Hmac = 1 -> Parsec.Client.Algorithms.MacKind
+Parsec.Client.Algorithms.MacKind.None = 0 -> Parsec.Client.Algorithms.MacKind
+Parsec.Client.Algorithms.NoAlgorithm
+Parsec.Client.Algorithms.NoAlgorithm.Equals(Parsec.Client.Algorithms.NoAlgorithm? other) -> bool
+Parsec.Client.Algorithms.SignHash
+Parsec.Client.Algorithms.SignHash.Equals(Parsec.Client.Algorithms.SignHash other) -> bool
+Parsec.Client.Algorithms.SignHash.Hash.get -> Parsec.Client.Algorithms.Hash?
+Parsec.Client.Algorithms.SignHash.SignHash() -> void
+Parsec.Client.Algorithms.SignatureAlgorithm
+Parsec.Client.Algorithms.SignatureAlgorithm.Equals(Parsec.Client.Algorithms.SignatureAlgorithm? other) -> bool
+Parsec.Client.Algorithms.SignatureAlgorithm.Hash.get -> Parsec.Client.Algorithms.SignHash
+Parsec.Client.Algorithms.SignatureAlgorithm.Kind.get -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.DeterministicEcdsa = 6 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.Ecdsa = 4 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.EcdsaAny = 5 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.None = 0 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.RsaPkcs1v15Sign = 1 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.RsaPkcs1v15SignRaw = 2 -> Parsec.Client.Algorithms.SignatureKind
+Parsec.Client.Algorithms.SignatureKind.RsaPss = 3 -> Parsec.Client.Algorithms.SignatureKind
 Parsec.Client.Authentication.DirectAuthentication
 Parsec.Client.Authentication.DirectAuthentication.ApplicationName.get -> string!
 Parsec.Client.Authentication.DirectAuthentication.AuthBytesLength.get -> int
@@ -57,13 +163,80 @@ Parsec.Client.Errors.ParsecTransportException.ParsecTransportException(string! m
 Parsec.Client.Errors.ParsecTransportException.ParsecTransportException(string! message, System.Exception! innerException) -> void
 Parsec.Client.IParsecClient
 Parsec.Client.IParsecClient.ProviderName.get -> string!
+Parsec.Client.Keys.DhFamily
+Parsec.Client.Keys.DhFamily.Rfc7919 = 0 -> Parsec.Client.Keys.DhFamily
+Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.BrainpoolPR1 = 7 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.Frp = 8 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.Montgomery = 9 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.None = 0 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.SecpK1 = 1 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.SecpR1 = 2 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.SecpR2 = 3 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.SectK1 = 4 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.SectR1 = 5 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.EccFamily.SectR2 = 6 -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.KeyAttributes
+Parsec.Client.Keys.KeyAttributes.<Clone>$() -> Parsec.Client.Keys.KeyAttributes!
+Parsec.Client.Keys.KeyAttributes.Bits.get -> uint
+Parsec.Client.Keys.KeyAttributes.Equals(Parsec.Client.Keys.KeyAttributes? other) -> bool
+Parsec.Client.Keys.KeyAttributes.KeyAttributes(Parsec.Client.Keys.KeyType! type, uint bits, Parsec.Client.Keys.KeyPolicy! policy) -> void
+Parsec.Client.Keys.KeyAttributes.Policy.get -> Parsec.Client.Keys.KeyPolicy!
+Parsec.Client.Keys.KeyAttributes.Type.get -> Parsec.Client.Keys.KeyType!
+Parsec.Client.Keys.KeyCheckType
+Parsec.Client.Keys.KeyCheckType.Derive = 4 -> Parsec.Client.Keys.KeyCheckType
+Parsec.Client.Keys.KeyCheckType.Generate = 2 -> Parsec.Client.Keys.KeyCheckType
+Parsec.Client.Keys.KeyCheckType.Import = 3 -> Parsec.Client.Keys.KeyCheckType
+Parsec.Client.Keys.KeyCheckType.None = 0 -> Parsec.Client.Keys.KeyCheckType
+Parsec.Client.Keys.KeyCheckType.Use = 1 -> Parsec.Client.Keys.KeyCheckType
+Parsec.Client.Keys.KeyPolicy
+Parsec.Client.Keys.KeyPolicy.<Clone>$() -> Parsec.Client.Keys.KeyPolicy!
+Parsec.Client.Keys.KeyPolicy.Algorithm.get -> Parsec.Client.Algorithms.Algorithm!
+Parsec.Client.Keys.KeyPolicy.Equals(Parsec.Client.Keys.KeyPolicy? other) -> bool
+Parsec.Client.Keys.KeyPolicy.KeyPolicy(Parsec.Client.Keys.KeyUsages usage, Parsec.Client.Algorithms.Algorithm! algorithm) -> void
+Parsec.Client.Keys.KeyPolicy.Usage.get -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyType
+Parsec.Client.Keys.KeyType.<Clone>$() -> Parsec.Client.Keys.KeyType!
+Parsec.Client.Keys.KeyType.DhFamily.get -> Parsec.Client.Keys.DhFamily
+Parsec.Client.Keys.KeyType.EccFamily.get -> Parsec.Client.Keys.EccFamily
+Parsec.Client.Keys.KeyType.Equals(Parsec.Client.Keys.KeyType? other) -> bool
+Parsec.Client.Keys.KeyType.Kind.get -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.Aes = 4 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.Arc4 = 7 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.Camellia = 6 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.ChaCha20 = 8 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.Derive = 3 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.Des = 5 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.DhKeyPair = 13 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.DhPublicKey = 14 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.EccKeyPair = 11 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.EccPublicKey = 12 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.Hmac = 2 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.None = 0 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.RawData = 1 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.RsaKeyPair = 10 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyTypeKind.RsaPublicKey = 9 -> Parsec.Client.Keys.KeyTypeKind
+Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.Cache = 4 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.Copy = 2 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.Decrypt = 16 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.Derive = 512 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.Encrypt = 8 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.Export = 1 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.None = 0 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.SignHash = 128 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.SignMessage = 32 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.VerifyHash = 256 -> Parsec.Client.Keys.KeyUsages
+Parsec.Client.Keys.KeyUsages.VerifyMessage = 64 -> Parsec.Client.Keys.KeyUsages
 Parsec.Client.Models.AuthenticatorInfo
 Parsec.Client.Models.AuthenticatorInfo.AuthenticatorInfo(Parsec.Client.Protocol.AuthType id, string! description, System.Version! version) -> void
 Parsec.Client.Models.AuthenticatorInfo.Description.get -> string!
 Parsec.Client.Models.AuthenticatorInfo.Id.get -> Parsec.Client.Protocol.AuthType
 Parsec.Client.Models.AuthenticatorInfo.Version.get -> System.Version!
 Parsec.Client.Models.KeyInfo
-Parsec.Client.Models.KeyInfo.KeyInfo(Parsec.Client.Protocol.ProviderId provider, string! name) -> void
+Parsec.Client.Models.KeyInfo.Attributes.get -> Parsec.Client.Keys.KeyAttributes!
+Parsec.Client.Models.KeyInfo.KeyInfo(Parsec.Client.Protocol.ProviderId provider, string! name, Parsec.Client.Keys.KeyAttributes! attributes) -> void
 Parsec.Client.Models.KeyInfo.Name.get -> string!
 Parsec.Client.Models.KeyInfo.Provider.get -> Parsec.Client.Protocol.ProviderId
 Parsec.Client.Models.ProviderInfo
@@ -166,11 +339,138 @@ Parsec.Client.Protocol.ResponseStatus.WrongProviderId = 1 -> Parsec.Client.Proto
 Parsec.Client.Protocol.ResponseStatus.WrongProviderUuid = 18 -> Parsec.Client.Protocol.ResponseStatus
 Parsec.Client.Protocol.ResponseStatusExtensions
 Parsec.Client.Transport.ParsecEndpoint
+abstract Parsec.Client.Algorithms.Algorithm.<Clone>$() -> Parsec.Client.Algorithms.Algorithm!
 const Parsec.Client.Transport.ParsecEndpoint.DefaultSocketPath = "/run/parsec/parsec.sock" -> string!
 const Parsec.Client.Transport.ParsecEndpoint.EnvironmentVariableName = "PARSEC_SERVICE_ENDPOINT" -> string!
 const Parsec.Client.Transport.ParsecEndpoint.UnixScheme = "unix" -> string!
+override Parsec.Client.Algorithms.AeadAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.AeadAlgorithm!
+override Parsec.Client.Algorithms.AeadAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.AeadAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.AeadAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.Algorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.Algorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.Algorithm.ToString() -> string!
+override Parsec.Client.Algorithms.CipherAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.CipherAlgorithm!
+override Parsec.Client.Algorithms.CipherAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.CipherAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.CipherAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.EncryptionAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.EncryptionAlgorithm!
+override Parsec.Client.Algorithms.EncryptionAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.EncryptionAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.EncryptionAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.HashAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.HashAlgorithm!
+override Parsec.Client.Algorithms.HashAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.HashAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.HashAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.KeyAgreementAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.KeyAgreementAlgorithm!
+override Parsec.Client.Algorithms.KeyAgreementAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.KeyAgreementAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.KeyAgreementAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.KeyDerivationAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.KeyDerivationAlgorithm!
+override Parsec.Client.Algorithms.KeyDerivationAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.KeyDerivationAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.KeyDerivationAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.MacAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.MacAlgorithm!
+override Parsec.Client.Algorithms.MacAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.MacAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.MacAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.NoAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.NoAlgorithm!
+override Parsec.Client.Algorithms.NoAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.NoAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.NoAlgorithm.ToString() -> string!
+override Parsec.Client.Algorithms.SignHash.GetHashCode() -> int
+override Parsec.Client.Algorithms.SignatureAlgorithm.<Clone>$() -> Parsec.Client.Algorithms.SignatureAlgorithm!
+override Parsec.Client.Algorithms.SignatureAlgorithm.Equals(object? obj) -> bool
+override Parsec.Client.Algorithms.SignatureAlgorithm.GetHashCode() -> int
+override Parsec.Client.Algorithms.SignatureAlgorithm.ToString() -> string!
+override Parsec.Client.Keys.KeyAttributes.Equals(object? obj) -> bool
+override Parsec.Client.Keys.KeyAttributes.GetHashCode() -> int
+override Parsec.Client.Keys.KeyAttributes.ToString() -> string!
+override Parsec.Client.Keys.KeyPolicy.Equals(object? obj) -> bool
+override Parsec.Client.Keys.KeyPolicy.GetHashCode() -> int
+override Parsec.Client.Keys.KeyPolicy.ToString() -> string!
+override Parsec.Client.Keys.KeyType.Equals(object? obj) -> bool
+override Parsec.Client.Keys.KeyType.GetHashCode() -> int
+override Parsec.Client.Keys.KeyType.ToString() -> string!
+override sealed Parsec.Client.Algorithms.AeadAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.CipherAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.EncryptionAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.HashAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.KeyAgreementAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.KeyDerivationAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.MacAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.NoAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+override sealed Parsec.Client.Algorithms.SignatureAlgorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+static Parsec.Client.Algorithms.AeadAlgorithm.Ccm.get -> Parsec.Client.Algorithms.AeadAlgorithm!
+static Parsec.Client.Algorithms.AeadAlgorithm.ChaCha20Poly1305.get -> Parsec.Client.Algorithms.AeadAlgorithm!
+static Parsec.Client.Algorithms.AeadAlgorithm.FromAead(Parsec.Client.Algorithms.Aead aead) -> Parsec.Client.Algorithms.AeadAlgorithm!
+static Parsec.Client.Algorithms.AeadAlgorithm.Gcm.get -> Parsec.Client.Algorithms.AeadAlgorithm!
+static Parsec.Client.Algorithms.AeadAlgorithm.operator !=(Parsec.Client.Algorithms.AeadAlgorithm? left, Parsec.Client.Algorithms.AeadAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.AeadAlgorithm.operator ==(Parsec.Client.Algorithms.AeadAlgorithm? left, Parsec.Client.Algorithms.AeadAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.Algorithm.FromCipher(Parsec.Client.Algorithms.Cipher cipher) -> Parsec.Client.Algorithms.CipherAlgorithm!
+static Parsec.Client.Algorithms.Algorithm.FromHash(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.HashAlgorithm!
+static Parsec.Client.Algorithms.Algorithm.None.get -> Parsec.Client.Algorithms.Algorithm!
+static Parsec.Client.Algorithms.Algorithm.operator !=(Parsec.Client.Algorithms.Algorithm? left, Parsec.Client.Algorithms.Algorithm? right) -> bool
+static Parsec.Client.Algorithms.Algorithm.operator ==(Parsec.Client.Algorithms.Algorithm? left, Parsec.Client.Algorithms.Algorithm? right) -> bool
+static Parsec.Client.Algorithms.CipherAlgorithm.operator !=(Parsec.Client.Algorithms.CipherAlgorithm? left, Parsec.Client.Algorithms.CipherAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.CipherAlgorithm.operator ==(Parsec.Client.Algorithms.CipherAlgorithm? left, Parsec.Client.Algorithms.CipherAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.EncryptionAlgorithm.RsaOaep(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.EncryptionAlgorithm!
+static Parsec.Client.Algorithms.EncryptionAlgorithm.RsaPkcs1v15Crypt.get -> Parsec.Client.Algorithms.EncryptionAlgorithm!
+static Parsec.Client.Algorithms.EncryptionAlgorithm.operator !=(Parsec.Client.Algorithms.EncryptionAlgorithm? left, Parsec.Client.Algorithms.EncryptionAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.EncryptionAlgorithm.operator ==(Parsec.Client.Algorithms.EncryptionAlgorithm? left, Parsec.Client.Algorithms.EncryptionAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.HashAlgorithm.operator !=(Parsec.Client.Algorithms.HashAlgorithm? left, Parsec.Client.Algorithms.HashAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.HashAlgorithm.operator ==(Parsec.Client.Algorithms.HashAlgorithm? left, Parsec.Client.Algorithms.HashAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.KeyAgreementAlgorithm.Ecdh.get -> Parsec.Client.Algorithms.KeyAgreementAlgorithm!
+static Parsec.Client.Algorithms.KeyAgreementAlgorithm.Ffdh.get -> Parsec.Client.Algorithms.KeyAgreementAlgorithm!
+static Parsec.Client.Algorithms.KeyAgreementAlgorithm.operator !=(Parsec.Client.Algorithms.KeyAgreementAlgorithm? left, Parsec.Client.Algorithms.KeyAgreementAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.KeyAgreementAlgorithm.operator ==(Parsec.Client.Algorithms.KeyAgreementAlgorithm? left, Parsec.Client.Algorithms.KeyAgreementAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.KeyDerivationAlgorithm.Hkdf(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.KeyDerivationAlgorithm!
+static Parsec.Client.Algorithms.KeyDerivationAlgorithm.Tls12Prf(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.KeyDerivationAlgorithm!
+static Parsec.Client.Algorithms.KeyDerivationAlgorithm.Tls12PskToMs(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.KeyDerivationAlgorithm!
+static Parsec.Client.Algorithms.KeyDerivationAlgorithm.operator !=(Parsec.Client.Algorithms.KeyDerivationAlgorithm? left, Parsec.Client.Algorithms.KeyDerivationAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.KeyDerivationAlgorithm.operator ==(Parsec.Client.Algorithms.KeyDerivationAlgorithm? left, Parsec.Client.Algorithms.KeyDerivationAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.MacAlgorithm.CbcMac.get -> Parsec.Client.Algorithms.MacAlgorithm!
+static Parsec.Client.Algorithms.MacAlgorithm.Cmac.get -> Parsec.Client.Algorithms.MacAlgorithm!
+static Parsec.Client.Algorithms.MacAlgorithm.Hmac(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.MacAlgorithm!
+static Parsec.Client.Algorithms.MacAlgorithm.operator !=(Parsec.Client.Algorithms.MacAlgorithm? left, Parsec.Client.Algorithms.MacAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.MacAlgorithm.operator ==(Parsec.Client.Algorithms.MacAlgorithm? left, Parsec.Client.Algorithms.MacAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.NoAlgorithm.operator !=(Parsec.Client.Algorithms.NoAlgorithm? left, Parsec.Client.Algorithms.NoAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.NoAlgorithm.operator ==(Parsec.Client.Algorithms.NoAlgorithm? left, Parsec.Client.Algorithms.NoAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.SignHash.Any.get -> Parsec.Client.Algorithms.SignHash
+static Parsec.Client.Algorithms.SignHash.FromHash(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.SignHash
+static Parsec.Client.Algorithms.SignHash.implicit operator Parsec.Client.Algorithms.SignHash(Parsec.Client.Algorithms.Hash hash) -> Parsec.Client.Algorithms.SignHash
+static Parsec.Client.Algorithms.SignHash.operator !=(Parsec.Client.Algorithms.SignHash left, Parsec.Client.Algorithms.SignHash right) -> bool
+static Parsec.Client.Algorithms.SignHash.operator ==(Parsec.Client.Algorithms.SignHash left, Parsec.Client.Algorithms.SignHash right) -> bool
+static Parsec.Client.Algorithms.SignatureAlgorithm.DeterministicEcdsa(Parsec.Client.Algorithms.SignHash hash) -> Parsec.Client.Algorithms.SignatureAlgorithm!
+static Parsec.Client.Algorithms.SignatureAlgorithm.Ecdsa(Parsec.Client.Algorithms.SignHash hash) -> Parsec.Client.Algorithms.SignatureAlgorithm!
+static Parsec.Client.Algorithms.SignatureAlgorithm.EcdsaAny.get -> Parsec.Client.Algorithms.SignatureAlgorithm!
+static Parsec.Client.Algorithms.SignatureAlgorithm.RsaPkcs1v15Sign(Parsec.Client.Algorithms.SignHash hash) -> Parsec.Client.Algorithms.SignatureAlgorithm!
+static Parsec.Client.Algorithms.SignatureAlgorithm.RsaPkcs1v15SignRaw.get -> Parsec.Client.Algorithms.SignatureAlgorithm!
+static Parsec.Client.Algorithms.SignatureAlgorithm.RsaPss(Parsec.Client.Algorithms.SignHash hash) -> Parsec.Client.Algorithms.SignatureAlgorithm!
+static Parsec.Client.Algorithms.SignatureAlgorithm.operator !=(Parsec.Client.Algorithms.SignatureAlgorithm? left, Parsec.Client.Algorithms.SignatureAlgorithm? right) -> bool
+static Parsec.Client.Algorithms.SignatureAlgorithm.operator ==(Parsec.Client.Algorithms.SignatureAlgorithm? left, Parsec.Client.Algorithms.SignatureAlgorithm? right) -> bool
 static Parsec.Client.Authentication.NoAuthentication.Instance.get -> Parsec.Client.Authentication.NoAuthentication!
 static Parsec.Client.Errors.ParsecServiceException.FromStatus(Parsec.Client.Protocol.ResponseStatus status, Parsec.Client.Protocol.Opcode? operation = null) -> Parsec.Client.Errors.ParsecServiceException!
+static Parsec.Client.Keys.KeyAttributes.operator !=(Parsec.Client.Keys.KeyAttributes? left, Parsec.Client.Keys.KeyAttributes? right) -> bool
+static Parsec.Client.Keys.KeyAttributes.operator ==(Parsec.Client.Keys.KeyAttributes? left, Parsec.Client.Keys.KeyAttributes? right) -> bool
+static Parsec.Client.Keys.KeyPolicy.operator !=(Parsec.Client.Keys.KeyPolicy? left, Parsec.Client.Keys.KeyPolicy? right) -> bool
+static Parsec.Client.Keys.KeyPolicy.operator ==(Parsec.Client.Keys.KeyPolicy? left, Parsec.Client.Keys.KeyPolicy? right) -> bool
+static Parsec.Client.Keys.KeyType.Aes.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.Arc4.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.Camellia.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.ChaCha20.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.Derive.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.Des.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.DhKeyPair(Parsec.Client.Keys.DhFamily family) -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.DhPublicKey(Parsec.Client.Keys.DhFamily family) -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.EccKeyPair(Parsec.Client.Keys.EccFamily family) -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.EccPublicKey(Parsec.Client.Keys.EccFamily family) -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.Hmac.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.RawData.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.RsaKeyPair.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.RsaPublicKey.get -> Parsec.Client.Keys.KeyType!
+static Parsec.Client.Keys.KeyType.operator !=(Parsec.Client.Keys.KeyType? left, Parsec.Client.Keys.KeyType? right) -> bool
+static Parsec.Client.Keys.KeyType.operator ==(Parsec.Client.Keys.KeyType? left, Parsec.Client.Keys.KeyType? right) -> bool
 static Parsec.Client.Protocol.AuthTypeExtensions.IsKnown(this Parsec.Client.Protocol.AuthType value) -> bool
 static Parsec.Client.Protocol.OpcodeExtensions.IsKnown(this Parsec.Client.Protocol.Opcode value) -> bool
 static Parsec.Client.Protocol.ProviderIdExtensions.IsKnown(this Parsec.Client.Protocol.ProviderId value) -> bool
@@ -180,3 +480,8 @@ static Parsec.Client.Transport.ParsecEndpoint.Default.get -> System.Uri!
 static Parsec.Client.Transport.ParsecEndpoint.GetSocketPath(System.Uri! endpoint) -> string!
 static Parsec.Client.Transport.ParsecEndpoint.Resolve() -> System.Uri!
 static Parsec.Client.Transport.ParsecEndpoint.Resolve(string? endpoint) -> System.Uri!
+virtual Parsec.Client.Algorithms.Algorithm.EqualityContract.get -> System.Type!
+virtual Parsec.Client.Algorithms.Algorithm.Equals(Parsec.Client.Algorithms.Algorithm? other) -> bool
+virtual Parsec.Client.Algorithms.Algorithm.PrintMembers(System.Text.StringBuilder! builder) -> bool
+~override Parsec.Client.Algorithms.SignHash.Equals(object obj) -> bool
+~override Parsec.Client.Algorithms.SignHash.ToString() -> string

@@ -1,5 +1,6 @@
 using Parsec.Client.Authentication;
 using Parsec.Client.Errors;
+using Parsec.Client.Keys;
 using Parsec.Client.Models;
 using Parsec.Client.Protocol;
 using Parsec.Client.Transport;
@@ -202,7 +203,8 @@ internal sealed class ParsecCoreOperations(IParsecTransport transport, IParsecAu
         {
             keys.Add(new KeyInfo(
                 (ProviderId)ToWireByte(Opcode.ListKeys, "provider identifier", key.ProviderId),
-                key.Name));
+                key.Name,
+                KeyAttributesCodec.FromWire(Opcode.ListKeys, key.Attributes)));
         }
 
         return keys;
@@ -227,14 +229,14 @@ internal sealed class ParsecCoreOperations(IParsecTransport transport, IParsecAu
     /// </remarks>
     public async Task<bool> CanDoCryptoAsync(
         ProviderId provider,
-        CanDoCrypto.CheckType checkType,
-        PsaKeyAttributes.KeyAttributes attributes,
+        KeyCheckType checkType,
+        KeyAttributes attributes,
         CancellationToken cancellationToken = default)
     {
         var operation = new CanDoCrypto.Operation
         {
-            CheckType = checkType,
-            Attributes = attributes,
+            CheckType = (CanDoCrypto.CheckType)checkType,
+            Attributes = KeyAttributesCodec.ToWire(attributes),
         };
 
         var response = await _client.ExchangeAsync(

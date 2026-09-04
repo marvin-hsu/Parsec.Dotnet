@@ -75,6 +75,16 @@ internal static class ParsecErrorText
         $"The service reported a {field} of {value}. The field holds a value of 0 to {maximum}.");
 
     /// <summary>
+    /// Describes a field of an answer that the client cannot read back into its own model.
+    /// </summary>
+    /// <param name="field">The name of the field.</param>
+    /// <param name="detail">What the field carried, in a form a reader can act on.</param>
+    /// <returns>One sentence that names the field and what it carried.</returns>
+    public static string DescribeUnreadableField(string field, string detail) => string.Create(
+        CultureInfo.InvariantCulture,
+        $"The service reported a {field} that this client cannot read: {detail}.");
+
+    /// <summary>
     /// Describes an authentication field that the header cannot state the length of.
     /// </summary>
     /// <param name="length">The byte count of the field.</param>
