@@ -1,6 +1,18 @@
 - name: Overview
   href: index.md
+- name: Getting started
+  href: getting-started.md
+- name: Authentication
+  href: authentication.md
+- name: The error model
+  href: error-model.md
+- name: The wire protocol
+  href: wire-protocol.md
+- name: Testing
+  href: testing.md
+- name: Security notes
+  href: security.md
 - name: API reference
   href: api/
 - name: 中文
-  href: /zh-tw/
+  href: https://marvin-hsu.github.io/Parsec.Dotnet/zh-tw/

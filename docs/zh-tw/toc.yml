@@ -1,6 +1,18 @@
 - name: 概觀
   href: index.md
+- name: 開始使用
+  href: getting-started.md
+- name: 驗證
+  href: authentication.md
+- name: 錯誤模型
+  href: error-model.md
+- name: wire protocol
+  href: wire-protocol.md
+- name: 測試
+  href: testing.md
+- name: 安全性注意事項
+  href: security.md
 - name: API 參考（英文）
-  href: /api/
+  href: https://marvin-hsu.github.io/Parsec.Dotnet/api/
 - name: English
-  href: /
+  href: https://marvin-hsu.github.io/Parsec.Dotnet/
