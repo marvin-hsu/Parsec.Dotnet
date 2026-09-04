@@ -22,8 +22,37 @@ dotnet add package Parsec.Testcontainers   # for integration tests
 ## Quick start
 
 ```csharp
-// API under design — see docs/ for the roadmap.
+using Parsec.Client;
+using Parsec.Client.Algorithms;
+using Parsec.Client.Authentication;
+using Parsec.Client.Keys;
+
+// The client finds the service, agrees a protocol version and picks a provider.
+await using var client = await ParsecClient.CreateAsync(new ParsecClientOptions
+{
+    Authentication = new DirectAuthentication("my-application"),
+});
+
+// Create a signing key. The private half never leaves the service.
+var algorithm = SignatureAlgorithm.RsaPkcs1v15Sign(Hash.Sha256);
+
+await client.Keys.GenerateKeyAsync("my-key", KeyAttributes.RsaSigningKey(algorithm: algorithm));
+
+// Sign a hash and check the signature.
+var digest = await client.Crypto.HashComputeAsync(Hash.Sha256, "sign me"u8.ToArray());
+var signature = await client.Crypto.SignHashAsync("my-key", algorithm, digest);
+
+var ok = await client.Crypto.VerifyHashAsync("my-key", algorithm, digest, signature);
 ```
+
+`ParsecClientOptions` reads `PARSEC_SERVICE_ENDPOINT` when no `Endpoint` is
+given, and binds to the first provider that is not the core one unless
+`Provider` names another. The default authentication identifies nobody, which
+is enough to ask the service what it can do and not enough to own a key.
+
+This sample is compiled and run against a real service by
+`TheQuickStartOfTheReadmeRuns` in `tests/Parsec.Client.Tests`, so it cannot
+drift out of date without a test failing.
 
 ## Testing against a real service
 

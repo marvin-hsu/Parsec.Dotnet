@@ -21,7 +21,7 @@ namespace Parsec.Client.Operations;
 internal sealed class ParsecCryptoOperations(
     IParsecTransport transport,
     IParsecAuthentication authentication,
-    ProviderId provider)
+    ProviderId provider) : IParsecCryptoOperations
 {
     private readonly ParsecOperationClient _client =
         new(transport ?? throw new ArgumentNullException(nameof(transport)));
@@ -29,18 +29,7 @@ internal sealed class ParsecCryptoOperations(
     private readonly IParsecAuthentication _authentication =
         authentication ?? throw new ArgumentNullException(nameof(authentication));
 
-    /// <summary>
-    /// Signs a hash that the caller computed.
-    /// </summary>
-    /// <param name="name">The name of the signing key.</param>
-    /// <param name="algorithm">The signature algorithm. It must be the one the key binds to.</param>
-    /// <param name="hash">The hash to sign. Its length must suit the algorithm.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The signature.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> SignHashAsync(
         string name,
         SignatureAlgorithm algorithm,
@@ -67,24 +56,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Signature.ToByteArray();
     }
 
-    /// <summary>
-    /// Checks a signature over a hash that the caller computed.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The signature algorithm. It must be the one the key binds to.</param>
-    /// <param name="hash">The hash that was signed.</param>
-    /// <param name="signature">The signature to check.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>
-    /// <see langword="true"/> when the signature matches, and <see langword="false"/> when it
-    /// does not.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">
-    /// The provider refused for a reason other than a signature that does not match.
-    /// </exception>
+    /// <inheritdoc/>
     public async Task<bool> VerifyHashAsync(
         string name,
         SignatureAlgorithm algorithm,
@@ -105,22 +77,7 @@ internal sealed class ParsecCryptoOperations(
         return await VerifyAsync(Opcode.PsaVerifyHash, operation, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Signs a message, hashing it as part of the operation.
-    /// </summary>
-    /// <param name="name">The name of the signing key.</param>
-    /// <param name="algorithm">The signature algorithm. It must be the one the key binds to.</param>
-    /// <param name="message">The message to sign.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The signature.</returns>
-    /// <remarks>
-    /// The Mbed Crypto provider does not offer this. Hash the message and call
-    /// <see cref="SignHashAsync"/> instead where that provider is the only one running.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> SignMessageAsync(
         string name,
         SignatureAlgorithm algorithm,
@@ -147,25 +104,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Signature.ToByteArray();
     }
 
-    /// <summary>
-    /// Checks a signature over a message, hashing it as part of the operation.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The signature algorithm. It must be the one the key binds to.</param>
-    /// <param name="message">The message that was signed.</param>
-    /// <param name="signature">The signature to check.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>
-    /// <see langword="true"/> when the signature matches, and <see langword="false"/> when it
-    /// does not.
-    /// </returns>
-    /// <remarks>The Mbed Crypto provider does not offer this.</remarks>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">
-    /// The provider refused for a reason other than a signature that does not match.
-    /// </exception>
+    /// <inheritdoc/>
     public async Task<bool> VerifyMessageAsync(
         string name,
         SignatureAlgorithm algorithm,
@@ -187,18 +126,7 @@ internal sealed class ParsecCryptoOperations(
             .ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Computes a hash over some bytes.
-    /// </summary>
-    /// <param name="algorithm">The hash to compute.</param>
-    /// <param name="input">The bytes to hash.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The hash.</returns>
-    /// <remarks>
-    /// This needs no key. It is here because an application that signs a hash needs somewhere to
-    /// get the hash from, and using the same provider for both keeps the two in step.
-    /// </remarks>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> HashComputeAsync(
         Hash algorithm,
         ReadOnlyMemory<byte> input,
@@ -221,24 +149,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Hash.ToByteArray();
     }
 
-    /// <summary>
-    /// Checks some bytes against a hash of them.
-    /// </summary>
-    /// <param name="algorithm">The hash that was computed.</param>
-    /// <param name="input">The bytes to hash.</param>
-    /// <param name="hash">The hash to compare against.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>
-    /// <see langword="true"/> when the hash of the bytes matches, and <see langword="false"/>
-    /// when it does not.
-    /// </returns>
-    /// <remarks>
-    /// The service compares the two in a way that takes the same time whatever the answer, which
-    /// is why this is worth a round trip rather than hashing and comparing at home.
-    /// </remarks>
-    /// <exception cref="ParsecServiceException">
-    /// The provider refused for a reason other than a hash that does not match.
-    /// </exception>
+    /// <inheritdoc/>
     public async Task<bool> HashCompareAsync(
         Hash algorithm,
         ReadOnlyMemory<byte> input,
@@ -255,20 +166,7 @@ internal sealed class ParsecCryptoOperations(
         return await VerifyAsync(Opcode.PsaHashCompare, operation, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Asks the provider for random bytes.
-    /// </summary>
-    /// <param name="length">How many bytes to ask for.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The bytes, of exactly the length asked for.</returns>
-    /// <remarks>
-    /// These come from the generator of the provider, which on a hardware provider is the one in
-    /// the hardware. That is the reason to ask the service rather than the platform.
-    /// </remarks>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
-    /// <exception cref="ParsecProtocolException">
-    /// The provider answered with a different number of bytes than the one asked for.
-    /// </exception>
+    /// <inheritdoc/>
     public async Task<byte[]> GenerateRandomAsync(
         int length,
         CancellationToken cancellationToken = default)
@@ -296,22 +194,7 @@ internal sealed class ParsecCryptoOperations(
                 length);
     }
 
-    /// <summary>
-    /// Encrypts with the public half of an asymmetric key.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
-    /// <param name="plaintext">The bytes to encrypt. An asymmetric algorithm takes only a few.</param>
-    /// <param name="salt">
-    /// The label for OAEP, which both sides must agree on. Leave it empty for PKCS#1 v1.5, which
-    /// has no label.
-    /// </param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The ciphertext.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> AsymmetricEncryptAsync(
         string name,
         EncryptionAlgorithm algorithm,
@@ -340,19 +223,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Ciphertext.ToByteArray();
     }
 
-    /// <summary>
-    /// Decrypts with the private half of an asymmetric key.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
-    /// <param name="ciphertext">The bytes to decrypt.</param>
-    /// <param name="salt">The label that the encryption used.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The plaintext.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> AsymmetricDecryptAsync(
         string name,
         EncryptionAlgorithm algorithm,
@@ -381,25 +252,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Plaintext.ToByteArray();
     }
 
-    /// <summary>
-    /// Encrypts and authenticates in one pass.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
-    /// <param name="nonce">
-    /// The nonce. It must never repeat for one key, and for most algorithms repeating it loses
-    /// the key rather than only the message.
-    /// </param>
-    /// <param name="additionalData">
-    /// Bytes to authenticate without encrypting. The decryption must be given the same bytes.
-    /// </param>
-    /// <param name="plaintext">The bytes to encrypt.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The ciphertext with the authentication tag on the end.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> AeadEncryptAsync(
         string name,
         AeadAlgorithm algorithm,
@@ -430,28 +283,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Ciphertext.ToByteArray();
     }
 
-    /// <summary>
-    /// Decrypts and checks the authentication tag in one pass.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
-    /// <param name="nonce">The nonce that the encryption used.</param>
-    /// <param name="additionalData">The bytes that the encryption authenticated.</param>
-    /// <param name="ciphertext">The ciphertext with its tag.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The plaintext.</returns>
-    /// <remarks>
-    /// A tag that does not match raises rather than answering false, unlike the two verify
-    /// operations. There is no plaintext to hand back in that case, and returning nothing
-    /// alongside a boolean invites a caller to read the nothing.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">
-    /// The provider refused. <see cref="ResponseStatus.PsaErrorInvalidSignature"/> means the tag
-    /// did not match, so the ciphertext or the additional data was changed.
-    /// </exception>
+    /// <inheritdoc/>
     public async Task<byte[]> AeadDecryptAsync(
         string name,
         AeadAlgorithm algorithm,
@@ -482,23 +314,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Plaintext.ToByteArray();
     }
 
-    /// <summary>
-    /// Agrees a shared secret with another party.
-    /// </summary>
-    /// <param name="name">The name of the private key of this side.</param>
-    /// <param name="algorithm">The algorithm that produces the shared secret.</param>
-    /// <param name="peerKey">The public key of the other side.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The shared secret.</returns>
-    /// <remarks>
-    /// The secret comes back raw. It is not a key: feed it through a derivation function before
-    /// using it as one, because the bytes of a Diffie-Hellman result are not uniformly random.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// The specification does not define <paramref name="algorithm"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> RawKeyAgreementAsync(
         string name,
         KeyAgreementKind algorithm,
@@ -525,21 +341,7 @@ internal sealed class ParsecCryptoOperations(
         return result.SharedSecret.ToByteArray();
     }
 
-    /// <summary>
-    /// Encrypts with a symmetric key.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The cipher mode. It must be the one the key binds to.</param>
-    /// <param name="plaintext">The bytes to encrypt.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The initialisation vector followed by the ciphertext.</returns>
-    /// <remarks>
-    /// This encrypts and does not authenticate, so a change to the ciphertext goes unnoticed.
-    /// Reach for <see cref="AeadEncryptAsync"/> unless something outside this call authenticates
-    /// the result. The Mbed Crypto provider offers no cipher operation.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> CipherEncryptAsync(
         string name,
         Cipher algorithm,
@@ -566,17 +368,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Ciphertext.ToByteArray();
     }
 
-    /// <summary>
-    /// Decrypts with a symmetric key.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The cipher mode. It must be the one the key binds to.</param>
-    /// <param name="ciphertext">The initialisation vector followed by the ciphertext.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The plaintext.</returns>
-    /// <remarks>The Mbed Crypto provider offers no cipher operation.</remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> CipherDecryptAsync(
         string name,
         Cipher algorithm,
@@ -603,19 +395,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Plaintext.ToByteArray();
     }
 
-    /// <summary>
-    /// Computes a message authentication code.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
-    /// <param name="input">The bytes to authenticate.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The code.</returns>
-    /// <remarks>The Mbed Crypto provider offers no code operation.</remarks>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> MacComputeAsync(
         string name,
         MacAlgorithm algorithm,
@@ -642,24 +422,7 @@ internal sealed class ParsecCryptoOperations(
         return result.Mac.ToByteArray();
     }
 
-    /// <summary>
-    /// Checks a message authentication code.
-    /// </summary>
-    /// <param name="name">The name of the key.</param>
-    /// <param name="algorithm">The algorithm. It must be the one the key binds to.</param>
-    /// <param name="input">The bytes that were authenticated.</param>
-    /// <param name="mac">The code to check.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>
-    /// <see langword="true"/> when the code matches, and <see langword="false"/> when it does not.
-    /// </returns>
-    /// <remarks>The Mbed Crypto provider offers no code operation.</remarks>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="name"/> or <paramref name="algorithm"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">
-    /// The provider refused for a reason other than a code that does not match.
-    /// </exception>
+    /// <inheritdoc/>
     public async Task<bool> MacVerifyAsync(
         string name,
         MacAlgorithm algorithm,

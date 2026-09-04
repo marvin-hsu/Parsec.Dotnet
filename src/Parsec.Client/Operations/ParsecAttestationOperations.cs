@@ -28,7 +28,7 @@ namespace Parsec.Client.Operations;
 internal sealed class ParsecAttestationOperations(
     IParsecTransport transport,
     IParsecAuthentication authentication,
-    ProviderId provider)
+    ProviderId provider) : IParsecAttestationOperations
 {
     private const string OutputField = "attestation output";
 
@@ -38,22 +38,7 @@ internal sealed class ParsecAttestationOperations(
     private readonly IParsecAuthentication _authentication =
         authentication ?? throw new ArgumentNullException(nameof(authentication));
 
-    /// <summary>
-    /// Asks the device for what a challenger needs to build a credential.
-    /// </summary>
-    /// <param name="attestedKeyName">The name of the key whose provenance is in question.</param>
-    /// <param name="attestingKeyName">The name of the key that speaks for the device.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>The three blobs that the challenger needs.</returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="attestedKeyName"/> or <paramref name="attestingKeyName"/> is
-    /// <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">
-    /// The provider refused. <see cref="ResponseStatus.PsaErrorNotSupported"/> means it has no
-    /// device to speak for a key.
-    /// </exception>
-    /// <exception cref="ParsecProtocolException">The answer names no mechanism.</exception>
+    /// <inheritdoc/>
     public async Task<ActivateCredentialPreparation> PrepareActivateCredentialAsync(
         string attestedKeyName,
         string attestingKeyName,
@@ -99,24 +84,7 @@ internal sealed class ParsecAttestationOperations(
             output.ActivateCredential.AttestingKeyPub.Memory);
     }
 
-    /// <summary>
-    /// Asks the device to unwrap a credential that a challenger built.
-    /// </summary>
-    /// <param name="attestedKeyName">The name of the key whose provenance is in question.</param>
-    /// <param name="attestingKeyName">The name of the key that speaks for the device.</param>
-    /// <param name="credentialBlob">The wrapped credential from the challenger.</param>
-    /// <param name="secret">The secret that goes with the credential.</param>
-    /// <param name="cancellationToken">Stops the exchange.</param>
-    /// <returns>
-    /// The unwrapped credential. Handing this back to the challenger is the proof: only a device
-    /// holding both keys could have produced it.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="attestedKeyName"/> or <paramref name="attestingKeyName"/> is
-    /// <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="ParsecServiceException">The provider refused.</exception>
-    /// <exception cref="ParsecProtocolException">The answer names no mechanism.</exception>
+    /// <inheritdoc/>
     public async Task<byte[]> AttestKeyWithActivateCredentialAsync(
         string attestedKeyName,
         string attestingKeyName,

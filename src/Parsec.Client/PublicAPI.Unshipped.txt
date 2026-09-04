@@ -167,7 +167,18 @@ Parsec.Client.Errors.ParsecTransportException.ParsecTransportException() -> void
 Parsec.Client.Errors.ParsecTransportException.ParsecTransportException(string! message) -> void
 Parsec.Client.Errors.ParsecTransportException.ParsecTransportException(string! message, System.Exception! innerException) -> void
 Parsec.Client.IParsecClient
+Parsec.Client.IParsecClient.Attestation.get -> Parsec.Client.Operations.IParsecAttestationOperations!
+Parsec.Client.IParsecClient.CanDoCryptoAsync(Parsec.Client.Keys.KeyCheckType checkType, Parsec.Client.Keys.KeyAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Parsec.Client.IParsecClient.Crypto.get -> Parsec.Client.Operations.IParsecCryptoOperations!
+Parsec.Client.IParsecClient.Keys.get -> Parsec.Client.Operations.IParsecKeyOperations!
+Parsec.Client.IParsecClient.ListAuthenticatorsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Parsec.Client.Models.AuthenticatorInfo!>!>!
+Parsec.Client.IParsecClient.ListKeysAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Parsec.Client.Models.KeyInfo!>!>!
+Parsec.Client.IParsecClient.ListOpcodesAsync(Parsec.Client.Protocol.ProviderId provider, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlySet<Parsec.Client.Protocol.Opcode>!>!
+Parsec.Client.IParsecClient.ListProvidersAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Parsec.Client.Models.ProviderInfo!>!>!
+Parsec.Client.IParsecClient.PingAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Version!>!
+Parsec.Client.IParsecClient.Provider.get -> Parsec.Client.Protocol.ProviderId
 Parsec.Client.IParsecClient.ProviderName.get -> string!
+Parsec.Client.IParsecClient.WireProtocolVersion.get -> System.Version!
 Parsec.Client.Keys.DhFamily
 Parsec.Client.Keys.DhFamily.Rfc7919 = 0 -> Parsec.Client.Keys.DhFamily
 Parsec.Client.Keys.EccFamily
@@ -251,6 +262,60 @@ Parsec.Client.Models.ProviderInfo.ProviderInfo(Parsec.Client.Protocol.ProviderId
 Parsec.Client.Models.ProviderInfo.Uuid.get -> string!
 Parsec.Client.Models.ProviderInfo.Vendor.get -> string!
 Parsec.Client.Models.ProviderInfo.Version.get -> System.Version!
+Parsec.Client.Operations.IParsecAttestationOperations
+Parsec.Client.Operations.IParsecAttestationOperations.AttestKeyWithActivateCredentialAsync(string! attestedKeyName, string! attestingKeyName, System.ReadOnlyMemory<byte> credentialBlob, System.ReadOnlyMemory<byte> secret, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecAttestationOperations.PrepareActivateCredentialAsync(string! attestedKeyName, string! attestingKeyName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Parsec.Client.Attestation.ActivateCredentialPreparation!>!
+Parsec.Client.Operations.IParsecCryptoOperations
+Parsec.Client.Operations.IParsecCryptoOperations.AeadDecryptAsync(string! name, Parsec.Client.Algorithms.AeadAlgorithm! algorithm, System.ReadOnlyMemory<byte> nonce, System.ReadOnlyMemory<byte> additionalData, System.ReadOnlyMemory<byte> ciphertext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.AeadEncryptAsync(string! name, Parsec.Client.Algorithms.AeadAlgorithm! algorithm, System.ReadOnlyMemory<byte> nonce, System.ReadOnlyMemory<byte> additionalData, System.ReadOnlyMemory<byte> plaintext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.AsymmetricDecryptAsync(string! name, Parsec.Client.Algorithms.EncryptionAlgorithm! algorithm, System.ReadOnlyMemory<byte> ciphertext, System.ReadOnlyMemory<byte> salt = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.AsymmetricEncryptAsync(string! name, Parsec.Client.Algorithms.EncryptionAlgorithm! algorithm, System.ReadOnlyMemory<byte> plaintext, System.ReadOnlyMemory<byte> salt = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.CipherDecryptAsync(string! name, Parsec.Client.Algorithms.Cipher algorithm, System.ReadOnlyMemory<byte> ciphertext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.CipherEncryptAsync(string! name, Parsec.Client.Algorithms.Cipher algorithm, System.ReadOnlyMemory<byte> plaintext, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.GenerateRandomAsync(int length, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.HashCompareAsync(Parsec.Client.Algorithms.Hash algorithm, System.ReadOnlyMemory<byte> input, System.ReadOnlyMemory<byte> hash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Parsec.Client.Operations.IParsecCryptoOperations.HashComputeAsync(Parsec.Client.Algorithms.Hash algorithm, System.ReadOnlyMemory<byte> input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.MacComputeAsync(string! name, Parsec.Client.Algorithms.MacAlgorithm! algorithm, System.ReadOnlyMemory<byte> input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.MacVerifyAsync(string! name, Parsec.Client.Algorithms.MacAlgorithm! algorithm, System.ReadOnlyMemory<byte> input, System.ReadOnlyMemory<byte> mac, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Parsec.Client.Operations.IParsecCryptoOperations.RawKeyAgreementAsync(string! name, Parsec.Client.Algorithms.KeyAgreementKind algorithm, System.ReadOnlyMemory<byte> peerKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.SignHashAsync(string! name, Parsec.Client.Algorithms.SignatureAlgorithm! algorithm, System.ReadOnlyMemory<byte> hash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.SignMessageAsync(string! name, Parsec.Client.Algorithms.SignatureAlgorithm! algorithm, System.ReadOnlyMemory<byte> message, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecCryptoOperations.VerifyHashAsync(string! name, Parsec.Client.Algorithms.SignatureAlgorithm! algorithm, System.ReadOnlyMemory<byte> hash, System.ReadOnlyMemory<byte> signature, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Parsec.Client.Operations.IParsecCryptoOperations.VerifyMessageAsync(string! name, Parsec.Client.Algorithms.SignatureAlgorithm! algorithm, System.ReadOnlyMemory<byte> message, System.ReadOnlyMemory<byte> signature, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Parsec.Client.Operations.IParsecKeyOperations
+Parsec.Client.Operations.IParsecKeyOperations.DestroyKeyAsync(string! name, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Parsec.Client.Operations.IParsecKeyOperations.ExportKeyAsync(string! name, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecKeyOperations.ExportPublicKeyAsync(string! name, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Parsec.Client.Operations.IParsecKeyOperations.GenerateKeyAsync(string! name, Parsec.Client.Keys.KeyAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Parsec.Client.Operations.IParsecKeyOperations.ImportKeyAsync(string! name, Parsec.Client.Keys.KeyAttributes! attributes, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Parsec.Client.ParsecClient
+Parsec.Client.ParsecClient.Attestation.get -> Parsec.Client.Operations.IParsecAttestationOperations!
+Parsec.Client.ParsecClient.CanDoCryptoAsync(Parsec.Client.Keys.KeyCheckType checkType, Parsec.Client.Keys.KeyAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Parsec.Client.ParsecClient.Crypto.get -> Parsec.Client.Operations.IParsecCryptoOperations!
+Parsec.Client.ParsecClient.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Parsec.Client.ParsecClient.Keys.get -> Parsec.Client.Operations.IParsecKeyOperations!
+Parsec.Client.ParsecClient.ListAuthenticatorsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Parsec.Client.Models.AuthenticatorInfo!>!>!
+Parsec.Client.ParsecClient.ListKeysAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Parsec.Client.Models.KeyInfo!>!>!
+Parsec.Client.ParsecClient.ListOpcodesAsync(Parsec.Client.Protocol.ProviderId provider, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlySet<Parsec.Client.Protocol.Opcode>!>!
+Parsec.Client.ParsecClient.ListProvidersAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Parsec.Client.Models.ProviderInfo!>!>!
+Parsec.Client.ParsecClient.PingAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Version!>!
+Parsec.Client.ParsecClient.Provider.get -> Parsec.Client.Protocol.ProviderId
+Parsec.Client.ParsecClient.ProviderName.get -> string!
+Parsec.Client.ParsecClient.WireProtocolVersion.get -> System.Version!
+Parsec.Client.ParsecClientOptions
+Parsec.Client.ParsecClientOptions.Authentication.get -> Parsec.Client.Authentication.IParsecAuthentication!
+Parsec.Client.ParsecClientOptions.Authentication.init -> void
+Parsec.Client.ParsecClientOptions.ConnectTimeout.get -> System.TimeSpan
+Parsec.Client.ParsecClientOptions.ConnectTimeout.init -> void
+Parsec.Client.ParsecClientOptions.Endpoint.get -> System.Uri?
+Parsec.Client.ParsecClientOptions.Endpoint.init -> void
+Parsec.Client.ParsecClientOptions.IoTimeout.get -> System.TimeSpan
+Parsec.Client.ParsecClientOptions.IoTimeout.init -> void
+Parsec.Client.ParsecClientOptions.MaxBodyLength.get -> uint
+Parsec.Client.ParsecClientOptions.MaxBodyLength.init -> void
+Parsec.Client.ParsecClientOptions.ParsecClientOptions() -> void
+Parsec.Client.ParsecClientOptions.Provider.get -> Parsec.Client.Protocol.ProviderId?
+Parsec.Client.ParsecClientOptions.Provider.init -> void
 Parsec.Client.Protocol.AuthType
 Parsec.Client.Protocol.AuthType.Direct = 1 -> Parsec.Client.Protocol.AuthType
 Parsec.Client.Protocol.AuthType.Jwt = 2 -> Parsec.Client.Protocol.AuthType
@@ -480,6 +545,7 @@ static Parsec.Client.Keys.KeyType.RsaKeyPair.get -> Parsec.Client.Keys.KeyType!
 static Parsec.Client.Keys.KeyType.RsaPublicKey.get -> Parsec.Client.Keys.KeyType!
 static Parsec.Client.Keys.KeyType.operator !=(Parsec.Client.Keys.KeyType? left, Parsec.Client.Keys.KeyType? right) -> bool
 static Parsec.Client.Keys.KeyType.operator ==(Parsec.Client.Keys.KeyType? left, Parsec.Client.Keys.KeyType? right) -> bool
+static Parsec.Client.ParsecClient.CreateAsync(Parsec.Client.ParsecClientOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Parsec.Client.ParsecClient!>!
 static Parsec.Client.Protocol.AuthTypeExtensions.IsKnown(this Parsec.Client.Protocol.AuthType value) -> bool
 static Parsec.Client.Protocol.OpcodeExtensions.IsKnown(this Parsec.Client.Protocol.Opcode value) -> bool
 static Parsec.Client.Protocol.ProviderIdExtensions.IsKnown(this Parsec.Client.Protocol.ProviderId value) -> bool

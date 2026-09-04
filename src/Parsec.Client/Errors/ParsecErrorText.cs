@@ -1,4 +1,5 @@
 using System.Globalization;
+using Parsec.Client.Models;
 using Parsec.Client.Protocol;
 
 namespace Parsec.Client.Errors;
@@ -28,6 +29,13 @@ internal static class ParsecErrorText
     /// <param name="operation">The operation that the request asked for.</param>
     /// <returns>The name of the operation, or <see cref="UnknownName"/>.</returns>
     public static string GetName(Opcode operation) => Enum.GetName(operation) ?? UnknownName;
+
+    /// <summary>
+    /// Names a provider, or says so when the client does not know the value.
+    /// </summary>
+    /// <param name="provider">The provider to name.</param>
+    /// <returns>The name of the provider.</returns>
+    public static string GetName(ProviderId provider) => Enum.GetName(provider) ?? UnknownName;
 
     /// <summary>
     /// Describes a failed answer of the service.
@@ -73,6 +81,31 @@ internal static class ParsecErrorText
     public static string DescribeOutOfRangeField(string field, uint value, long maximum) => string.Create(
         CultureInfo.InvariantCulture,
         $"The service reported a {field} of {value}. The field holds a value of 0 to {maximum}.");
+
+    /// <summary>
+    /// Describes a service that runs no provider of the name the caller asked for.
+    /// </summary>
+    /// <param name="wanted">The provider that the caller named.</param>
+    /// <param name="providers">The providers that the service reported.</param>
+    /// <returns>One sentence that names the wanted provider and the ones there are.</returns>
+    public static string DescribeMissingProvider(ProviderId wanted, IEnumerable<ProviderInfo> providers)
+    {
+        ArgumentNullException.ThrowIfNull(providers);
+
+        var available = string.Join(", ", providers.Select(provider => GetName(provider.Id)));
+
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $"The service runs no {GetName(wanted)} provider ({(uint)wanted}). It runs: {available}.");
+    }
+
+    /// <summary>
+    /// Describes a service that runs nothing but the core provider.
+    /// </summary>
+    /// <returns>One sentence that says why that is not enough.</returns>
+    public static string DescribeNoCryptographicProvider() =>
+        "The service runs the core provider and no other. The core provider answers questions "
+        + "about the service and runs no cryptography, so there is nothing to bind a client to.";
 
     /// <summary>
     /// Describes a field of an answer that the client cannot read back into its own model.
