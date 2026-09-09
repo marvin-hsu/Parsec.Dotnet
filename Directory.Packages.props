@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Testcontainers">
-    <PackageVersion Include="Testcontainers" Version="4.14.0" />
+    <PackageVersion Include="Testcontainers" Version="4.15.0" />
   </ItemGroup>
 
   <ItemGroup Label="Tests">
