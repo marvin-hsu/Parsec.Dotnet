@@ -17,7 +17,7 @@
   <ItemGroup Label="Build">
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="MinVer" Version="7.0.0" />
+    <PackageVersion Include="MinVer" Version="8.0.0" />
   </ItemGroup>
 
   <!-- A floor rather than a pin: an application picks the version its host already brings, and
