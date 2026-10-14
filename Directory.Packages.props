@@ -25,7 +25,7 @@
        Testcontainers reaches that version transitively, and central package management makes one
        number serve every project here. -->
   <ItemGroup Label="Dependency injection">
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
 
     <!-- The container itself, for the tests only. The package ships against the abstractions. -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
